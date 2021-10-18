@@ -1,0 +1,6 @@
+- [ ] Parser (Adeline)
+- [ ] HTTP status codes (Ben)
+- [ ] Poll / Select
+- [ ] Socket (server)
+- [ ] CGI
+- [ ] Tester
