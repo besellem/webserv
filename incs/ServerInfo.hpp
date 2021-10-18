@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:27:04 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/18 22:19:22 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/19 00:41:12 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,11 @@ class ServerInfo
 		void	setName(const std::string &);
 		void	setErrorPages(int error, const std::string &);
 		void	setCliMaxSize(int);
+
+		void	setPort(const std::vector<std::string> &);
+		void	setName(const std::vector<std::string> &);
+		void	setErrorPages(const std::vector<std::string> &);
+		void	setCliMaxSize(const std::vector<std::string> &);
 };
 
 #endif

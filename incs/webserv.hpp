@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/18 20:38:15 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/19 00:33:00 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ class WebServer
 
 
 	private:
-	
+		ServerInfo	_info;
 	
 }; /* class WebServer */
 
