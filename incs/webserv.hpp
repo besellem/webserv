@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/18 16:38:26 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/18 20:38:15 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@
 # include <iomanip>
 
 # include "defs.hpp"
+# include "ServerInfo.hpp"
 
 
 class WebServer
