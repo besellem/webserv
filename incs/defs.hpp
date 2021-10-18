@@ -1,31 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   defs.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/18 15:46:24 by besellem         ###   ########.fr       */
+/*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
+/*   Updated: 2021/10/18 15:20:27 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../incs/webserv.hpp"
+#ifndef DEFS_HPP
+# define DEFS_HPP
 
-int	main(int ac, char **av)
-{
-	WebServer		serv;
-	std::string		conf = (ac > 1) ? av[1] : DEFAULT_CONFIG_FILE;
+# define DEFAULT_CONFIG_FILE  "./config_files/default.conf"
 
-
-	try
-	{
-		serv.parse(conf);
-	}
-	catch (std::exception &e)
-	{
-		std::cout << e.what() << std::endl;
-	}
-	
-	return EXIT_SUCCESS;
-}
+#endif /* !defined(DEFS_HPP) */
