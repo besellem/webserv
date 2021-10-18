@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/18 15:45:10 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/18 16:38:26 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,10 @@
 # include <iostream>
 # include <cstring>
 
+# include <exception>
+# include <fstream>
+# include <iomanip>
+
 # include "defs.hpp"
 
 
@@ -37,10 +41,10 @@ class WebServer
 		
 		WebServer(const WebServer&);
 		
-		~WebServer()
+		virtual ~WebServer()
 		{}
 		
-		WebServer&	operator=(const WebServer&);
+		WebServer&	operator=(const WebServer&) { return *this; }
 
 
 		void		parse(const std::string);
@@ -49,7 +53,9 @@ class WebServer
 	public:
 		class ParsingError : public std::exception
 		{
-			virtual const char*	what() const throw();
+            public:
+                ParsingError() {}
+			    virtual const char*	what() const throw() { return "File error"; }
 		};
 
 
