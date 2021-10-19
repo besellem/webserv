@@ -6,25 +6,29 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:53:23 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/19 00:57:45 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/19 12:48:36 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 
-typedef void (ServerInfo::*t_function)(std::string);
-
 void    parseTokens(ServerInfo& info, std::vector<std::string> tokens)
 {
     if (tokens.empty())
         return ;
-    static t_function   set[] = {ServerInfo::setPort, ServerInfo::setName,
-            ServerInfo::setErrorPages, ServerInfo::setCliMaxSize}; // Trouver comment faire un tableau de methodes
+    static method_function   method_ptr[4] = {&ServerInfo::setPort,
+        &ServerInfo::setName, &ServerInfo::setErrorPages,
+        &ServerInfo::setCliMaxSize};
     static std::string  directives[] = {"listen", "server_name",
             "error_pages", "cli_max_size"};
     for (int i = 0; i < 4; i++)
+    {
         if (tokens[0] == directives[i])
-            info.(set[i])(*(tokens.begin() + 1));
+        {
+            method_function func = method_ptr[i];
+            (info.*func)(tokens);
+        }
+    }
 }
 
 std::vector<std::string>    getTokens(std::string line)

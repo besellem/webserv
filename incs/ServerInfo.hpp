@@ -6,16 +6,25 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:27:04 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/19 00:41:12 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/19 12:47:56 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVERINFO_HPP
 # define SERVERINFO_HPP
 
-# include "webserv.hpp"
+// # include "webserv.hpp"
+# include <iostream>
+# include <cstring>
+
+# include <exception>
+# include <fstream>
+# include <iomanip>
+
 # include <map>
 # include <vector>
+
+// class Webserv;
 
 typedef struct s_location
 {
@@ -54,5 +63,7 @@ class ServerInfo
 		void	setErrorPages(const std::vector<std::string> &);
 		void	setCliMaxSize(const std::vector<std::string> &);
 };
+
+typedef void (ServerInfo::*method_function)(const std::vector<std::string> &);
 
 #endif
