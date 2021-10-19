@@ -3,14 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   epoll.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/19 15:48:20 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/19 16:11:00 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "epoll.hpp"
+
+#define __DEBUG std::cout << __FILE__ << ":" << __LINE__ << ": Here" << std::endl;
 
 webserv::epoll::epoll(void) {}
 webserv::epoll::~epoll(void) {}
@@ -30,6 +32,7 @@ webserv::epoll::epoll(short const & port) : _port(port) {
 	_addr.sin_family = AF_INET;
 	_addr.sin_port = htons(port);
 	_addr.sin_addr.s_addr = INADDR_ANY; // 0.0.0.0
+	// memset(&_addr.sin_zero, 0, sizeof(_addr.sin_zero));
 }
 
 void	webserv::epoll::bindStep(void) const {
@@ -119,14 +122,15 @@ void	webserv::epoll::handleAccept(int fd) {
 
 	std::cout << "accept a connection from [" S_GREEN << "127.0.0.1" << S_NONE "]" << std::endl;
 
-	setNonBlock(lfd);
+	// setNonBlock(lfd);
 	updateEvents(_epollFd, lfd, kReadEvent | kWriteEvent, false);
 }
 
 void	webserv::epoll::handleRead(int fd) {
-	char	buffer[4096];
+	char	buffer[4096] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
 	int		n = 0;
 
+	std::cout << "Here" << std::endl;
 	while ((n = ::read(fd, buffer, sizeof(buffer))) > 0) {
 		std::cout << "read: [" S_GREEN << n << S_NONE "]"  << std::endl;
 		int r = :: write(fd, buffer, n);
@@ -149,14 +153,14 @@ void	webserv::epoll::handleWrite(int fd) {
 	updateEvents(_epollFd, fd, kReadEvent, true);
 }
 
-short				webserv::epoll::getPort(void) const { return _port; }
-int					webserv::epoll::getEpollFd(void) const { return _epollFd; }
+short				webserv::epoll::getPort(void)     const { return _port; }
+int					webserv::epoll::getEpollFd(void)  const { return _epollFd; }
 int					webserv::epoll::getListenFd(void) const { return _listenFd; }
 struct sockaddr_in	webserv::epoll::getSockAddr(void) const { return _addr; }
 
-char const	*webserv::epoll::epollCreateException::what() const throw() { return "Epoll create failed!"; }
-char const	*webserv::epoll::socketFailException::what() const throw() { return "Socket failed!"; }
-char const	*webserv::epoll::bindFailException::what() const throw() { return "bind failed!"; }
-char const	*webserv::epoll::listenFailException::what() const throw() { return "listen failed!"; }
-char const	*webserv::epoll::nonBlockException::what() const throw() { return "fcntl failed!"; }
+char const	*webserv::epoll::epollCreateException::what()  const throw() { return "Epoll create failed!"; }
+char const	*webserv::epoll::socketFailException::what()   const throw() { return "Socket failed!"; }
+char const	*webserv::epoll::bindFailException::what()     const throw() { return "bind failed!"; }
+char const	*webserv::epoll::listenFailException::what()   const throw() { return "listen failed!"; }
+char const	*webserv::epoll::nonBlockException::what()     const throw() { return "fcntl failed!"; }
 char const	*webserv::epoll::updateEventsException::what() const throw() { return "kevent failed!"; }
