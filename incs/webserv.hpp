@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/18 18:29:10 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/19 14:33:13 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,5 +31,6 @@
 
 # include "defs.hpp"
 
+# include "epoll.hpp"
 
 #endif /* !defined(WEBSERV_HPP) */
