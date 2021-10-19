@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/19 17:06:09 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/19 23:11:26 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@
 # include <iomanip>
 # include <map>
 # include <vector>
+
+class WebServer;
 
 typedef struct s_location
 {

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:17 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/19 17:12:26 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/19 23:11:26 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,6 @@
 # define SERVERGENERATOR_HPP
 
 # include "Server.hpp"
-# include "webserver.hpp"
-
-class WebServ;
 
 enum e_state
 {
@@ -30,7 +27,7 @@ enum e_state
 
 class ServerGenerator
 {
-		friend class WebServ;
+		friend class WebServer;
 	public:
 		typedef std::vector<std::string> tokens_type;
 		
@@ -42,7 +39,7 @@ class ServerGenerator
 		Server*	operator[](size_t i);
 		Server*	lastServer() const;
 
-		void	newDirective(Server *, const tokens_type &)
+		void	newDirective(Server *, const tokens_type &);
 		void	newLocation(Server *, const tokens_type &);
 		void	newServer(const tokens_type &);
 		void	openBlock(const tokens_type &);

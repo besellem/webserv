@@ -6,11 +6,11 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:19 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/19 17:05:37 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/19 23:11:01 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Webserver.hpp"
+#include "ServerGenerator.hpp"
 
 ServerGenerator::ServerGenerator() { this->_sate = START; }
 

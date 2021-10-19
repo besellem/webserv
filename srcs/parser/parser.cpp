@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:53:23 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/19 17:12:54 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/19 23:11:01 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,22 +44,22 @@ void	WebServer::parse(const std::string config_file)
 	while(i) // trouver le EOF
 	{
 		std::getline(os, line);
-		tokens_type tok = getTokens(line);
+		ServerGenerator::tokens_type tok = getTokens(line);
 		if (!tok.empty())
 		{
 			// faire un tableau de methodes a la place
 			if (tok[0] == "server")
-				this->newServer(tok);
+				this->_servGen.newServer(tok);
 			else if (tok[0] == "location")
-				this->newLocation(this->lastServer(), tok);
+				this->_servGen.newLocation(this->_servGen.lastServer(), tok);
 			else if (tok[0] == "{")
-				this->openBlock(tok);
+				this->_servGen.openBlock(tok);
 			else if (tok[0] == "}")
-				this->closeBlock(tok);
+				this->_servGen.closeBlock(tok);
 			else
-				this->newDirective(this->lastServer(), tok);
+				this->_servGen.newDirective(this->_servGen.lastServer(), tok);
 		}
 		--i;
 	}
-	os.close(config_file);
+	os.close();
 }

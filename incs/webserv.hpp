@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/19 16:23:48 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/19 23:11:01 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ class WebServer
 
 
 	private:
-		ServerGenerator	_ServGen;
+		ServerGenerator	_servGen;
 	
 }; /* class WebServer */
 

@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Webserv.hpp"
+#include "webserv.hpp"
 
 Server::Server() {}
 
@@ -25,7 +25,7 @@ Server& Server::operator=(const Server &x) {
     this->_name = x._name;
     this->_errorPages = x._errorPages;
 	this->_cliMaxSize = x._cliMaxSize;
-    this->_location = x._location;
+    this->_locations = x._locations;
     return *this;
 }
 
@@ -45,14 +45,14 @@ void	Server::setErrorPages(const std::vector<std::string> &tok) {
     for (std::vector<std::string>::const_iterator it = tok.begin(); it != tok.end() - 1; it++)
         this->_errorPages.insert(std::make_pair(std::atoi(it->c_str()), *(tok.end() - 1)));
 }
-`
+
 void	Server::setCliMaxSize(const std::vector<std::string> &tok) {
     this->_cliMaxSize = std::atoi(tok[0].c_str());
 }
 
 void	Server::newLocation(const std::vector<std::string> &tok) {
     if (tok.size() != 2)
-        throw Webserv::ParsingError();
+        throw WebServer::ParsingError();
     t_location* loc = new t_location;
     loc->path = tok[1];
     this->_locations.push_back(loc);
@@ -61,11 +61,11 @@ void	Server::newLocation(const std::vector<std::string> &tok) {
 void	Server::setLocationMethods(const std::vector<std::string> &tok)
 {
     std::string methods[] = {"GET", "POST", "DELETE"};
-    t_location  *loc      = this->_location.back();
+    t_location  *loc      = this->_locations.back();
 
-    for(std::vector<std::string>::iterator it = tok.begin() + 1; it != tok.end(), it++)
+    for(std::vector<std::string>::const_iterator it = tok.begin() + 1; it != tok.end(); it++)
     {
-        for(size_t i = 0; i < 3, i++)
+        for(size_t i = 0; i < 3; i++)
             if (*it == methods[i])
                 loc->methods.push_back(methods[i]);      
     }
@@ -74,11 +74,11 @@ void	Server::setLocationMethods(const std::vector<std::string> &tok)
 void	Server::newLocationDirective(const std::vector<std::string> &tok)
 {
     t_location* loc = this->_locations.back();
-    std::string *atrr = {&_location.redirection, &_location.root, &_location.index};
+    std::string *atrr = {&loc->redirection, &loc->root, &loc->index};
     std::string directives[] = {"return", "root" "index"};
 
     if (tok[0] == "autoindex")
-        _location.autoindex = (tok.size() != 2 || tok[1] != "ON") ? 0 : 1;
+        loc->autoindex = (tok.size() != 2 || tok[1] != "ON") ? 0 : 1;
     else if (tok[0] == "allow")
         setLocationMethods(tok);
     for (size_t i = 0; i < 4; i++)
