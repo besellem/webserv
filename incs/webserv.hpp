@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/19 12:47:42 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/19 16:23:48 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,10 @@
 # include <vector>
 
 # include "defs.hpp"
-# include "ServerInfo.hpp"
+# include "Server.hpp"
+# include "ServerGenerator.hpp"
 
-// class ServerInfo;
+class ServerGenerator;
 
 class WebServer
 {
@@ -65,7 +66,7 @@ class WebServer
 
 
 	private:
-		ServerInfo	_info;
+		ServerGenerator	_ServGen;
 	
 }; /* class WebServer */
 
