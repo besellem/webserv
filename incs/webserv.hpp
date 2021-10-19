@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/19 14:33:13 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/19 20:08:11 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 # include <sys/time.h>
 # include <sys/socket.h>
 # include <sys/types.h>
-#include <netinet/in.h>
+# include <netinet/in.h>
 # include <fcntl.h>
 
 #include <unistd.h>
@@ -30,7 +30,9 @@
 # include <cstring>
 
 # include "defs.hpp"
+# include "socket.hpp"
 
-# include "epoll.hpp"
+/** @brief function declare */
+int	socketAccept(int fd, sockaddr *addr, socklen_t *addrLen);
 
 #endif /* !defined(WEBSERV_HPP) */
