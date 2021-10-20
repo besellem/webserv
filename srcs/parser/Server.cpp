@@ -98,28 +98,47 @@ void	Server::setCliMaxSize(const tokens_type &tok) {
     std::stringstream(tok[1]) >> this->_cliMaxSize;
 }
 
-void	Server::setLocationCgi(const tokens_type &tok)
-{
-    t_location  *loc      = this->_locations.back();
-
-    for(tokens_type::const_iterator it = tok.begin() + 1; it != tok.end(); it++)
-        loc->cgi.push_back(*it);
+void	Server::setCgi(t_location  *loc, const tokens_type &tok) {
+    loc->cgi.assign(tok.begin() + 1, tok.end());
 }
 
-void	Server::setLocationMethods(const tokens_type &tok)
+void	Server::setIndex(t_location  *loc, const tokens_type &tok) {
+    loc->index.assign(tok.begin() + 1, tok.end());
+}
+
+void	Server::setAutoIndex(t_location  *loc, const tokens_type &tok) {
+    if (tok.size() != 2)
+        throw WebServer::ParsingError();
+    loc->autoindex = (tok[1] == "on") ? ON : throw WebServer::ParsingError();
+}
+
+void	Server::setRedirection(t_location  *loc, const tokens_type &tok) {
+    if (tok.size() != 2)
+        throw WebServer::ParsingError();
+    loc->redirection = tok[1];
+}
+
+void	Server::setRoot(t_location  *loc, const tokens_type &tok) {
+    if (tok.size() != 2)
+        throw WebServer::ParsingError();
+    loc->root = tok[1];
+}
+
+void	Server::setMethods(t_location  *loc, const tokens_type &tok)
 {
     std::string methods[] = {"GET", "POST", "DELETE"};
-    t_location  *loc      = this->_locations.back();
 
     for(tokens_type::const_iterator it = tok.begin() + 1; it != tok.end(); it++)
     {
         size_t i;
         for(i = 0; i < 3; i++)
+        {
             if (*it == methods[i])
             {
                 loc->methods.push_back(methods[i]);
                 break ;
             }
+        }
         if (i == 3)
             throw WebServer::ParsingError();
     }
@@ -140,45 +159,37 @@ void	Server::newLocation(const tokens_type &tok) {
 
 void	Server::newLocationDirective(const tokens_type &tok)
 {
+    std::string directives[] = {"allow", "return", "root",
+            "index", "autoindex", "cgi"};
+	static method_function1   method_ptr[] = {&Server::setMethods,
+		    &Server::setRedirection, &Server::setRoot, &Server::setIndex,
+            &Server::setAutoIndex, &Server::setCgi,};
     t_location* loc = this->_locations.back();
-    std::string* atrr[] = {&loc->redirection, &loc->root, &loc->index};
-    std::string directives[] = {"return", "root", "index"};
 
     if (tok.size() < 2)
         throw WebServer::ParsingError();
-    if (tok[0] == "autoindex")
-        loc->autoindex = (tok[1] == "on") ? ON : throw WebServer::ParsingError();
-    else if (tok[0] == "allow")
-        this->setLocationMethods(tok);
-    else if (tok[0] == "cgi")
-        this->setLocationCgi(tok);
-    else
-    {
-        if (tok.size() != 2)
-            throw WebServer::ParsingError();
-        for (size_t i = 0; i < 3; i++)
-        {
-            if (tok[0] == directives[i])
-            {
-                *(atrr[i]) = tok[1];
-                return ;
-            }
-        }
-        throw WebServer::ParsingError();
-    }
+	for (size_t i = 0; i < 6; i++)
+	{
+		if (tok[0] == directives[i])
+		{
+			method_function1 func = method_ptr[i];
+			(this->*func)(loc, tok);
+            return ;
+		}
+	}
+    throw WebServer::ParsingError();
 }
 
 void	Server::newDirective(const tokens_type &tokens)
 {
 	if (tokens.empty())
 		return ;
-	static method_function   method_ptr[4] = {&Server::setPort,
-		&Server::setName, &Server::setErrorPages,
-		&Server::setCliMaxSize};
+	static method_function   method_ptr[] = {&Server::setPort,
+            &Server::setName, &Server::setErrorPages, &Server::setCliMaxSize};
 	static std::string  directives[] = {"listen", "server_name",
 			"error_page", "cli_max_size"};
 
-	for (int i = 0; i < 4; i++)
+	for (size_t i = 0; i < 4; i++)
 	{
 		if (tokens[0] == directives[i])
 		{
@@ -194,8 +205,8 @@ void	Server::newDirective(const tokens_type &tokens)
 
 std::ostream& operator<<(std::ostream& os, const t_location& loc)
 {
-    std::string directives[] = {"return", "root", "index"};
-    const std::string* loc_atrr[] = {&loc.redirection, &loc.root, &loc.index};
+    std::string directives[] = {"return", "root"};
+    const std::string* loc_atrr[] = {&loc.redirection, &loc.root};
     os << "\tlocation " << loc.path << std::endl << "\t{" << std::endl;
     if (loc.autoindex == ON)
         os << "\t\tautoindex on" << std::endl;
@@ -213,7 +224,14 @@ std::ostream& operator<<(std::ostream& os, const t_location& loc)
             os << " " << loc.cgi[k];
         os << std::endl;
     }
-    for (size_t k = 0; k < 3; k++)
+    if (!loc.index.empty())
+    {
+        os << "\t\tindex";
+        for (size_t k = 0; k < loc.index.size(); k++)
+            os << " " << loc.index[k];
+        os << std::endl;
+    }
+    for (size_t k = 0; k < 2; k++)
         if (!(*loc_atrr)[k].empty())
             os << "\t\t" << directives[k] << " " << (*loc_atrr)[k] << std::endl;
     os << "\t}" << std::endl;

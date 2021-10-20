@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/20 23:05:13 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/21 00:52:30 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ typedef struct s_location
 	std::vector<std::string>	methods;		// list of accepted HTTP Methods for the root
 	std::string					redirection;	// HTTP redirection
 	std::string					root;			// directory or a file from where the file should be search
-	std::string					index;			// default file to answer if the request is a directory
+	std::vector<std::string>	index;			// default file to answer if the request is a directory
 	bool						autoindex;		// turn on or off directory listing
 	std::vector<std::string>	cgi;			// a comprendre
 }				t_location;
@@ -65,8 +65,12 @@ class Server
 		void	setName(const tokens_type &);
 		void	setErrorPages(const tokens_type &);
 		void	setCliMaxSize(const tokens_type &);
-		void	setLocationMethods(const tokens_type &);
-		void	setLocationCgi(const tokens_type &);
+		void	setMethods(t_location  *, const tokens_type &);
+		void	setRedirection(t_location  *, const tokens_type &);
+		void	setRoot(t_location  *, const tokens_type &);
+		void	setIndex(t_location  *, const tokens_type &);
+		void	setAutoIndex(t_location  *, const tokens_type &);
+		void	setCgi(t_location  *, const tokens_type &);
 		void	newLocationDirective(const tokens_type &);
 		
 		void	newLocation(const std::vector<std::string> &);
@@ -83,7 +87,8 @@ class Server
 
 std::ostream& operator<<(std::ostream &, const Server &);
 
-typedef void (Server::*method_function)(const std::vector<std::string> &);
+typedef void (Server::*method_function)(const Server::tokens_type &);
+typedef void (Server::*method_function1)(t_location  *, const Server::tokens_type &);
 
 _END_NS_WEBSERV
 
