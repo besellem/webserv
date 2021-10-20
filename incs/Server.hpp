@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/20 22:41:05 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 22:55:01 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ typedef struct s_location
 	std::string					root;			// directory or a file from where the file should be search
 	std::string					index;			// default file to answer if the request is a directory
 	bool						autoindex;		// turn on or off directory listing
-	std::string					cgi;			// a comprendre
+	std::vector<std::string>	cgi;			// a comprendre
 }				t_location;
 
 class Server
@@ -64,6 +64,7 @@ class Server
 		void	setErrorPages(const tokens_type &);
 		void	setCliMaxSize(const tokens_type &);
 		void	setLocationMethods(const tokens_type &);
+		void	setLocationCgi(const tokens_type &);
 		void	newLocationDirective(const tokens_type &);
 		
 		void	newLocation(const std::vector<std::string> &);

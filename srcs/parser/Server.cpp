@@ -96,6 +96,14 @@ void	Server::setCliMaxSize(const tokens_type &tok) {
     std::stringstream(tok[1]) >> this->_cliMaxSize;
 }
 
+void	Server::setLocationCgi(const tokens_type &tok)
+{
+    t_location  *loc      = this->_locations.back();
+
+    for(tokens_type::const_iterator it = tok.begin() + 1; it != tok.end(); it++)
+        loc->cgi.push_back(*it);
+}
+
 void	Server::setLocationMethods(const tokens_type &tok)
 {
     std::string methods[] = {"GET", "POST", "DELETE"};
@@ -137,9 +145,11 @@ void	Server::newLocationDirective(const tokens_type &tok)
     if (tok.size() < 2)
         throw WebServer::ParsingError();
     if (tok[0] == "autoindex")
-        loc->autoindex = (tok.size() != 2 || tok[1] != "ON") ? 0 : 1;
+        loc->autoindex = (tok[1] == "on") ? 1 : throw WebServer::ParsingError();
     else if (tok[0] == "allow")
         this->setLocationMethods(tok);
+    else if (tok[0] == "cgi")
+        this->setLocationCgi(tok);
     else
     {
         if (tok.size() != 2)
@@ -194,6 +204,13 @@ std::ostream& operator<<(std::ostream& os, const t_location& loc)
             os << " " << loc.methods[k];
         os << std::endl;
     }
+    if (!loc.cgi.empty())
+    {
+        os << "\t\tcgi";
+        for (size_t k = 0; k < loc.cgi.size(); k++)
+            os << " " << loc.cgi[k];
+        os << std::endl;
+    }
     for (size_t k = 0; k < 3; k++)
         if (!(*loc_atrr)[k].empty())
             os << "\t\t" << directives[k] << " " << (*loc_atrr)[k] << std::endl;
@@ -212,7 +229,8 @@ std::ostream& operator<<(std::ostream& os, const Server& server)
         os << "\tserver_name " << server.name() << std::endl;
     if (!server.errorPages().empty())
     {
-        for (std::map<int, std::string>::const_iterator it = server.errorPages().begin(); it != server.errorPages().end(); it++)
+        for (std::map<int, std::string>::const_iterator it = server.errorPages().begin();
+            it != server.errorPages().end(); it++)
             os << "\terror_page " << it->first << " " << it->second << std::endl;
     }
     if (server.cliMaxSize() != -1)
