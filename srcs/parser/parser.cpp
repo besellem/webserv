@@ -6,11 +6,13 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:53:23 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/20 22:38:43 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 23:09:53 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
+
+_BEGIN_NS_WEBSERV
 
 /* Returns 1 if the string is numeric.
 Otherwise, returns 0. */
@@ -125,3 +127,5 @@ void	WebServer::parse(const std::string config_file)
 	os.close();
 	std::cout << "\n## ServerGenerator :\n\n" << this->_servers;
 }
+
+_END_NS_WEBSERV

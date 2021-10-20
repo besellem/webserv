@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:17 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/20 22:49:12 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 23:05:45 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 # include "webserv.hpp"
 # include "Server.hpp"
+
+_BEGIN_NS_WEBSERV
 
 class WebServer;
 
@@ -68,5 +70,7 @@ class ServerGenerator
 }; /* class ServerGenerator */
 
 std::ostream& operator<<(std::ostream &, const ServerGenerator &);
+
+_END_NS_WEBSERV
 
 #endif /* !defined(SERVERGENERATOR_HPP) */

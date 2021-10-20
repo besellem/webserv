@@ -12,6 +12,8 @@
 
 #include "webserv.hpp"
 
+_BEGIN_NS_WEBSERV
+
 Server::Server() : _port(-1), _cliMaxSize(-1) {}
 
 Server::~Server() {
@@ -132,7 +134,7 @@ void	Server::newLocation(const tokens_type &tok) {
         throw WebServer::ParsingError();
     t_location* loc = new t_location;
     loc->path = tok[1];
-    loc->autoindex = 0;
+    loc->autoindex = OFF;
     this->_locations.push_back(loc);
 }
 
@@ -145,7 +147,7 @@ void	Server::newLocationDirective(const tokens_type &tok)
     if (tok.size() < 2)
         throw WebServer::ParsingError();
     if (tok[0] == "autoindex")
-        loc->autoindex = (tok[1] == "on") ? 1 : throw WebServer::ParsingError();
+        loc->autoindex = (tok[1] == "on") ? ON : throw WebServer::ParsingError();
     else if (tok[0] == "allow")
         this->setLocationMethods(tok);
     else if (tok[0] == "cgi")
@@ -195,7 +197,7 @@ std::ostream& operator<<(std::ostream& os, const t_location& loc)
     std::string directives[] = {"return", "root", "index"};
     const std::string* loc_atrr[] = {&loc.redirection, &loc.root, &loc.index};
     os << "\tlocation " << loc.path << std::endl << "\t{" << std::endl;
-    if (loc.autoindex == 1)
+    if (loc.autoindex == ON)
         os << "\t\tautoindex on" << std::endl;
     if (!loc.methods.empty())
     {
@@ -240,3 +242,5 @@ std::ostream& operator<<(std::ostream& os, const Server& server)
     os << "}" << std::endl;
     return os;
 }
+
+_END_NS_WEBSERV

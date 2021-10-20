@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/20 22:38:27 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 23:10:56 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,8 @@
 
 # include "defs.hpp"
 # include "ServerGenerator.hpp"
+
+_BEGIN_NS_WEBSERV
 
 bool	ft_isNumeric(const std::string &str);
 
@@ -73,5 +75,6 @@ class WebServer
 	
 }; /* class WebServer */
 
+_END_NS_WEBSERV
 
 #endif /* !defined(WEBSERV_HPP) */

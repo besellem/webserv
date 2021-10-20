@@ -6,11 +6,13 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:19 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/20 22:45:29 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 23:10:40 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
+
+_BEGIN_NS_WEBSERV
 
 ServerGenerator::ServerGenerator() { this->_state = START; }
 
@@ -122,3 +124,5 @@ std::ostream& operator<<(std::ostream& os, const ServerGenerator& servers)
         os << *(servers[i]);
     return os;
 }
+
+_END_NS_WEBSERV

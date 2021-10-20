@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/18 20:57:51 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 23:01:35 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,5 +17,8 @@
 
 # define OFF 0
 # define ON 1
+
+# define _BEGIN_NS_WEBSERV namespace webserv {
+# define _END_NS_WEBSERV }
 
 #endif /* !defined(DEFS_HPP) */

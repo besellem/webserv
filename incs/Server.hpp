@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/20 22:55:01 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 23:05:13 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 # include <map>
 # include <vector>
 # include "webserv.hpp"
+
+_BEGIN_NS_WEBSERV
 
 class WebServer;
 
@@ -82,5 +84,7 @@ class Server
 std::ostream& operator<<(std::ostream &, const Server &);
 
 typedef void (Server::*method_function)(const std::vector<std::string> &);
+
+_END_NS_WEBSERV
 
 #endif /* !defined(SERVER_HPP) */
