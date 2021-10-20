@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:53:23 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/20 18:48:29 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 18:55:48 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ std::vector<std::string>	ft_vectorcut(const std::vector<std::string>& vect, char
 	size_t pos = 0;
 	std::vector<std::string> newVect(vect);
 	std::vector<std::string>::const_iterator it;
-	
+
 	for(it = newVect.begin(); it != newVect.end(); it++, pos++)
 	{
 		if (*it != ft_strcut(*it, delimiter))

@@ -99,7 +99,7 @@ void	Server::setCliMaxSize(const tokens_type &tok) {
 }
 
 void	Server::newLocation(const tokens_type &tok) {
-    if (tok.size() != 2)
+    if (tok.size() != 2 || tok[1].find(';') != std::string::npos)
         throw WebServer::ParsingError();
     t_location* loc = new t_location;
     loc->path = tok[1];
