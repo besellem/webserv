@@ -148,6 +148,8 @@ void	Server::setMethods(t_location  *loc, const tokens_type &tok)
 **  Modifiers
 */
 
+/* Adds a new location to the server */
+
 void	Server::newLocation(const tokens_type &tok) {
     if (tok.size() != 2 || tok[1].find(';') != std::string::npos)
         throw WebServer::ParsingError();
@@ -156,6 +158,8 @@ void	Server::newLocation(const tokens_type &tok) {
     loc->autoindex = OFF;
     this->_locations.push_back(loc);
 }
+
+/* Adds the new directive to the location */
 
 void	Server::newLocationDirective(const tokens_type &tok)
 {
@@ -179,6 +183,8 @@ void	Server::newLocationDirective(const tokens_type &tok)
 	}
     throw WebServer::ParsingError();
 }
+
+/* Adds the new directive to the server */
 
 void	Server::newDirective(const tokens_type &tokens)
 {
