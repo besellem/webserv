@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/19 20:08:11 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/20 12:43:49 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@
 #include <cstdio>
 
 # include <iostream>
+# include <fstream>
+# include <string>
 # include <cstring>
 
 # include "defs.hpp"

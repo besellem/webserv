@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 14:17:07 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/19 20:19:59 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/20 13:21:51 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,15 @@ int main(int ac, char **av) {
 	
 	int port = atoi(av[1]);
 
+	std::string path = "/Users/kaye/42/42_Project/webserv/www/www.apple.com.html";
+
 	webserv::Socket	socketVar(port);
 	socketVar.startUp();
 
 	int new_socket;
 	long valread;
 
-	char *hello = (char *)"HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+	// char *hello = (char *)"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\n\n<h1>Hello world!<\\h1>";
 
 	while(1)
 	{
@@ -42,7 +44,8 @@ int main(int ac, char **av) {
 	    char buffer[30000] = {0};
 	    valread = read(new_socket , buffer, 30000);
 	    printf("%s\n",buffer );
-	    ::write(new_socket , hello , strlen(hello));
+	    // ::write(new_socket , hello , strlen(hello));
+		socketVar.parsing(new_socket, path);
 	    printf("------------------Hello message sent-------------------");
 	    close(new_socket);
 	}
