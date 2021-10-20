@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:17 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/20 14:14:47 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 22:49:12 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,43 +18,55 @@
 
 class WebServer;
 
+/* Config file states */
+
 enum e_state
 {
 	START = 0,
 	NEW_SERVER,
 	IN_SERVER,
 	NEW_LOCATION,
-	IN_LOCATION,
-	END
+	IN_LOCATION
 };
 
 class ServerGenerator
 {
-		friend class WebServer;
 	public:
-		typedef std::vector<std::string> tokens_type;
+		typedef Server::tokens_type tokens_type;
 		
 		ServerGenerator();
 		~ServerGenerator();
 		ServerGenerator(const ServerGenerator &);
 		ServerGenerator&	operator=(const ServerGenerator &);
-
-		Server*	operator[](int i) const;
-		Server*	lastServer() const;
 		
-		void	newDirective(Server *, const tokens_type &);
-		void	newLocation(Server *, const tokens_type &);
-		void	newServer(const tokens_type &);
-		void	openBlock(const tokens_type &);
-		void	closeBlock(const tokens_type &);
+		int			state() const;
+		size_t  	size() const;
+
+		/*
+		**  Element access
+		*/
+	
+		Server*		operator[](int) const;
+		Server*		last() const;
+		
+		/*
+		**  Modifiers / Checkers
+		*/
+	
+		void		newDirective(Server *, const tokens_type &);
+		void		newLocation(Server *, const tokens_type &);
+		void		newServer(const tokens_type &);
+		void		openBlock(const tokens_type &);
+		void		closeBlock(const tokens_type &);
 		
 	private:
 		std::vector<Server *>	_servers;
 		int						_state;
 
 	public:
-		friend std::ostream& operator<<(std::ostream& os, const ServerGenerator& config);
 
 }; /* class ServerGenerator */
+
+std::ostream& operator<<(std::ostream &, const ServerGenerator &);
 
 #endif /* !defined(SERVERGENERATOR_HPP) */

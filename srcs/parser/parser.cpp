@@ -6,11 +6,14 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:53:23 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/20 18:55:48 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 22:38:43 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
+
+/* Returns 1 if the string is numeric.
+Otherwise, returns 0. */
 
 bool	ft_isNumeric(const std::string &str)
 {
@@ -21,7 +24,7 @@ bool	ft_isNumeric(const std::string &str)
 }
 
 /* Cuts str from delimiter.
-Returns the new string */
+Returns the new string. */
 
 std::string    ft_strcut(const std::string& str, char delimiter)
 {
@@ -31,7 +34,10 @@ std::string    ft_strcut(const std::string& str, char delimiter)
 	return str.substr(0, pos);
 }
 
-std::vector<std::string>	ft_vectorcut(const std::vector<std::string>& vect, char delimiter)
+/* Cuts vector from delimiter.
+Returns the new vector. */
+
+Server::tokens_type	ft_vectorcut(const std::vector<std::string>& vect, char delimiter)
 {
 	size_t pos = 0;
 	std::vector<std::string> newVect(vect);
@@ -51,7 +57,11 @@ std::vector<std::string>	ft_vectorcut(const std::vector<std::string>& vect, char
 	return newVect;
 }
 
-std::vector<std::string>    getTokens(std::string line)
+/* Breaks a string into a sequence of zero or
+more nonempty tokens delimiter by tabulation or space
+Returns the vector of tokens. */
+
+Server::tokens_type    getTokens(std::string line)
 {
 	std::vector<std::string> tokens;
 
@@ -68,9 +78,36 @@ std::vector<std::string>    getTokens(std::string line)
 	}
 	if (line[0])
 		tokens.push_back(line);
-	
 	return tokens;
 }
+
+/* Fills the servers with line's data */
+
+void	parse_line(ServerGenerator& servers, std::string line)
+{	
+	line = ft_strcut(line, '#');
+	Server::tokens_type tok = getTokens(line);
+	if (!tok.empty())
+	{
+		if (tok[0] == "server")
+			servers.newServer(tok);
+		else if (tok[0] == "location")
+			servers.newLocation(servers.last(), tok);
+		else if (tok[0] == "{")
+			servers.openBlock(tok);
+		else if (tok[0] == "}")
+			servers.closeBlock(tok);
+		else
+		{
+			tok = ft_vectorcut(tok, ';');
+			if (servers.size() == 0)
+				throw WebServer::ParsingError();
+			servers.newDirective(servers.last(), tok);
+		}
+	}
+}
+
+/* Reads the config file and parse it line by line */
 
 void	WebServer::parse(const std::string config_file)
 {
@@ -82,28 +119,9 @@ void	WebServer::parse(const std::string config_file)
 	std::string line;
 	os.open(config_file);
 	while (std::getline(os, line))
-	{
-		line = ft_strcut(line, '#');
-		ServerGenerator::tokens_type tok = getTokens(line);
-		if (!tok.empty())
-		{
-			if (tok[0] == "server")
-				this->_config.newServer(tok);
-			else if (tok[0] == "location")
-				this->_config.newLocation(this->_config.lastServer(), tok);
-			else if (tok[0] == "{")
-				this->_config.openBlock(tok);
-			else if (tok[0] == "}")
-				this->_config.closeBlock(tok);
-			else
-			{
-				tok = ft_vectorcut(tok, ';');
-				this->_config.newDirective(this->_config.lastServer(), tok);
-			}
-		}
-	}
-	if (this->_config._state != START)
+		parse_line(this->_servers, line);
+	if (this->_servers.state() != START)
 		throw ParsingError();
 	os.close();
-	std::cout << "\n## ServerGenerator :\n\n" << this->_config;
+	std::cout << "\n## ServerGenerator :\n\n" << this->_servers;
 }

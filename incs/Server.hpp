@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/20 16:03:44 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 22:41:05 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,11 +49,11 @@ class Server
 		**  Getters
 		*/
 	
-		const int&							getPort() const;
-		const std::string&					getName() const;
-		const std::map<int, std::string>&	getErrorPages() const;
-		const int&							getClimaxSize() const;
-		const std::vector<t_location *>&	getLocations() const;
+		const int&							port() const;
+		const std::string&					name() const;
+		const std::map<int, std::string>&	errorPages() const;
+		const int&							cliMaxSize() const;
+		const std::vector<t_location *>&	locations() const;
 
 		/*
 		**  Setters
@@ -78,7 +78,8 @@ class Server
 
 }; /* class Server */
 
+std::ostream& operator<<(std::ostream &, const Server &);
+
 typedef void (Server::*method_function)(const std::vector<std::string> &);
-// typedef e_state (*state_function)(Server &, const std::vector<std::string> &);
 
 #endif /* !defined(SERVER_HPP) */

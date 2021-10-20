@@ -37,19 +37,19 @@ Server& Server::operator=(const Server &x) {
 **  Getters
 */
 
-const int&	Server::getPort() const {
+const int&	Server::port() const {
     return this->_port ;
 }
-const std::string&	Server::getName() const {
+const std::string&	Server::name() const {
     return this->_name ;
 }
-const std::map<int, std::string>&	Server::getErrorPages() const {
+const std::map<int, std::string>&	Server::errorPages() const {
     return this->_errorPages ;
 }
-const int&	Server::getClimaxSize() const {
+const int&	Server::cliMaxSize() const {
     return this->_cliMaxSize ;
 }
-const std::vector<t_location *>&	Server::getLocations() const {
+const std::vector<t_location *>&	Server::locations() const {
     return this->_locations;
 }
 
@@ -69,7 +69,7 @@ void	Server::setPort(const tokens_type &tok) {
     if (!ft_isNumeric(tok[1]))
         throw WebServer::ParsingError();
     std::stringstream(tok[1]) >> this->_port;
-    if (this->_port < 0 || this->_port > 65535)
+    if (this->_port > 65535)
         throw WebServer::ParsingError();
 }
 
@@ -94,17 +94,6 @@ void	Server::setCliMaxSize(const tokens_type &tok) {
     if (!ft_isNumeric(tok[1]))
         throw WebServer::ParsingError();
     std::stringstream(tok[1]) >> this->_cliMaxSize;
-    if (this->_cliMaxSize < 0)
-        throw WebServer::ParsingError();
-}
-
-void	Server::newLocation(const tokens_type &tok) {
-    if (tok.size() != 2 || tok[1].find(';') != std::string::npos)
-        throw WebServer::ParsingError();
-    t_location* loc = new t_location;
-    loc->path = tok[1];
-    loc->autoindex = 0;
-    this->_locations.push_back(loc);
 }
 
 void	Server::setLocationMethods(const tokens_type &tok)
@@ -124,6 +113,19 @@ void	Server::setLocationMethods(const tokens_type &tok)
         if (i == 3)
             throw WebServer::ParsingError();
     }
+}
+
+/*
+**  Modifiers
+*/
+
+void	Server::newLocation(const tokens_type &tok) {
+    if (tok.size() != 2 || tok[1].find(';') != std::string::npos)
+        throw WebServer::ParsingError();
+    t_location* loc = new t_location;
+    loc->path = tok[1];
+    loc->autoindex = 0;
+    this->_locations.push_back(loc);
 }
 
 void	Server::newLocationDirective(const tokens_type &tok)
@@ -174,4 +176,49 @@ void	Server::newDirective(const tokens_type &tokens)
 		}
 	}
     throw WebServer::ParsingError();
+}
+
+/* Display location block like the config file */
+
+std::ostream& operator<<(std::ostream& os, const t_location& loc)
+{
+    std::string directives[] = {"return", "root", "index"};
+    const std::string* loc_atrr[] = {&loc.redirection, &loc.root, &loc.index};
+    os << "\tlocation " << loc.path << std::endl << "\t{" << std::endl;
+    if (loc.autoindex == 1)
+        os << "\t\tautoindex on" << std::endl;
+    if (!loc.methods.empty())
+    {
+        os << "\t\tallow";
+        for (size_t k = 0; k < loc.methods.size(); k++)
+            os << " " << loc.methods[k];
+        os << std::endl;
+    }
+    for (size_t k = 0; k < 3; k++)
+        if (!(*loc_atrr)[k].empty())
+            os << "\t\t" << directives[k] << " " << (*loc_atrr)[k] << std::endl;
+    os << "\t}" << std::endl;
+    return os;
+}
+
+/* Display server block like the config file */
+
+std::ostream& operator<<(std::ostream& os, const Server& server)
+{
+    os << "server\n" << "{" << std::endl;
+    if (server.port() != -1)
+        os << "\tlisten " << server.port() << std::endl;
+    if (!server.name().empty())
+        os << "\tserver_name " << server.name() << std::endl;
+    if (!server.errorPages().empty())
+    {
+        for (std::map<int, std::string>::const_iterator it = server.errorPages().begin(); it != server.errorPages().end(); it++)
+            os << "\terror_page " << it->first << " " << it->second << std::endl;
+    }
+    if (server.cliMaxSize() != -1)
+        os << "\tcli_max_size " << server.cliMaxSize() << std::endl;
+    for (size_t j = 0; j < server.locations().size(); j++)
+        os << *(server.locations()[j]);
+    os << "}" << std::endl;
+    return os;
 }
