@@ -55,7 +55,7 @@ int main(int argc, char const *argv[])
         valread = read(new_socket , buffer, 30000);
         printf("sock:\n%s\n", buffer);
         // write(new_socket, buffer , valread);
-		write(new_socket, "hello", sizeof("hello"));
+		// write(new_socket, "hello", sizeof("hello"));
         printf("------------------Hello message sent-------------------");
 		close(new_socket);
     }

@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/20 15:57:37 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/20 17:22:02 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,8 @@
 # define S_CLRLINE "\033[K\r"
 
 /** @brief namespace define */
-# define _BEGIN_NS_WEBSERV namespace webserv {
+# define _INLINE_NAMESPACE webserv
+# define _BEGIN_NS_WEBSERV namespace _INLINE_NAMESPACE {
 # define _END_NS_WEBSERV   }
 
 # define GET	(1L << 0)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/20 12:36:07 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/20 17:25:31 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,37 +17,48 @@
 
 _BEGIN_NS_WEBSERV
 
-class Socket {
+class HttpHeader
+{
+	
+};
+
+class Socket
+{
+	
 	public:
 	/** @brief constructor / destructor */
 
-		explicit Socket(short const & port);
+		explicit Socket(const short& port);
 		~Socket(void);
 
-		short		getPort(void);
-		int			getServerFd(void);
-		sockaddr_in	getAddr(void);
-		size_t		getAddrLen(void);
+		short		getPort(void) const;
+		int			getServerFd(void) const;
+		sockaddr_in	getAddr(void) const;
+		size_t		getAddrLen(void) const;
 
 		/** @brief init socket */
 		void		startUp(void);
 
-		void		parsing(int skt, std::string);
+		void		parse(int skt, const char* http_header);
+
 
 	private:
 		Socket(void);
 
-		void errorExit(std::string const & str) const;
-		void bindStep(int const & serverFd, sockaddr_in const & addr);
-		void listenStep(int const & serverFd);
+		void	errorExit(const std::string& str) const;
+		void	bindStep(const int& serverFd, const sockaddr_in& addr);
+		void	listenStep(const int& serverFd);
 
-		void		getParsing(int skt, std::string path);
+		void	getParsing(int skt, const char* http_header);
+		void	_parse_wrapper(const char*);
+
 
 	private:
 		short		_port;
 		int			_serverFd;
 		sockaddr_in	_addr;
 		size_t		_addrLen;
+	
 };
 
 _END_NS_WEBSERV
