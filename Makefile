@@ -3,35 +3,33 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+         #
+#    By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/18 15:37:05 by kaye             ###   ########.fr        #
+#    Updated: 2021/10/20 16:58:07 by adbenoit         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # COMPILATION
 
 CC		= clang++
-CFLAGS 	= -Wall -Wextra -Werror -std=c++98
+CFLAGS 	= -Wall -Wextra -Werror -std=c++98# -fsanitize=address -g3
 IFLAGS 	= -I./incs
 
 # DIRECTORIES
 
 BUILD 			:= .build
 SRC_DIR 		:= srcs
+SUB_DIR 		:= parser
 OBJ_DIR 		:= $(BUILD)/obj
-## all sub folder add here: (check exemple)
-SUB_DIR 		:= exemple
 DIRS			:= $(OBJ_DIR) $(addprefix $(OBJ_DIR)/, $(SUB_DIR))
 
 # FILES
 
 NAME			:= webserv
 SRC				:= main.cpp
-## all sub file add here: (check exemple)
-SUB_SRC			:= exemple.cpp
-SRC				+= $(addprefix exemple/, $(SUB_SRC))
+SUB_SRC			:= parser.cpp Server.cpp ServerGenerator.cpp
+SRC				+= $(addprefix parser/, $(SUB_SRC))
 OBJ				:= $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 
 # COLORS
@@ -66,7 +64,11 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+debug:
+	@echo SRC = $(SRC)
+	@echo OBJ = $(OBJ)
+
+.PHONY: all clean fclean re debug
 
 $(BUILD):
 	@mkdir $@ $(DIRS)

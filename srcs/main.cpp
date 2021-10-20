@@ -3,20 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/18 15:46:24 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/20 23:07:08 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../incs/webserv.hpp"
+#include "webserv.hpp"
+#include <stdio.h>
 
 int	main(int ac, char **av)
 {
-	WebServer		serv;
-	std::string		conf = (ac > 1) ? av[1] : DEFAULT_CONFIG_FILE;
-
+	webserv::WebServer	serv;
+	std::string			conf = (ac > 1) ? av[1] : DEFAULT_CONFIG_FILE;
 
 	try
 	{

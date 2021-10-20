@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/18 15:45:10 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/20 23:10:56 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,27 @@
 # include <sys/socket.h>
 # include <sys/types.h>
 # include <fcntl.h>
+# include <cctype>
 
 # include <iostream>
 # include <cstring>
 
-# include "defs.hpp"
+# include <exception>
+# include <fstream>
+# include <iomanip>
+# include <sstream>
 
+# include <map>
+# include <vector>
+
+# include "defs.hpp"
+# include "ServerGenerator.hpp"
+
+_BEGIN_NS_WEBSERV
+
+bool	ft_isNumeric(const std::string &str);
+
+class ServerGenerator;
 
 class WebServer
 {
@@ -37,10 +52,10 @@ class WebServer
 		
 		WebServer(const WebServer&);
 		
-		~WebServer()
+		virtual ~WebServer()
 		{}
 		
-		WebServer&	operator=(const WebServer&);
+		WebServer&	operator=(const WebServer&) { return *this; }
 
 
 		void		parse(const std::string);
@@ -49,14 +64,17 @@ class WebServer
 	public:
 		class ParsingError : public std::exception
 		{
-			virtual const char*	what() const throw();
+            public:
+                ParsingError() {}
+			    virtual const char*	what() const throw() { return "Config File Error"; }
 		};
 
 
 	private:
-	
+		ServerGenerator	_servers;
 	
 }; /* class WebServer */
 
+_END_NS_WEBSERV
 
 #endif /* !defined(WEBSERV_HPP) */
