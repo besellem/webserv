@@ -6,14 +6,17 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:17 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/20 06:34:44 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 14:14:47 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVERGENERATOR_HPP
 # define SERVERGENERATOR_HPP
 
+# include "webserv.hpp"
 # include "Server.hpp"
+
+class WebServer;
 
 enum e_state
 {

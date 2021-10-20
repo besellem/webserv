@@ -12,7 +12,7 @@
 
 #include "webserv.hpp"
 
-Server::Server() {}
+Server::Server() : _port(-1), _cliMaxSize(-1) {}
 
 Server::~Server() {
     for (size_t i = 0; i < this->_locations.size(); i++)
@@ -34,66 +34,127 @@ Server& Server::operator=(const Server &x) {
 }
 
 /*
+**  Getters
+*/
+
+const int&	Server::getPort() const {
+    return this->_port ;
+}
+const std::string&	Server::getName() const {
+    return this->_name ;
+}
+const std::map<int, std::string>&	Server::getErrorPages() const {
+    return this->_errorPages ;
+}
+const int&	Server::getClimaxSize() const {
+    return this->_cliMaxSize ;
+}
+const std::vector<t_location *>&	Server::getLocations() const {
+    return this->_locations;
+}
+
+/*
 **  Setters
 */
 
-void	Server::setName(const std::vector<std::string> &tok) {
-    this->_name = tok[0];
+void	Server::setName(const tokens_type &tok) {
+     if (tok.size() != 2)
+        throw WebServer::ParsingError();
+    this->_name = tok[1];
 }
 
-void	Server::setPort(const std::vector<std::string> &tok) {
-    this->_port = std::atoi(tok[0].c_str());
+void	Server::setPort(const tokens_type &tok) {
+     if (tok.size() != 2)
+        throw WebServer::ParsingError();
+    if (!ft_isNumeric(tok[1]))
+        throw WebServer::ParsingError();
+    std::stringstream(tok[1]) >> this->_port;
+    if (this->_port < 0 || this->_port > 65535)
+        throw WebServer::ParsingError();
 }
 
-void	Server::setErrorPages(const std::vector<std::string> &tok) {
-    for (std::vector<std::string>::const_iterator it = tok.begin(); it != tok.end() - 1; it++)
-        this->_errorPages.insert(std::make_pair(std::atoi(it->c_str()), *(tok.end() - 1)));
+void	Server::setErrorPages(const tokens_type &tok) {
+     if (tok.size() < 3)
+        throw WebServer::ParsingError();
+    for (tokens_type::const_iterator it = tok.begin() + 1; it != tok.end() - 1; it++)
+    {
+        int error_code;
+        if (!ft_isNumeric(*it))
+            throw WebServer::ParsingError();
+        std::stringstream(*it) >> error_code;
+        if (this->_errorPages.find(error_code) != this->_errorPages.end())
+            this->_errorPages.erase(error_code);
+        this->_errorPages.insert(std::make_pair(error_code, *(tok.end() - 1)));
+    }
 }
 
-void	Server::setCliMaxSize(const std::vector<std::string> &tok) {
-    this->_cliMaxSize = std::atoi(tok[0].c_str());
+void	Server::setCliMaxSize(const tokens_type &tok) {
+     if (tok.size() != 2)
+        throw WebServer::ParsingError();
+    if (!ft_isNumeric(tok[1]))
+        throw WebServer::ParsingError();
+    std::stringstream(tok[1]) >> this->_cliMaxSize;
+    if (this->_cliMaxSize < 0)
+        throw WebServer::ParsingError();
 }
 
-void	Server::newLocation(const std::vector<std::string> &tok) {
+void	Server::newLocation(const tokens_type &tok) {
     if (tok.size() != 2)
         throw WebServer::ParsingError();
     t_location* loc = new t_location;
     loc->path = tok[1];
+    loc->autoindex = 0;
     this->_locations.push_back(loc);
 }
 
-void	Server::setLocationMethods(const std::vector<std::string> &tok)
+void	Server::setLocationMethods(const tokens_type &tok)
 {
     std::string methods[] = {"GET", "POST", "DELETE"};
     t_location  *loc      = this->_locations.back();
 
-    for(std::vector<std::string>::const_iterator it = tok.begin() + 1; it != tok.end(); it++)
+    for(tokens_type::const_iterator it = tok.begin() + 1; it != tok.end(); it++)
     {
-        for(size_t i = 0; i < 3; i++)
+        size_t i;
+        for(i = 0; i < 3; i++)
             if (*it == methods[i])
-                loc->methods.push_back(methods[i]);      
+            {
+                loc->methods.push_back(methods[i]);
+                break ;
+            }
+        if (i == 3)
+            throw WebServer::ParsingError();
     }
 }
 
-void	Server::newLocationDirective(const std::vector<std::string> &tok)
+void	Server::newLocationDirective(const tokens_type &tok)
 {
     t_location* loc = this->_locations.back();
     std::string* atrr[] = {&loc->redirection, &loc->root, &loc->index};
-    std::string directives[] = {"return", "root" "index"};
+    std::string directives[] = {"return", "root", "index"};
 
+    if (tok.size() < 2)
+        throw WebServer::ParsingError();
     if (tok[0] == "autoindex")
         loc->autoindex = (tok.size() != 2 || tok[1] != "ON") ? 0 : 1;
     else if (tok[0] == "allow")
         this->setLocationMethods(tok);
     else
     {
-        for (size_t i = 0; i < 4; i++)
+        if (tok.size() != 2)
+            throw WebServer::ParsingError();
+        for (size_t i = 0; i < 3; i++)
+        {
             if (tok[0] == directives[i])
+            {
                 *(atrr[i]) = tok[1];
+                return ;
+            }
+        }
+        throw WebServer::ParsingError();
     }
 }
 
-void	Server::newDirective(const std::vector<std::string> &tokens)
+void	Server::newDirective(const tokens_type &tokens)
 {
 	if (tokens.empty())
 		return ;
@@ -101,7 +162,7 @@ void	Server::newDirective(const std::vector<std::string> &tokens)
 		&Server::setName, &Server::setErrorPages,
 		&Server::setCliMaxSize};
 	static std::string  directives[] = {"listen", "server_name",
-			"error_pages", "cli_max_size"};
+			"error_page", "cli_max_size"};
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -109,10 +170,8 @@ void	Server::newDirective(const std::vector<std::string> &tokens)
 		{
 			method_function func = method_ptr[i];
 			(this->*func)(tokens);
+            return ;
 		}
 	}
-}
-
-std::vector<t_location *>	Server::getLocations() const {
-    return this->_locations;
+    throw WebServer::ParsingError();
 }

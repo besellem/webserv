@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/20 06:24:51 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 16:03:44 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # include <iomanip>
 # include <map>
 # include <vector>
+# include "webserv.hpp"
 
 class WebServer;
 
@@ -37,24 +38,37 @@ typedef struct s_location
 class Server
 {
 	public:
+		typedef std::vector<std::string> tokens_type;
+
 		Server();
 		~Server();
 		Server(const Server &);
 		Server& operator=(const Server &);
 		
-		void	setPort(const std::vector<std::string> &);
-		void	setName(const std::vector<std::string> &);
-		void	setErrorPages(const std::vector<std::string> &);
-		void	setCliMaxSize(const std::vector<std::string> &);
-		void	setLocationMethods(const std::vector<std::string> &);
-		void	newLocationDirective(const std::vector<std::string> &);
+		/*
+		**  Getters
+		*/
+	
+		const int&							getPort() const;
+		const std::string&					getName() const;
+		const std::map<int, std::string>&	getErrorPages() const;
+		const int&							getClimaxSize() const;
+		const std::vector<t_location *>&	getLocations() const;
+
+		/*
+		**  Setters
+		*/
+	
+		void	setPort(const tokens_type &);
+		void	setName(const tokens_type &);
+		void	setErrorPages(const tokens_type &);
+		void	setCliMaxSize(const tokens_type &);
+		void	setLocationMethods(const tokens_type &);
+		void	newLocationDirective(const tokens_type &);
 		
 		void	newLocation(const std::vector<std::string> &);
 		void	newDirective(const std::vector<std::string> &);
-
-		std::vector<t_location *>	getLocations() const;
-
-
+		
 	private:
 		int					        _port;			// listen port
 		std::string					_name;			// server name

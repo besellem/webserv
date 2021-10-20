@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/19 23:11:01 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 18:05:46 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <sys/socket.h>
 # include <sys/types.h>
 # include <fcntl.h>
+# include <cctype>
 
 # include <iostream>
 # include <cstring>
@@ -28,13 +29,15 @@
 # include <exception>
 # include <fstream>
 # include <iomanip>
+# include <sstream>
 
 # include <map>
 # include <vector>
 
 # include "defs.hpp"
-# include "Server.hpp"
 # include "ServerGenerator.hpp"
+
+bool	ft_isNumeric(const std::string &str);
 
 class ServerGenerator;
 
@@ -61,12 +64,12 @@ class WebServer
 		{
             public:
                 ParsingError() {}
-			    virtual const char*	what() const throw() { return "File error"; }
+			    virtual const char*	what() const throw() { return "Config File Error"; }
 		};
 
 
 	private:
-		ServerGenerator	_servGen;
+		ServerGenerator	_config;
 	
 }; /* class WebServer */
 
