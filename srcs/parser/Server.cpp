@@ -14,7 +14,11 @@
 
 Server::Server() {}
 
-Server::~Server() {}
+Server::~Server() {
+    for (size_t i = 0; i < this->_locations.size(); i++)
+        delete this->_locations[i];
+    this->_locations.clear();
+}
 
 Server::Server(const Server &x) { *this = x; }
 
@@ -74,16 +78,19 @@ void	Server::setLocationMethods(const std::vector<std::string> &tok)
 void	Server::newLocationDirective(const std::vector<std::string> &tok)
 {
     t_location* loc = this->_locations.back();
-    std::string *atrr = {&loc->redirection, &loc->root, &loc->index};
+    std::string* atrr[] = {&loc->redirection, &loc->root, &loc->index};
     std::string directives[] = {"return", "root" "index"};
 
     if (tok[0] == "autoindex")
         loc->autoindex = (tok.size() != 2 || tok[1] != "ON") ? 0 : 1;
     else if (tok[0] == "allow")
-        setLocationMethods(tok);
-    for (size_t i = 0; i < 4; i++)
-        if (tok[0] == directives[i])
-            *(atrr[i]) = tok[1];
+        this->setLocationMethods(tok);
+    else
+    {
+        for (size_t i = 0; i < 4; i++)
+            if (tok[0] == directives[i])
+                *(atrr[i]) = tok[1];
+    }
 }
 
 void	Server::newDirective(const std::vector<std::string> &tokens)
@@ -104,4 +111,8 @@ void	Server::newDirective(const std::vector<std::string> &tokens)
 			(this->*func)(tokens);
 		}
 	}
+}
+
+std::vector<t_location *>	Server::getLocations() const {
+    return this->_locations;
 }

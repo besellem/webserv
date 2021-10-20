@@ -6,7 +6,7 @@
 #    By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/19 23:11:26 by adbenoit         ###   ########.fr        #
+#    Updated: 2021/10/20 06:47:14 by adbenoit         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,9 +26,9 @@ DIRS			:= $(OBJ_DIR) $(addprefix $(OBJ_DIR)/, $(SUB_DIR))
 
 # FILES
 
-NAME			:= WebServer
+NAME			:= webserv
 SRC				:= main.cpp
-SUB_SRC			:= parser.cpp Server.cpp
+SUB_SRC			:= parser.cpp Server.cpp ServerGenerator.cpp
 SRC				+= $(addprefix parser/, $(SUB_SRC))
 OBJ				:= $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 

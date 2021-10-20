@@ -6,15 +6,19 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:19 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/19 23:11:01 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 12:13:09 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerGenerator.hpp"
 
-ServerGenerator::ServerGenerator() { this->_sate = START; }
+ServerGenerator::ServerGenerator() { this->_state = START; }
 
-ServerGenerator::~ServerGenerator() {}
+ServerGenerator::~ServerGenerator() {
+    for (size_t i = 0; i < this->_servers.size(); i++)
+        delete this->_servers[i];
+    this->_servers.clear();
+}
 
 ServerGenerator::ServerGenerator(const ServerGenerator &x) {
     *this = x;
@@ -33,7 +37,7 @@ ServerGenerator&	ServerGenerator::operator=(const ServerGenerator &x) {
 **  Element access
 */
 
-Server*	ServerGenerator::operator[](size_t i) {
+Server*	ServerGenerator::operator[](int i) const {
     return this->_servers[i];
 }
 
@@ -48,17 +52,19 @@ Server* ServerGenerator::lastServer() const {
 /* if the key 'server' is well placed, add a new location to the generator */
 
 void	ServerGenerator::newServer(const tokens_type &tok) {
-	if (tokens.size() != 1 || state != START)
-		throw WebServer::ParsingError();
-	gen._servers.push_back(new Server());
+	if (tok.size() != 1 || this->_state != START)
+        return ;
+		// throw WebServer::ParsingError();
+	this->_servers.push_back(new Server());
 	this->_state = NEW_SERVER;
 }
 
 /* if the key 'location' is well placed, add a new location to the server */
 
 void	ServerGenerator::newLocation(Server *server, const tokens_type &tok) {
-    if (this->_state != SERVER_OPEN)
-        throw WebServer::ParsingError();
+    if (this->_state != IN_SERVER)
+        return ;
+        // throw WebServer::ParsingError();
     server->newLocation(tok);
     this->_state = NEW_LOCATION;
 }
@@ -66,13 +72,13 @@ void	ServerGenerator::newLocation(Server *server, const tokens_type &tok) {
 /* if the directive is well placed, add it to the server */
 
 void	ServerGenerator::newDirective(Server *server, const tokens_type &tok) {
-    if (this->_state == SERVER_OPEN)
+    if (this->_state == IN_SERVER)
         server->newDirective(tok);
-    else if (this->_state == LOCATION_OPEN)
+    else if (this->_state == IN_LOCATION)
         server->newLocationDirective(tok);
     else
-        throw WebServer::ParsingError();
-    this->_state = NEW_LOCATION;
+        return ;
+        // throw WebServer::ParsingError();
 }
 
 /* check if the '{' is well placed */
@@ -80,14 +86,14 @@ void	ServerGenerator::newDirective(Server *server, const tokens_type &tok) {
 void	ServerGenerator::openBlock(const tokens_type &tokens)
 {
 	if (tokens.size() != 1)
-		throw WebServer::ParsingError();
+        return ;
+		// throw WebServer::ParsingError();
 
-	if (this->_state == NEW_SERVER)
-        this->_state = SERVER_OPEN;
-    else if (this->_state == NEW_LOCATION)
-        this->_state = LOCATION_OPEN;
+	if (this->_state == NEW_SERVER || this->_state == NEW_LOCATION)
+        ++this->_state;
     else
-        throw WebServer::ParsingError();
+        return ;
+        // throw WebServer::ParsingError();
 }
 
 /* check if the '}' is well placed */
@@ -95,13 +101,27 @@ void	ServerGenerator::openBlock(const tokens_type &tokens)
 void	ServerGenerator::closeBlock(const tokens_type &tokens)
 {
 	if (tokens.size() != 1)
-		throw WebServer::ParsingError();
+        return ;
+		// throw WebServer::ParsingError();
 
-    if (this->_state == LOCATION_OPEN)
-        this->_state = NEW_SERVER
-    else if (this->_state == SERVER_OPEN || this->_state == LOCATION_CLOSE)
+    if (this->_state == IN_LOCATION)
+        this->_state = NEW_SERVER;
+    else if (this->_state == IN_SERVER)
         this->_state = START;
     else
-        throw WebServer::ParsingError();
+        return ;
+        // throw WebServer::ParsingError();
 }
 
+std::ostream& operator<<(std::ostream& os, const ServerGenerator& config) {
+    for (size_t i = 0; i < config._servers.size(); i++)
+    {
+        os << "server\n" << "{" << std::endl;
+        for (size_t j = 0; j < config[i]->getLocations().size(); j++)
+        {
+            os << "\tlocation\n" << "\t{" << std::endl;
+        }
+        
+    }
+    return os;
+}

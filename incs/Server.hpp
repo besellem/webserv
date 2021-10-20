@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/19 23:11:26 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 06:24:51 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ class Server
 		
 		void	newLocation(const std::vector<std::string> &);
 		void	newDirective(const std::vector<std::string> &);
+
+		std::vector<t_location *>	getLocations() const;
 
 
 	private:

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:17 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/19 23:11:26 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 06:34:44 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,9 @@ enum e_state
 {
 	START = 0,
 	NEW_SERVER,
-	SERVER_OPEN,
+	IN_SERVER,
 	NEW_LOCATION,
-	LOCATION_OPEN,
+	IN_LOCATION,
 	END
 };
 
@@ -36,9 +36,9 @@ class ServerGenerator
 		ServerGenerator(const ServerGenerator &);
 		ServerGenerator&	operator=(const ServerGenerator &);
 
-		Server*	operator[](size_t i);
+		Server*	operator[](int i) const;
 		Server*	lastServer() const;
-
+		
 		void	newDirective(Server *, const tokens_type &);
 		void	newLocation(Server *, const tokens_type &);
 		void	newServer(const tokens_type &);
@@ -47,7 +47,10 @@ class ServerGenerator
 		
 	private:
 		std::vector<Server *>	_servers;
-		e_state					_state;
+		int						_state;
+
+	public:
+		friend std::ostream& operator<<(std::ostream& os, const ServerGenerator& config);
 
 }; /* class ServerGenerator */
 

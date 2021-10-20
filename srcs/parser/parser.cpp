@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:53:23 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/19 23:11:01 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/20 12:16:19 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@ std::vector<std::string>    getTokens(std::string line)
 
 	size_t pos = line.find(' ');
 	pos = (line.find('\t', pos) != std::string::npos) ? line.find('\t', pos) : pos;
-
 	while (pos != std::string::npos)
 	{
 		std::string str = line.substr(0, pos);
@@ -28,12 +27,14 @@ std::vector<std::string>    getTokens(std::string line)
 		pos = line.find(' ');
 		pos = (line.find('\t', pos) != std::string::npos) ? line.find('\t', pos) : pos;
 	}
+	tokens.push_back(line);
 	
 	return tokens;
 }
 
 void	WebServer::parse(const std::string config_file)
 {
+	std::cout << "=== Parsing ===\n";
 	int pos = config_file.rfind(".conf");
 	if (pos != (int)config_file.size() - 5)
 		throw ParsingError();
@@ -41,12 +42,14 @@ void	WebServer::parse(const std::string config_file)
 	std::string line;
 	os.open(config_file);
 	int i = 10;
-	while(i) // trouver le EOF
+	while (i) // trouver le EOF
 	{
+		std::cout << "reading file...\n";
 		std::getline(os, line);
 		ServerGenerator::tokens_type tok = getTokens(line);
 		if (!tok.empty())
 		{
+			std::cout << "setting " << tok[0] << std::endl;
 			// faire un tableau de methodes a la place
 			if (tok[0] == "server")
 				this->_servGen.newServer(tok);
@@ -62,4 +65,5 @@ void	WebServer::parse(const std::string config_file)
 		--i;
 	}
 	os.close();
+	std::cout << "\n## ServerGenerator :\n\n" << this->_servGen;
 }
