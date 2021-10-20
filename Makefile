@@ -6,7 +6,7 @@
 #    By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/19 14:24:38 by kaye             ###   ########.fr        #
+#    Updated: 2021/10/19 20:08:33 by kaye             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,7 +23,8 @@ SRC_DIR 		:= srcs
 OBJ_DIR 		:= $(BUILD)/obj
 ## all sub folder add here: (check exemple)
 # SUB_DIR 		:= exemple
-SUB_DIR			:= epoll
+SUB_DIR			:= epoll \
+					socket
 DIRS			:= $(OBJ_DIR) $(addprefix $(OBJ_DIR)/, $(SUB_DIR))
 
 # FILES
@@ -32,9 +33,12 @@ NAME			:= webserv
 SRC				:= main.cpp
 ## all sub file add here: (check exemple)
 # SUB_SRC			:= exemple.cpp
-SUB_SRC			:= epoll.cpp
+# SUB_SRC			:= epoll.cpp
 # SRC				+= $(addprefix exemple/, $(SUB_SRC))
-SRC				+= $(addprefix epoll/, $(SUB_SRC))
+# SRC				+= $(addprefix epoll/, $(SUB_SRC))
+SUB_SRC			:= socket.cpp \
+					accept.cpp
+SRC				+= $(addprefix socket/, $(SUB_SRC))
 OBJ				:= $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 
 # COLORS
