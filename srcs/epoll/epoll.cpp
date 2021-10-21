@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/21 18:18:19 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/21 18:44:48 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ void	Epoll::updateEvents(int & sockFd, int const & events, bool const & modify) 
 		EV_SET(&evts[nEvts++], sockFd, EVFILT_WRITE, EV_DELETE, 0, 0, (void *)(intptr_t)sockFd);
 
 	// debug msg
-	// std::cout << (modify == true ? "[MODIFY] fd: [" : "[ADD] fd: [") << sockFd << "] events: [" << ((events & kReadEvent) ? "Read" : "Write") << "]." << std::endl;
+	std::cout << "\n" << (modify == true ? "[" S_GREEN "MODIFY" S_NONE "] fd: [" S_GREEN : "[" S_GREEN "ADD" S_NONE "] fd: [" S_GREEN) << sockFd << S_NONE "] events: [" S_GREEN << ((events & kReadEvent) ? "Read" S_NONE : "NOTHING" S_NONE) << "] & [" S_GREEN << ((events & kWriteEvent) ? "Write" S_NONE "]" : "NOTHING" S_NONE "]") << "\n" << std::endl;
 
 	if (kevent(_epollFd, evts, nEvts, NULL, 0, NULL) < 0)
 		errorExit("kevent failed");
@@ -59,11 +59,7 @@ void	Epoll::handleAccept(void) {
 		errorExit("accept failed");
 
 	// debug msg
-	// socklen_t len = sizeof(sockaddr_in);
-	// int r = getpeername(newSocket, (sockaddr*)&_sock.getAddr(), &len);
-	// if (r < 0)
-	// 	errorExit("getpeername failed");
-	// printf("accept a connection from %s\n", inet_ntoa(_sock.getAddr().sin_addr));
+	std::cout << "accept a connction form: [" S_GREEN << inet_ntoa(_sock.getAddr().sin_addr) << S_NONE "]:[" S_GREEN << ntohs(_sock.getAddr().sin_port) << S_NONE "]" << std::endl;
 
 	_sock.setNonBlock(newSocket);
 	updateEvents(newSocket, kReadEvent|kWriteEvent, false);
@@ -72,7 +68,7 @@ void	Epoll::handleAccept(void) {
 void	Epoll::handleRead(int & sockFd) {
 	char header[30000] = {0};
 	recv(sockFd, header, 30000, 0);
-	std::cout << "handleRead:\n" << header << std::endl;
+	std::cout << "\nhandleRead:\n" S_GREEN << header << S_NONE << std::endl;
 	close(sockFd);
 }
 
@@ -92,7 +88,8 @@ void	Epoll::serverLoop(int const & waitMs) {
 	struct kevent	activeEvs[kMaxEvents];
 
 	int kevt = kevent(_epollFd, NULL, 0, activeEvs, kMaxEvents, &timeout);
-	std::cout << "epoll_wait return: [" << kevt << "]" << std::endl;
+	// debug msg
+	std::cout << "epoll_wait return: [" S_GREEN << kevt << S_NONE "]" << std::endl;
 
 	for (int i = 0; i < kevt; i++) {
 		int sockFd = (int)(intptr_t)activeEvs[i].udata;
