@@ -14,7 +14,7 @@
 
 _BEGIN_NS_WEBSERV
 
-Server::Server() : _port(-1), _cliMaxSize(-1) {}
+Server::Server() : _port(8080), _cliMaxSize(-1) {}
 
 Server::~Server() {
     for (size_t i = 0; i < this->_locations.size(); i++)
@@ -42,7 +42,7 @@ Server& Server::operator=(const Server &x) {
 const int&	Server::port() const {
     return this->_port ;
 }
-const std::string&	Server::name() const {
+const std::vector<std::string>&	Server::name() const {
     return this->_name ;
 }
 const std::map<int, std::string>&	Server::errorPages() const {
@@ -60,9 +60,7 @@ const std::vector<t_location *>&	Server::locations() const {
 */
 
 void	Server::setName(const tokens_type &tok) {
-     if (tok.size() != 2)
-        throw WebServer::ParsingError();
-    this->_name = tok[1];
+    this->_name.assign(tok.begin() + 1, tok.end());
 }
 
 void	Server::setPort(const tokens_type &tok) {
@@ -163,7 +161,7 @@ void	Server::newLocation(const tokens_type &tok) {
 
 void	Server::newLocationDirective(const tokens_type &tok)
 {
-    std::string directives[] = {"allow", "return", "root",
+    std::string directives[] = {"allow", "rewrite", "root",
             "index", "autoindex", "cgi"};
 	static method_function1   method_ptr[] = {&Server::setMethods,
 		    &Server::setRedirection, &Server::setRoot, &Server::setIndex,
@@ -193,7 +191,7 @@ void	Server::newDirective(const tokens_type &tokens)
 	static method_function   method_ptr[] = {&Server::setPort,
             &Server::setName, &Server::setErrorPages, &Server::setCliMaxSize};
 	static std::string  directives[] = {"listen", "server_name",
-			"error_page", "cli_max_size"};
+			"error_page", "client_max_body_size"};
 
 	for (size_t i = 0; i < 4; i++)
 	{
@@ -211,7 +209,7 @@ void	Server::newDirective(const tokens_type &tokens)
 
 std::ostream& operator<<(std::ostream& os, const t_location& loc)
 {
-    std::string directives[] = {"return", "root"};
+    std::string directives[] = {"rewrite", "root"};
     const std::string* loc_atrr[] = {&loc.redirection, &loc.root};
     os << "\tlocation " << loc.path << std::endl << "\t{" << std::endl;
     if (loc.autoindex == ON)
@@ -252,7 +250,13 @@ std::ostream& operator<<(std::ostream& os, const Server& server)
     if (server.port() != -1)
         os << "\tlisten " << server.port() << std::endl;
     if (!server.name().empty())
-        os << "\tserver_name " << server.name() << std::endl;
+    {
+        os << "\tserver_name";
+        for (std::vector<std::string>::const_iterator it = server.name().begin();
+            it != server.name().end(); it++)
+            os << "  " << *it;
+        os << std::endl;
+    }
     if (!server.errorPages().empty())
     {
         for (std::map<int, std::string>::const_iterator it = server.errorPages().begin();
@@ -260,7 +264,7 @@ std::ostream& operator<<(std::ostream& os, const Server& server)
             os << "\terror_page " << it->first << " " << it->second << std::endl;
     }
     if (server.cliMaxSize() != -1)
-        os << "\tcli_max_size " << server.cliMaxSize() << std::endl;
+        os << "\tclient_max_body_size " << server.cliMaxSize() << std::endl;
     for (size_t j = 0; j < server.locations().size(); j++)
         os << *(server.locations()[j]);
     os << "}" << std::endl;
