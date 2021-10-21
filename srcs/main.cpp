@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/20 23:07:08 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/21 04:58:48 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,41 @@
 
 int	main(int ac, char **av)
 {
-	webserv::WebServer	serv;
-	std::string			conf = (ac > 1) ? av[1] : DEFAULT_CONFIG_FILE;
+	// webserv::WebServer	serv;
+	// std::string			conf = (ac > 1) ? av[1] : DEFAULT_CONFIG_FILE;
 
-	try
+	if (ac != 2)
 	{
-		serv.parse(conf);
-	}
-	catch (std::exception &e)
-	{
-		std::cout << e.what() << std::endl;
+		std::cout << "Enter Port" << std::endl;
+		return 1;
 	}
 	
-	return EXIT_SUCCESS;
+	const int					port = atoi(av[1]);
+	const std::string			const_path = "./www/index.html";
+	webserv::Socket		_sock(port);
+
+	int			new_socket;
+	ssize_t		valread;
+
+	_sock.startUp();
+	while (true)
+	{
+		printf("+++++++ Waiting for new connection ++++++++\n\n");
+		int			svrfd = _sock.getServerFd();
+		sockaddr_in	addr = _sock.getAddr();
+		size_t		len = _sock.getAddrLen();
+
+		new_socket = _INLINE_NAMESPACE::socketAccept(svrfd, (struct sockaddr *)&addr, (socklen_t*)&len);
+		
+		char	header[30000] = {0};
+		valread = recv(new_socket, header, 30000, 0);
+		printf("%s\n", header);
+		
+		// _sock.parse(new_socket, header);	// in process
+		_sock.parse(new_socket, const_path);		// TO REMOVE
+		printf("------------------Hello message sent-------------------\n");
+		close(new_socket);
+	}
+	
+	return 0;
 }

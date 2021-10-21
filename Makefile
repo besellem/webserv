@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+         #
+#    By: besellem <besellem@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/20 16:58:07 by adbenoit         ###   ########.fr        #
+#    Updated: 2021/10/21 05:00:49 by besellem         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,14 +22,29 @@ BUILD 			:= .build
 SRC_DIR 		:= srcs
 SUB_DIR 		:= parser
 OBJ_DIR 		:= $(BUILD)/obj
+## all sub folder add here: (check exemple)
+# SUB_DIR 		:= exemple
+SUB_DIR			:= epoll \
+				   socket \
+				   parser
 DIRS			:= $(OBJ_DIR) $(addprefix $(OBJ_DIR)/, $(SUB_DIR))
 
 # FILES
 
 NAME			:= webserv
 SRC				:= main.cpp
-SUB_SRC			:= parser.cpp Server.cpp ServerGenerator.cpp
+SUB_SRC			:= parser.cpp \
+				   Server.cpp \
+				   ServerGenerator.cpp
 SRC				+= $(addprefix parser/, $(SUB_SRC))
+## all sub file add here: (check exemple)
+# SUB_SRC			:= exemple.cpp
+# SUB_SRC			:= epoll.cpp
+# SRC				+= $(addprefix exemple/, $(SUB_SRC))
+# SRC				+= $(addprefix epoll/, $(SUB_SRC))
+SUB_SRC			:= socket.cpp \
+				   accept.cpp
+SRC				+= $(addprefix socket/, $(SUB_SRC))
 OBJ				:= $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 
 # COLORS
