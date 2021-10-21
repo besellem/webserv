@@ -6,30 +6,47 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/21 04:58:48 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/21 08:59:20 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 #include <stdio.h>
 
-int	main(int ac, char **av)
-{
-	// webserv::WebServer	serv;
-	// std::string			conf = (ac > 1) ? av[1] : DEFAULT_CONFIG_FILE;
+#define PORT 8080
 
+int	main(int ac, char **av, char **env)
+{
+	_INLINE_NAMESPACE::WebServer	serv;
+	std::string						config_file;
+	
 	if (ac != 2)
 	{
 		std::cout << "Enter Port" << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	
-	const int					port = atoi(av[1]);
+	config_file = (ac > 1) ? av[1] : DEFAULT_CONFIG_FILE;
+	try
+	{
+		serv.parse(config_file);
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << S_RED "Error: " S_NONE << e.what() << std::endl;
+		return EXIT_FAILURE;
+	}
+	
+	// serv.createServers();
+
+	const int					port = serv.getServer(0).port();
 	const std::string			const_path = "./www/index.html";
-	webserv::Socket		_sock(port);
+	// const std::string			const_path = "./test_cgi";
+	_INLINE_NAMESPACE::Socket	_sock(port);
 
 	int			new_socket;
 	ssize_t		valread;
+
 
 	_sock.startUp();
 	while (true)
@@ -40,7 +57,20 @@ int	main(int ac, char **av)
 		size_t		len = _sock.getAddrLen();
 
 		new_socket = _INLINE_NAMESPACE::socketAccept(svrfd, (struct sockaddr *)&addr, (socklen_t*)&len);
+
+
+		/* CGI Test */
+		// __unused char *tmp[] = {"php", "./www/index.php", NULL};
+		// int fd = fork();
+
+		// if (fd == 0)
+		// {
+		// 	dup2(new_socket, STDOUT_FILENO);
+		// 	execve("/usr/bin/php", tmp, env);
+		// 	exit(1);
+		// }
 		
+		std::cout << "Hellooo\n";
 		char	header[30000] = {0};
 		valread = recv(new_socket, header, 30000, 0);
 		printf("%s\n", header);
@@ -51,5 +81,5 @@ int	main(int ac, char **av)
 		close(new_socket);
 	}
 	
-	return 0;
+	return EXIT_SUCCESS;
 }

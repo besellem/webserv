@@ -6,44 +6,16 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/21 04:59:05 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/21 08:26:22 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
-# include <arpa/inet.h>
-# include <sys/select.h>
-# include <sys/types.h>
-# include <sys/event.h>
-# include <sys/time.h>
-# include <sys/socket.h>
-# include <sys/types.h>
-# include <netinet/in.h>
-# include <fcntl.h>
-# include <cctype>
-
-#include <unistd.h>
-#include <cstdio>
-
-# include <iostream>
-# include <fstream>
-# include <string>
-# include <cstring>
-
-# include <exception>
-# include <fstream>
-# include <iomanip>
-# include <sstream>
-
-# include <map>
-# include <vector>
-
 # include "defs.hpp"
 # include "ServerGenerator.hpp"
 # include "socket.hpp"
-
 
 
 _BEGIN_NS_WEBSERV
@@ -56,36 +28,35 @@ class WebServer
 {
 	
 	public:
-		WebServer(void)
-		{}
-		
+		WebServer(void);
 		WebServer(const WebServer&);
+		~WebServer();
 		
-		virtual ~WebServer()
-		{}
-		
-		WebServer&	operator=(const WebServer&) { return *this; }
+		WebServer&	operator=(const WebServer&);
 
+		void				parse(const std::string&);
+		size_t				serverSize(void) const;
+		const Server&		getServer(int);
 
-		void		parse(const std::string);
+		void				createServers(void);
 
 
 	public:
 		class ParsingError : public std::exception
 		{
-            public:
-                ParsingError() {}
-			    virtual const char*	what() const throw() { return "Config File Error"; }
+			public:
+				virtual const char*	what() const throw();
 		};
 
 
 	private:
-		ServerGenerator	_servers;
+		ServerGenerator		_servers;
+		Socket				*_socks;
 	
 }; /* class WebServer */
 
 /** @brief function declare */
-int	socketAccept(int fd, sockaddr *addr, socklen_t *addrLen);
+int		socketAccept(int fd, sockaddr *addr, socklen_t *addrLen);
 
 
 _END_NS_WEBSERV

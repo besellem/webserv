@@ -6,14 +6,14 @@
 #    By: besellem <besellem@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/21 05:00:49 by besellem         ###   ########.fr        #
+#    Updated: 2021/10/21 08:55:44 by besellem         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # COMPILATION
 
 CC		= clang++
-CFLAGS 	= -Wall -Wextra -Werror -std=c++98# -fsanitize=address -g3
+CFLAGS 	= #-Wall -Wextra -Werror -std=c++98# -fsanitize=address -g3
 IFLAGS 	= -I./incs
 
 # DIRECTORIES
@@ -32,7 +32,8 @@ DIRS			:= $(OBJ_DIR) $(addprefix $(OBJ_DIR)/, $(SUB_DIR))
 # FILES
 
 NAME			:= webserv
-SRC				:= main.cpp
+SRC				:= main.cpp \
+				   webserv.cpp
 SUB_SRC			:= parser.cpp \
 				   Server.cpp \
 				   ServerGenerator.cpp

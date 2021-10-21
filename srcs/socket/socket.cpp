@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/21 04:41:22 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/21 09:15:20 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,11 @@ Socket::Socket(const short& port) :
 
 /** @brief public function */
 
-short		Socket::getPort(void)     const { return _port; }
-int			Socket::getServerFd(void) const { return _serverFd; }
-sockaddr_in	Socket::getAddr(void)     const { return _addr; }
-size_t		Socket::getAddrLen(void)  const { return _addrLen; }
+short		Socket::getPort(void)       const { return _port; }
+int			Socket::getServerFd(void)   const { return _serverFd; }
+sockaddr_in	Socket::getAddr(void)       const { return _addr; }
+size_t		Socket::getAddrLen(void)    const { return _addrLen; }
+// HttpHeader&	Socket::getHttpHeader(void) const { return _header; };
 
 void	Socket::startUp(void)
 {
@@ -64,6 +65,14 @@ void	Socket::_parse_wrapper(const char* http_header)
 void	Socket::parse(int skt, const char* http_header)
 {
 	getParsing(skt, http_header);
+}
+
+
+#include <stdio.h> // printf
+void	Socket::resolveHttpRequest(int socket_fd)
+{
+	recv(socket_fd, header.buf, sizeof(header.buf), 0);
+	printf("%s\n", header.buf);
 }
 
 // TO REMOVE
