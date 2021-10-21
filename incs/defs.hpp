@@ -3,15 +3,43 @@
 /*                                                        :::      ::::::::   */
 /*   defs.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/21 04:53:50 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/21 16:51:48 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef DEFS_HPP
 # define DEFS_HPP
+
+# include <arpa/inet.h>
+# include <sys/select.h>
+# include <sys/types.h>
+# include <sys/event.h>
+# include <sys/time.h>
+# include <sys/socket.h>
+# include <sys/types.h>
+# include <netinet/in.h>
+# include <fcntl.h>
+# include <cctype>
+
+#include <unistd.h>
+#include <cstdio>
+
+# include <iostream>
+# include <fstream>
+# include <string>
+# include <cstring>
+
+# include <exception>
+# include <fstream>
+# include <iomanip>
+# include <sstream>
+
+# include <map>
+# include <vector>
+
 
 /** @brief Anscii code */
 # define S_NONE    "\033[0m"
@@ -40,8 +68,7 @@
 # define OFF     0
 # define ON      1
 
-/** @brief epoll */
-# define kReadEvent  1
-# define kWriteEvent 2
+/** @brief epoll utils define */
+# define EP_EVENTS 2 // 2: read / write
 
 #endif /* !defined(DEFS_HPP) */

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/21 04:58:48 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/21 18:23:01 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,31 +25,35 @@ int	main(int ac, char **av)
 	}
 	
 	const int					port = atoi(av[1]);
-	const std::string			const_path = "./www/index.html";
+	// const std::string			const_path = "./www/index.html";
 	webserv::Socket		_sock(port);
 
-	int			new_socket;
-	ssize_t		valread;
+	// int			new_socket;
+	// ssize_t		valread;
 
 	_sock.startUp();
+
+	webserv::Epoll _epoll(_sock);
+
+	int fd = _sock.getServerFd();
+	_sock.setNonBlock(fd);
+	_epoll.updateEvents(fd, webserv::Epoll::kReadEvent, false);
 	while (true)
 	{
-		printf("+++++++ Waiting for new connection ++++++++\n\n");
-		int			svrfd = _sock.getServerFd();
-		sockaddr_in	addr = _sock.getAddr();
-		size_t		len = _sock.getAddrLen();
+		// printf("+++++++ Waiting for new connection ++++++++\n\n");
 
-		new_socket = _INLINE_NAMESPACE::socketAccept(svrfd, (struct sockaddr *)&addr, (socklen_t*)&len);
+		// new_socket = _sock.socketAccept();
 		
-		char	header[30000] = {0};
-		valread = recv(new_socket, header, 30000, 0);
-		printf("%s\n", header);
+		// char	header[30000] = {0};
+		// valread = recv(new_socket, header, 30000, 0);
+		// printf("%s\n", header);
 		
-		// _sock.parse(new_socket, header);	// in process
-		_sock.parse(new_socket, const_path);		// TO REMOVE
-		printf("------------------Hello message sent-------------------\n");
-		close(new_socket);
+		// // _sock.parse(new_socket, header);	// in process
+		// _sock.parse(new_socket, const_path);		// TO REMOVE
+		
+		// printf("------------------Hello message sent-------------------\n");
+		// close(new_socket);
+		_epoll.serverLoop(10000);
 	}
-	
 	return 0;
 }

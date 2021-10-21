@@ -3,19 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/21 04:41:22 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/21 16:36:31 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "socket.hpp"
 
-
 _BEGIN_NS_WEBSERV
 
-Socket::Socket(void)  {}
+Socket::Socket(void) {}
 Socket::~Socket(void) {}
 
 Socket::Socket(const short& port) :
@@ -43,6 +42,24 @@ void	Socket::startUp(void)
 {
 	bindStep(_serverFd, _addr);
 	listenStep(_serverFd);
+}
+
+/** @brief socket tools */
+void	Socket::setNonBlock(int & fd) {
+	if (fcntl(fd, F_SETFL, O_NONBLOCK)) {
+		std::cout << "Error: set non block" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+}
+
+int		Socket::socketAccept(void) {
+	int socketFd = accept(_serverFd, (struct sockaddr *)&_addr, (socklen_t *)&_addrLen);
+	
+	if (socketFd < 0) {
+		std::cout << "Error: accept" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	return socketFd;
 }
 
 void	Socket::_parse_wrapper(const char* http_header)
@@ -161,6 +178,5 @@ void	Socket::getParsing(int skt, const std::string& path)
 		std::cout << "open file error: for get content";
 	ifs.close();
 }
-
 
 _END_NS_WEBSERV

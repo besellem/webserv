@@ -3,18 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/21 04:45:49 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/21 16:26:10 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SOCKET_HPP
 # define SOCKET_HPP
 
-#include "webserv.hpp"
-
+#include "defs.hpp"
 
 _BEGIN_NS_WEBSERV
 
@@ -23,9 +22,7 @@ _BEGIN_NS_WEBSERV
 	
 // };
 
-class Socket
-{
-	
+class Socket {
 	public:
 	/** @brief constructor / destructor */
 
@@ -43,6 +40,8 @@ class Socket
 		void		parse(int skt, const char *);
 		void		parse(int skt, const std::string &);
 
+		void		setNonBlock(int & fd);
+		int			socketAccept(void);
 
 	private:
 		Socket(void);
@@ -61,9 +60,7 @@ class Socket
 		int			_serverFd;
 		sockaddr_in	_addr;
 		size_t		_addrLen;
-	
 };
-
 
 _END_NS_WEBSERV
 

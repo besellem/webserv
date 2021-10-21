@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: besellem <besellem@student.42.fr>          +#+  +:+       +#+         #
+#    By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/21 05:00:49 by besellem         ###   ########.fr        #
+#    Updated: 2021/10/21 16:37:16 by kaye             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -42,9 +42,10 @@ SRC				+= $(addprefix parser/, $(SUB_SRC))
 # SUB_SRC			:= epoll.cpp
 # SRC				+= $(addprefix exemple/, $(SUB_SRC))
 # SRC				+= $(addprefix epoll/, $(SUB_SRC))
-SUB_SRC			:= socket.cpp \
-				   accept.cpp
+SUB_SRC			:= socket.cpp
 SRC				+= $(addprefix socket/, $(SUB_SRC))
+SUB_SRC			:= epoll.cpp
+SRC				+= $(addprefix epoll/, $(SUB_SRC))
 OBJ				:= $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 
 # COLORS
