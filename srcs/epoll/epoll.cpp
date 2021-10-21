@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/21 18:44:48 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/21 19:00:53 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ void	Epoll::updateEvents(int & sockFd, int const & events, bool const & modify) 
 
 	if (kevent(_epollFd, evts, nEvts, NULL, 0, NULL) < 0)
 		errorExit("kevent failed");
+	// kevent(_epollFd, evts, nEvts, NULL, 0, NULL);
 }
 
 void	Epoll::handleAccept(void) {
@@ -88,20 +89,36 @@ void	Epoll::serverLoop(int const & waitMs) {
 	struct kevent	activeEvs[kMaxEvents];
 
 	int kevt = kevent(_epollFd, NULL, 0, activeEvs, kMaxEvents, &timeout);
+	
 	// debug msg
 	std::cout << "epoll_wait return: [" S_GREEN << kevt << S_NONE "]" << std::endl;
 
 	for (int i = 0; i < kevt; i++) {
+		// debug msg
+		std::cout << "loop: [" S_RED << i << S_NONE "]" << std::endl;
+
 		int sockFd = (int)(intptr_t)activeEvs[i].udata;
 		int events = activeEvs[i].filter;
 		if (events == EVFILT_READ) {
-			if (sockFd == _sock.getServerFd())
+			if (sockFd == _sock.getServerFd()) {
+				// debug msg
+				std::cout << S_PURPLE "handle Accept" S_NONE << std::endl;
+
 				handleAccept();
-			else
+			}
+			else {
+				// debug msg
+				std::cout << S_PURPLE "handle Read" S_NONE << std::endl;
+
 				handleRead(sockFd);
+			}
 		}
-		else if (events == EVFILT_WRITE)
+		else if (events == EVFILT_WRITE) {
+			// debug msg
+			std::cout << S_PURPLE "handle Write" S_NONE << std::endl;
+
 			handleWrite(sockFd);
+		}
 		else
 			errorExit("Unknow event");
 	}
