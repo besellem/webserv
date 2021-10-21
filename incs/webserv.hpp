@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/20 23:10:56 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/21 04:59:05 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,16 @@
 # include <sys/time.h>
 # include <sys/socket.h>
 # include <sys/types.h>
+# include <netinet/in.h>
 # include <fcntl.h>
 # include <cctype>
 
+#include <unistd.h>
+#include <cstdio>
+
 # include <iostream>
+# include <fstream>
+# include <string>
 # include <cstring>
 
 # include <exception>
@@ -36,6 +42,9 @@
 
 # include "defs.hpp"
 # include "ServerGenerator.hpp"
+# include "socket.hpp"
+
+
 
 _BEGIN_NS_WEBSERV
 
@@ -74,6 +83,10 @@ class WebServer
 		ServerGenerator	_servers;
 	
 }; /* class WebServer */
+
+/** @brief function declare */
+int	socketAccept(int fd, sockaddr *addr, socklen_t *addrLen);
+
 
 _END_NS_WEBSERV
 
