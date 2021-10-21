@@ -1,6 +1,8 @@
-- [ ] Parser (Adeline)
-- [ ] HTTP status codes (Ben)
-- [ ] Poll / Select
-- [ ] Socket (server)
+- [x] Parser (Adeline)
+- [ ] Server engine
+- [ ] poll / epoll / select / kqueue
+- [ ] HTTP requests
+- [ ] HTTP response codes
+- [ ] Autoindex page generator
 - [ ] CGI
-- [ ] Tester
+- [ ] Tester (to do & to pass)

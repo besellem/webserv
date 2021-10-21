@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/20 17:25:31 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/21 04:45:49 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,13 @@
 
 #include "webserv.hpp"
 
+
 _BEGIN_NS_WEBSERV
 
-class HttpHeader
-{
+// class HttpHeader
+// {
 	
-};
+// };
 
 class Socket
 {
@@ -39,18 +40,20 @@ class Socket
 		/** @brief init socket */
 		void		startUp(void);
 
-		void		parse(int skt, const char* http_header);
+		void		parse(int skt, const char *);
+		void		parse(int skt, const std::string &);
 
 
 	private:
 		Socket(void);
 
-		void	errorExit(const std::string& str) const;
-		void	bindStep(const int& serverFd, const sockaddr_in& addr);
-		void	listenStep(const int& serverFd);
+		void	errorExit(const std::string &) const;
+		void	bindStep(const int &, const sockaddr_in &);
+		void	listenStep(const int &);
 
-		void	getParsing(int skt, const char* http_header);
-		void	_parse_wrapper(const char*);
+		void	getParsing(int skt, const char *); // -- in process
+		void	getParsing(int skt, const std::string &); // TO REMOVE
+		void	_parse_wrapper(const char *);
 
 
 	private:
@@ -60,6 +63,7 @@ class Socket
 		size_t		_addrLen;
 	
 };
+
 
 _END_NS_WEBSERV
 

@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 14:17:07 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/20 17:15:10 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/21 04:41:48 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ int	main(int ac, char **av)
 	}
 	
 	const int			port = atoi(av[1]);
-	const std::string	path = "./www/index.html";
+	const std::string	const_path = "./www/index.html";
 	webserv::Socket		_sock(port);
 
 	int					new_socket;
@@ -42,7 +42,8 @@ int	main(int ac, char **av)
 		valread = recv(new_socket, header, 30000, 0);
 		printf("%s\n", header);
 		
-		_sock.parse(new_socket, header);
+		// _sock.parse(new_socket, header);	// in process
+		_sock.parse(new_socket, const_path);		// TO REMOVE
 		printf("------------------Hello message sent-------------------\n");
 		close(new_socket);
 	}
