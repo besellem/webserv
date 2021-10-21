@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/21 12:31:39 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/21 17:31:57 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,6 @@ class Server
 
 		Server();
 		~Server();
-		Server(const Server &);
-		Server& operator=(const Server &);
 		
 		/*
 		**  Getters
@@ -55,7 +53,8 @@ class Server
 		const std::vector<std::string>&		name() const;
 		const std::map<int, std::string>&	errorPages() const;
 		const int&							cliMaxSize() const;
-		const std::vector<t_location *>&	locations() const;
+		const t_location&					locations(int) const;
+		size_t								nLoc() const;
 
 		/*
 		**  Setters
@@ -83,6 +82,9 @@ class Server
 		int							_cliMaxSize;	// client max body size
 		std::vector<t_location *>	_locations;		// routes with rules
 
+		Server& operator=(const Server &);
+		Server(const Server &);
+		
 }; /* class Server */
 
 std::ostream& operator<<(std::ostream &, const Server &);

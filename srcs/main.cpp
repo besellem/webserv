@@ -3,29 +3,32 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/21 04:58:48 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/21 18:13:29 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 #include <stdio.h>
 
-int	main(int ac, char **av)
+int	main(int ac, char **av, char *envp[])
 {
-	// webserv::WebServer	serv;
-	// std::string			conf = (ac > 1) ? av[1] : DEFAULT_CONFIG_FILE;
-
-	if (ac != 2)
+	webserv::WebServer	webserv;
+	std::string			conf = (ac > 1) ? av[1] : DEFAULT_CONFIG_FILE;
+	
+	try
 	{
-		std::cout << "Enter Port" << std::endl;
-		return 1;
+		webserv.parse(conf);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
 	}
 	
-	const int					port = atoi(av[1]);
-	const std::string			const_path = "./www/index.html";
+	const int					port = webserv.servers(0).port();
+	const std::string			const_path = "./www/test_cgi.html";
 	webserv::Socket		_sock(port);
 
 	int			new_socket;
@@ -44,7 +47,7 @@ int	main(int ac, char **av)
 		char	header[30000] = {0};
 		valread = recv(new_socket, header, 30000, 0);
 		printf("%s\n", header);
-		
+		webserv.execute_cgi(webserv.servers(0).locations(0), "test.php", new_socket, envp);
 		// _sock.parse(new_socket, header);	// in process
 		_sock.parse(new_socket, const_path);		// TO REMOVE
 		printf("------------------Hello message sent-------------------\n");

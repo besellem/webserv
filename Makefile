@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: besellem <besellem@student.42.fr>          +#+  +:+       +#+         #
+#    By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/21 05:00:49 by besellem         ###   ########.fr        #
+#    Updated: 2021/10/21 18:15:21 by adbenoit         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,8 @@ OBJ_DIR 		:= $(BUILD)/obj
 # SUB_DIR 		:= exemple
 SUB_DIR			:= epoll \
 				   socket \
-				   parser
+				   parser \
+				   cgi
 DIRS			:= $(OBJ_DIR) $(addprefix $(OBJ_DIR)/, $(SUB_DIR))
 
 # FILES
@@ -37,6 +38,8 @@ SUB_SRC			:= parser.cpp \
 				   Server.cpp \
 				   ServerGenerator.cpp
 SRC				+= $(addprefix parser/, $(SUB_SRC))
+SUB_SRC			:= cgi.cpp
+SRC				+= $(addprefix cgi/, $(SUB_SRC))
 ## all sub file add here: (check exemple)
 # SUB_SRC			:= exemple.cpp
 # SUB_SRC			:= epoll.cpp
@@ -82,6 +85,7 @@ re: fclean all
 debug:
 	@echo SRC = $(SRC)
 	@echo OBJ = $(OBJ)
+	@echo DIRS = $(DIRS)
 
 .PHONY: all clean fclean re debug
 

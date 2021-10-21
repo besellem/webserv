@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/21 04:59:05 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/21 18:11:40 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,10 +65,11 @@ class WebServer
 		{}
 		
 		WebServer&	operator=(const WebServer&) { return *this; }
-
+		const Server&	servers(int i) const { return *(this->_servers[i]); }
+		size_t			nServ() const { return this->_servers.size(); }
 
 		void		parse(const std::string);
-
+		void		execute_cgi(const t_location &, const std::string, int, char *envp[]);
 
 	public:
 		class ParsingError : public std::exception

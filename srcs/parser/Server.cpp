@@ -51,8 +51,12 @@ const std::map<int, std::string>&	Server::errorPages() const {
 const int&	Server::cliMaxSize() const {
     return this->_cliMaxSize ;
 }
-const std::vector<t_location *>&	Server::locations() const {
-    return this->_locations;
+const t_location&	Server::locations(int i) const {
+    return *(this->_locations[i]);
+}
+
+size_t  Server::nLoc() const {
+    return this->_locations.size();
 }
 
 /*
@@ -265,8 +269,8 @@ std::ostream& operator<<(std::ostream& os, const Server& server)
     }
     if (server.cliMaxSize() != -1)
         os << "\tclient_max_body_size " << server.cliMaxSize() << std::endl;
-    for (size_t j = 0; j < server.locations().size(); j++)
-        os << *(server.locations()[j]);
+    for (size_t j = 0; j < server.nLoc(); j++)
+        os << server.locations(j);
     os << "}" << std::endl;
     return os;
 }
