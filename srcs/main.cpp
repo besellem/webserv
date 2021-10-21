@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/21 18:26:51 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/21 21:24:28 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int	main(int ac, char **av, char *envp[])
 	}
 	
 	const int					port = webserv.servers(0).port();
-	const std::string			const_path = "./www/test_cgi.html";
+	const std::string			const_path = "./www/tmp.html";
 	webserv::Socket		_sock(port);
 
 	int			new_socket;
@@ -49,7 +49,7 @@ int	main(int ac, char **av, char *envp[])
 		printf("%s\n", header);
 		webserv.execute_cgi(webserv.servers(0).locations(0), "test.php", new_socket, envp);
 		// _sock.parse(new_socket, header);	// in process
-		// _sock.parse(new_socket, const_path);		// TO REMOVE
+		_sock.parse(new_socket, const_path);		// TO REMOVE
 		printf("------------------Hello message sent-------------------\n");
 		close(new_socket);
 	}
