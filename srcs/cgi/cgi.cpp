@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/21 18:17:26 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/21 18:28:48 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,10 @@ void    WebServer::execute_cgi(const t_location& loc, const std::string input, i
         pid = fork();
         if (pid == 0)
         {
-            char *arg[] = {loc.cgi[0].c_str(), input.c_str()};
-            fcntl(fd, F_DUPFD);
-            execve((loc.cgi[0]).c_str(), arg, envp);
+            // char *arg[] = {loc.cgi[0].c_str(), input.c_str()};
+            char *arg[] = {"/usr/bin/php", "text.php"};
+            // fcntl(0, F_DUPFD);
+            execve((loc.cgi[i]).c_str(), arg, envp); // utilise surement write donc doit trouver une solution pour ecrire dans un buffer
             exit(0);
         }
     }
