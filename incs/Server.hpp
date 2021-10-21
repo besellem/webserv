@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/21 00:52:30 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/21 12:31:39 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ class Server
 		*/
 	
 		const int&							port() const;
-		const std::string&					name() const;
+		const std::vector<std::string>&		name() const;
 		const std::map<int, std::string>&	errorPages() const;
 		const int&							cliMaxSize() const;
 		const std::vector<t_location *>&	locations() const;
@@ -78,9 +78,9 @@ class Server
 		
 	private:
 		int					        _port;			// listen port
-		std::string					_name;			// server name
+		std::vector<std::string>	_name;			// server names
 		std::map<int, std::string>  _errorPages;	// default error pages
-		int							_cliMaxSize;	// max client body size
+		int							_cliMaxSize;	// client max body size
 		std::vector<t_location *>	_locations;		// routes with rules
 
 }; /* class Server */

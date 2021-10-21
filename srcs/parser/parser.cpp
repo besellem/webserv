@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:53:23 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/21 01:05:28 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/21 00:58:44 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,7 @@ void	parse_line(ServerGenerator& servers, std::string line)
 
 void	WebServer::parse(const std::string config_file)
 {
+	std::cout << "=== Parsing ===\n";
 	int pos = config_file.rfind(".conf");
 	if (pos != (int)config_file.size() - 5)
 		throw ParsingError();
@@ -124,6 +125,7 @@ void	WebServer::parse(const std::string config_file)
 	if (this->_servers.state() != START)
 		throw ParsingError();
 	os.close();
+	std::cout << "\n## ServerGenerator :\n\n" << this->_servers;
 }
 
 _END_NS_WEBSERV
