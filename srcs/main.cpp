@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/21 08:59:20 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/22 18:01:51 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,18 +15,11 @@
 
 #define PORT 8080
 
-int	main(int ac, char **av, char **env)
+int	main(int ac, char **av, __unused char **env)
 {
 	_INLINE_NAMESPACE::WebServer	serv;
-	std::string						config_file;
 	
-	if (ac != 2)
-	{
-		std::cout << "Enter Port" << std::endl;
-		return EXIT_FAILURE;
-	}
-	
-	config_file = (ac > 1) ? av[1] : DEFAULT_CONFIG_FILE;
+	std::string	config_file = (ac > 1) ? av[1] : DEFAULT_CONFIG_FILE;
 	try
 	{
 		serv.parse(config_file);
@@ -37,6 +30,16 @@ int	main(int ac, char **av, char **env)
 		return EXIT_FAILURE;
 	}
 	
+
+	std::vector<std::string>	tmp =_INLINE_NAMESPACE::split_string("image/png,image/svg+xml,image/*;q=0.8,video/*;q=0.8,*/*;q=0.5", ",");
+
+	for (std::vector<std::string>::const_iterator it = tmp.begin(); it != tmp.end(); ++it)
+	{
+		std::cout << *it << std::endl;
+	}
+
+	
+	return 0;
 	// serv.createServers();
 
 	const int					port = serv.getServer(0).port();

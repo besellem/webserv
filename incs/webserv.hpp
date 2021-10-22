@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/21 08:26:22 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/22 17:49:42 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@
 
 _BEGIN_NS_WEBSERV
 
-bool	ft_isNumeric(const std::string &str);
+bool						ft_isNumeric(const std::string &str);
+
 
 class ServerGenerator;
 
@@ -57,6 +58,7 @@ class WebServer
 
 /** @brief function declare */
 int		socketAccept(int fd, sockaddr *addr, socklen_t *addrLen);
+int		socketAccept(const Socket &);
 
 
 _END_NS_WEBSERV

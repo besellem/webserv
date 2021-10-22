@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/21 09:16:07 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/22 17:09:24 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,18 +22,39 @@ class HttpHeader
 {
 
 	public:
-		typedef std::map<std::string, std::string>                   value_type;
+		typedef	void*                                                pointer;
+		typedef std::map<std::string, std::vector<std::string> >     value_type;
 	
 	public:
 		HttpHeader(void) : data()
-		{
-			memset(buf, 0, sizeof(buf));
-		}
+		{ resetBuffer(); }
 
-		HttpHeader(const HttpHeader &);
-		~HttpHeader() {}
+		HttpHeader(const HttpHeader &x)
+		{ *this = x; }
+
+		~HttpHeader()
+		{}
+
+		pointer		resetBuffer(void)
+		{ return memset(buf, 0, sizeof(buf)); }
 		
-		HttpHeader&	operator=(const HttpHeader &);
+		HttpHeader&	operator=(const HttpHeader &x)
+		{
+			if (this == &x)
+				return *this;
+			data = x.data;
+			memcpy(buf, x.buf, sizeof(buf));
+			return *this;
+		}
+	
+	
+	public:
+		class HttpHeaderParsingError : public std::exception
+		{
+			public:
+				virtual const char*	what() const throw()
+				{ return "incomplete http header received"; }
+		};
 
 
 	public: // TO REMOVE
@@ -48,7 +69,7 @@ class Socket
 	public:
 	/** @brief constructor / destructor */
 
-		explicit Socket(const short& port);
+		explicit Socket(const short &);
 		Socket(void);
 		~Socket(void);
 
@@ -61,7 +82,8 @@ class Socket
 		/** @brief init socket */
 		void		startUp(void);
 		
-		void		resolveHttpRequest(int);
+		void		readHttpRequest(int);
+		void		resolveHttpRequest(void);
 
 		void		parse(int skt, const char *);
 		void		parse(int skt, const std::string &);
@@ -71,6 +93,8 @@ class Socket
 		void	errorExit(const std::string &) const;
 		void	bindStep(const int &, const sockaddr_in &);
 		void	listenStep(const int &);
+
+		void	checkHttpHeaderLine(const std::string &);
 
 		void	getParsing(int skt, const char *); // -- in process
 		void	getParsing(int skt, const std::string &); // TO REMOVE

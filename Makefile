@@ -6,14 +6,14 @@
 #    By: besellem <besellem@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/21 08:55:44 by besellem         ###   ########.fr        #
+#    Updated: 2021/10/22 17:40:48 by besellem         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # COMPILATION
 
 CC		= clang++
-CFLAGS 	= #-Wall -Wextra -Werror -std=c++98# -fsanitize=address -g3
+CFLAGS 	= -Wall -Wextra -Werror -std=c++98# -fsanitize=address -g3
 IFLAGS 	= -I./incs
 
 # DIRECTORIES
@@ -26,7 +26,8 @@ OBJ_DIR 		:= $(BUILD)/obj
 # SUB_DIR 		:= exemple
 SUB_DIR			:= epoll \
 				   socket \
-				   parser
+				   parser \
+				   utils
 DIRS			:= $(OBJ_DIR) $(addprefix $(OBJ_DIR)/, $(SUB_DIR))
 
 # FILES
@@ -46,6 +47,8 @@ SRC				+= $(addprefix parser/, $(SUB_SRC))
 SUB_SRC			:= socket.cpp \
 				   accept.cpp
 SRC				+= $(addprefix socket/, $(SUB_SRC))
+SUB_SRC			:= utils.cpp
+SRC				+= $(addprefix utils/, $(SUB_SRC))
 OBJ				:= $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 
 # COLORS

@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/21 09:16:25 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/22 16:59:23 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,13 +72,15 @@ void				WebServer::createServers(void)
 		cur.startUp();
 		while (true)
 		{
-			sockaddr_in	addr = cur.getAddr();
-			size_t		len = cur.getAddrLen();
-			sock_fd = socketAccept(cur.getServerFd(),
-								   (struct sockaddr *)&addr,
-								   (socklen_t *)&len);
+			// sockaddr_in	addr = cur.getAddr();
+			// size_t		len = cur.getAddrLen();
+			// sock_fd = socketAccept(cur.getServerFd(),
+			// 					   (struct sockaddr *)&addr,
+			// 					   (socklen_t *)&len);
 
-			cur.resolveHttpRequest(sock_fd);
+			sock_fd = socketAccept(cur);
+			cur.readHttpRequest(sock_fd);
+			cur.resolveHttpRequest();
 			// header. = resolveHttpRequest(sock_fd);
 			// cur.header.data
 

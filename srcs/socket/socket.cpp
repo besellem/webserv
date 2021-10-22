@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/21 09:15:20 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/22 18:04:15 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,31 @@
 
 
 _BEGIN_NS_WEBSERV
+
+struct s_options
+{
+	char	*token;
+	char	*delim;
+};
+
+const char	*g_methods[] = {
+	"GET",
+	"POST",
+	"DELETE",
+	NULL
+};
+
+const struct s_options	g_options[] = {
+	{"Host",            " " },
+	{"Connection",      " " },
+	{"Accept",          "," },
+	{"User-Agent",      ""  },
+	{"Accept-Language", " " },
+	{"Referer",         " " },
+	{"Accept-Encoding", ", "},
+	{NULL, NULL}
+};
+
 
 Socket::Socket(void)  {}
 Socket::~Socket(void) {}
@@ -69,10 +94,62 @@ void	Socket::parse(int skt, const char* http_header)
 
 
 #include <stdio.h> // printf
-void	Socket::resolveHttpRequest(int socket_fd)
+void	Socket::readHttpRequest(int socket_fd)
 {
-	recv(socket_fd, header.buf, sizeof(header.buf), 0);
-	printf("%s\n", header.buf);
+	int		ret;
+
+	header.resetBuffer();
+	ret = recv(socket_fd, header.buf, sizeof(header.buf), 0);
+	
+	if (!DEBUG)
+	{
+		write(STDOUT_FILENO, header.buf, ret);
+		// printf("%s\n", header.buf);
+	}
+}
+
+void	Socket::checkHttpHeaderLine(const std::string& __line)
+{
+	typedef std::vector<std::string>                                vector_type;
+	
+	vector_type					methods;
+	vector_type					opts;
+	vector_type::const_iterator	opt_it;
+	vector_type::const_iterator	method_it;
+	
+	std::string					key = __line;
+	std::string					value = __line;
+	const size_t				pos = __line.find(": ");
+	
+	
+	if (pos == std::string::npos) // (?) HTTP_REQUEST_ERROR;
+		throw HttpHeader::HttpHeaderParsingError();
+	
+	key.substr(0, pos); // get only the key (eg: "Host" or "User-Agent")
+	value.substr(pos);  // get only the value (eg: "localhost:8080")
+	
+
+	for (size_t i = 0; g_options[i].token; ++i)
+	{
+		if (CMP_STRINGS(key.data(), g_options[i].token))
+		{
+			header.data[key] = split_string(value, g_options[i].delim);
+		}
+	}
+}
+
+void	Socket::resolveHttpRequest(void)
+{
+	typedef std::vector<std::string>     vector_type;
+	
+	vector_type				buffer = split_string(this->header.buf, "\n");
+	vector_type::iterator	line = buffer.begin();
+
+	// parse the buffer line by line
+	for ( ; line != buffer.end(); ++line)
+	{
+		this->checkHttpHeaderLine(*line);
+	}
 }
 
 // TO REMOVE
