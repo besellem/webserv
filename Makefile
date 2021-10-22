@@ -6,14 +6,14 @@
 #    By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/21 18:21:37 by adbenoit         ###   ########.fr        #
+#    Updated: 2021/10/22 13:51:25 by adbenoit         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # COMPILATION
 
 CC		= clang++
-CFLAGS 	= #-Wall -Wextra -Werror -std=c++98# -fsanitize=address -g3
+CFLAGS 	= -Wall -Wextra -Werror -std=c++98# -fsanitize=address -g3
 IFLAGS 	= -I./incs
 
 # DIRECTORIES

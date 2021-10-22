@@ -3,6 +3,6 @@
   <title>Test PHP</title>
  </head>
  <body>
- <?php echo "Test cgi :)<p>"; ?>
+ <?php echo "CGI TEST OK !<p>"; ?>
 </body>
 </html>

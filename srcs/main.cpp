@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/21 21:24:28 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/22 13:55:40 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ int	main(int ac, char **av, char *envp[])
 		char	header[30000] = {0};
 		valread = recv(new_socket, header, 30000, 0);
 		printf("%s\n", header);
-		webserv.execute_cgi(webserv.servers(0).locations(0), "test.php", new_socket, envp);
+		webserv.execute_cgi(webserv.servers(0).locations(0), "test.php", envp);
 		// _sock.parse(new_socket, header);	// in process
 		_sock.parse(new_socket, const_path);		// TO REMOVE
 		printf("------------------Hello message sent-------------------\n");

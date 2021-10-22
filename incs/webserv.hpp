@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/21 21:35:17 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/22 13:51:59 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ class WebServer
 		size_t			nServ() const { return this->_servers.size(); }
 
 		void		parse(const std::string);
-		void		execute_cgi(const t_location &, const std::string, int, char *envp[]);
+		void		execute_cgi(const t_location &, const std::string, char *envp[]);
 
 	public:
 		class ParsingError : public std::exception
