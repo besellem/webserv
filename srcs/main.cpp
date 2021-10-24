@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/21 18:55:27 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/24 16:39:42 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,10 @@ int	main(int ac, char **av)
 	webserv::Epoll _epoll(_sock);
 
 	int fd = _sock.getServerFd();
-	_sock.setNonBlock(fd);
-	_epoll.updateEvents(fd, webserv::Epoll::kReadEvent, false);
+	// _sock.setNonBlock(fd);
+	
+	// _epoll.updateEvents(fd, webserv::Epoll::kReadEvent, false);
+	_epoll.updateEvents(fd);
 	while (true)
 	{
 		// printf("+++++++ Waiting for new connection ++++++++\n\n");
