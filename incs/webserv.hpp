@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/24 18:03:22 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 00:45:37 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,23 +43,14 @@
 # include "defs.hpp"
 # include "ServerGenerator.hpp"
 # include "socket.hpp"
-
-
+# include "cgi.hpp"
 
 _BEGIN_NS_WEBSERV
 
 bool		ft_isNumeric(const std::string &str);
-std::string	execute_cgi(const t_location &, const std::string, char **envp);
-char 		**cgiEnv(const Server& server, const std::string &method);
-
-class CgiError : public std::exception
-{
-	public:
-		CgiError();
-		virtual const char*	what() const throw();
-};
 
 class ServerGenerator;
+class cgi;
 
 class WebServer
 {

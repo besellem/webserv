@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/24 18:03:49 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 01:16:10 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,19 +15,19 @@
 
 int	main(int ac, char **av)
 {
-	webserv::WebServer	webserv;
+	webserv::WebServer	webServ;
 	std::string			conf = (ac > 1) ? av[1] : DEFAULT_CONFIG_FILE;
 	
 	try
 	{
-		webserv.parse(conf);
+		webServ.parse(conf);
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
 	}
 	
-	const int					port = webserv.servers(0).port();
+	const int					port = webServ.servers(0).port();
 	const std::string			const_path = "./www/tmp.html";
 	webserv::Socket		_sock(port);
 
@@ -47,8 +47,17 @@ int	main(int ac, char **av)
 		char	header[30000] = {0};
 		valread = recv(new_socket, header, 30000, 0);
 		printf("%s\n", header);
-		std::string content = execute_cgi(webserv.servers(0).locations(0), "test.php", cgiEnv(webserv.servers(0), "GET"));
-		send(new_socket, content.c_str(), content.length(), 0);
+		try
+		{
+			webserv::cgi newCgi(&webServ.servers(0), &webServ.servers(0).locations(0), "test.php", "GET");
+			std::string content = newCgi.execute();
+			send(new_socket, content.c_str(), content.length(), 0);
+
+		}
+		catch(const std::exception& e)
+		{
+			std::cerr << e.what() << '\n';
+		}
 
 		// _sock.parse(new_socket, header);	// in process
 		// _sock.parse(new_socket, const_path);		// TO REMOVE
