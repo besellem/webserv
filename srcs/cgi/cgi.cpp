@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/25 01:22:31 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 01:47:20 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,9 @@ char**	cgi::getEnv() const {
     return this->_env;
 }
 
-/* il faut les infos du header au moment du read */
+/* Set the CGI environment variables.
+CGI Environment variables contain data about the transaction
+between the client and the server. */
 
 void cgi::setEnv()
 {
@@ -98,6 +100,9 @@ std::string addHeader(const std::string& content)
     header += "\n\n";
     return header + content;
 }
+
+/* Executes the CGI program on a file.
+Returns the output in a string */
 
 std::string cgi::execute()
 {
