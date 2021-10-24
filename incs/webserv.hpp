@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/22 17:49:42 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/24 13:19:31 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,12 +30,12 @@ class WebServer
 	
 	public:
 		WebServer(void);
-		WebServer(const WebServer&);
+		WebServer(const WebServer &);
 		~WebServer();
 		
-		WebServer&	operator=(const WebServer&);
+		WebServer&	operator=(const WebServer &);
 
-		void				parse(const std::string&);
+		void				parse(const std::string &);
 		size_t				serverSize(void) const;
 		const Server&		getServer(int);
 

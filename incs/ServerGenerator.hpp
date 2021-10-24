@@ -6,20 +6,20 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:17 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/21 05:57:54 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/24 15:25:15 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVERGENERATOR_HPP
 # define SERVERGENERATOR_HPP
 
-# include "webserv.hpp"
+# include "defs.hpp"
 # include "Server.hpp"
 
 
 _BEGIN_NS_WEBSERV
 
-class WebServer;
+// class Server;
 
 /* Config file states */
 enum e_state

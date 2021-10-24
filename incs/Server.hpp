@@ -3,28 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/21 12:31:39 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/24 15:25:57 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include <iostream>
-# include <cstring>
-# include <exception>
-# include <fstream>
-# include <iomanip>
-# include <map>
-# include <vector>
-# include "webserv.hpp"
+# include <defs.hpp>
+# include "Server.hpp"
+
 
 _BEGIN_NS_WEBSERV
-
-class WebServer;
 
 typedef struct s_location
 {

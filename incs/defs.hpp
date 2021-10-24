@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/22 17:59:07 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/24 16:11:27 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,9 @@
 # define CONFIG_FILETYPE_LEN  std::strlen(CONFIG_FILETYPE)
 # define DEFAULT_CONFIG_FILE  CONFIG_DEFAULT_PATH "/default" CONFIG_FILETYPE
 
+# define ROOT_PATH            "./www"
+
+
 # define GET     (1L << 0)
 # define POST    (1L << 1)
 # define DELETE  (1L << 2)
@@ -50,6 +53,15 @@
 
 /* Compare two strings. Returns a bool */
 # define CMP_STRINGS(s1, s2) (0 == std::strcmp((s1), (s2)))
+
+/* Logs & messages to print */
+# define LOG \
+	std::cout << S_RED << __FILE__ << ":" << __LINE__ << S_NONE ": Here\n" << std::endl
+# define EXCEPT_WARNING std::cerr << S_BLUE "Warning: " S_NONE << e.what() << std::endl
+# define EXCEPT_ERROR   std::cerr << S_RED  "Error: "   S_NONE << e.what() << std::endl
+
+/* Http response new lines (may change based on the sytem -- to check) */
+# define NEW_LINE "\r\n"
 
 
 /*

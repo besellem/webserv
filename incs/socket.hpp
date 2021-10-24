@@ -6,14 +6,15 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/22 17:09:24 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/24 17:23:53 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SOCKET_HPP
 # define SOCKET_HPP
 
-#include "defs.hpp"
+# include "defs.hpp"
+# include "Server.hpp"
 
 
 _BEGIN_NS_WEBSERV
@@ -26,7 +27,10 @@ class HttpHeader
 		typedef std::map<std::string, std::vector<std::string> >     value_type;
 	
 	public:
-		HttpHeader(void) : data()
+		HttpHeader(void) :
+			data(),
+			request_method(),
+			path_info()
 		{ resetBuffer(); }
 
 		HttpHeader(const HttpHeader &x)
@@ -43,6 +47,8 @@ class HttpHeader
 			if (this == &x)
 				return *this;
 			data = x.data;
+			request_method = x.request_method;
+			path_info = x.path_info;
 			memcpy(buf, x.buf, sizeof(buf));
 			return *this;
 		}
@@ -56,9 +62,18 @@ class HttpHeader
 				{ return "incomplete http header received"; }
 		};
 
+		class HttpBadRequestError : public std::exception
+		{
+			public:
+				virtual const char*	what() const throw()
+				{ return "bad http request"; }
+		};
+
 
 	public: // TO REMOVE
 		value_type		data;
+		std::string		request_method;
+		std::string		path_info;
 		char			buf[BUFSIZ];
 
 };
@@ -69,9 +84,13 @@ class Socket
 	public:
 	/** @brief constructor / destructor */
 
+		explicit Socket(void);
 		explicit Socket(const short &);
-		Socket(void);
-		~Socket(void);
+		Socket(const Socket &);
+		~Socket();
+
+		Socket&		operator=(const Socket &);
+
 
 		short		getPort(void) const;
 		int			getServerFd(void) const;
@@ -80,25 +99,23 @@ class Socket
 
 
 		/** @brief init socket */
-		void		startUp(void);
+		void		startSocket(void);
 		
 		void		readHttpRequest(int);
 		void		resolveHttpRequest(void);
-
-		void		parse(int skt, const char *);
-		void		parse(int skt, const std::string &);
+		int			getStatusCode(void) const;
+		const char*	getStatusMessage(int) const;
+		size_t		getContentLength(void) const;
+		std::string	getFileContent(void);
+		void		sendHttpResponse(int, const Server *);
 
 
 	private:
 		void	errorExit(const std::string &) const;
 		void	bindStep(const int &, const sockaddr_in &);
 		void	listenStep(const int &);
-
+		
 		void	checkHttpHeaderLine(const std::string &);
-
-		void	getParsing(int skt, const char *); // -- in process
-		void	getParsing(int skt, const std::string &); // TO REMOVE
-		void	_parse_wrapper(const char *);
 
 
 	private:
@@ -106,7 +123,7 @@ class Socket
 		int			_serverFd;
 		sockaddr_in	_addr;
 		size_t		_addrLen;
-		HttpHeader	header;
+		HttpHeader	*header;
 	
 	
 	friend class HttpHeader;

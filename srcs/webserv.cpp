@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/22 16:59:23 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/24 17:08:08 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,11 +34,13 @@ WebServer::~WebServer()
 	}
 }
 
+// TO DO but unused
 WebServer&	WebServer::operator=(const WebServer& x)
 {
 	if (this == &x)
 		return *this;
 	_servers = x._servers;
+	// _socks = x._socks;
 	return *this;
 }
 
@@ -69,21 +71,22 @@ void				WebServer::createServers(void)
 		_socks[i] = Socket(_servers[i]->port());
 
 		cur = _socks[i];
-		cur.startUp();
+		cur.startSocket();
 		while (true)
 		{
-			// sockaddr_in	addr = cur.getAddr();
-			// size_t		len = cur.getAddrLen();
-			// sock_fd = socketAccept(cur.getServerFd(),
-			// 					   (struct sockaddr *)&addr,
-			// 					   (socklen_t *)&len);
-
 			sock_fd = socketAccept(cur);
 			cur.readHttpRequest(sock_fd);
-			cur.resolveHttpRequest();
-			// header. = resolveHttpRequest(sock_fd);
-			// cur.header.data
-
+			
+			try
+			{
+				cur.resolveHttpRequest();
+			}
+			catch (std::exception &e)
+			{
+				EXCEPT_WARNING;
+				continue ;
+			}
+			cur.sendHttpResponse(sock_fd, _servers[i]);
 			close(sock_fd);
 		}
 	} // for each server
