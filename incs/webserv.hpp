@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/24 16:33:56 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/24 18:03:22 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,8 @@
 _BEGIN_NS_WEBSERV
 
 bool		ft_isNumeric(const std::string &str);
-std::string	execute_cgi(const t_location &, const std::string, char *envp[]);
+std::string	execute_cgi(const t_location &, const std::string, char **envp);
+char 		**cgiEnv(const Server& server, const std::string &method);
 
 class CgiError : public std::exception
 {

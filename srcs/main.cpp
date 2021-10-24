@@ -6,14 +6,14 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/24 16:42:55 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/24 18:03:49 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 #include <stdio.h>
 
-int	main(int ac, char **av, char *envp[])
+int	main(int ac, char **av)
 {
 	webserv::WebServer	webserv;
 	std::string			conf = (ac > 1) ? av[1] : DEFAULT_CONFIG_FILE;
@@ -47,7 +47,7 @@ int	main(int ac, char **av, char *envp[])
 		char	header[30000] = {0};
 		valread = recv(new_socket, header, 30000, 0);
 		printf("%s\n", header);
-		std::string content = execute_cgi(webserv.servers(0).locations(0), "test.php", envp);
+		std::string content = execute_cgi(webserv.servers(0).locations(0), "test.php", cgiEnv(webserv.servers(0), "GET"));
 		send(new_socket, content.c_str(), content.length(), 0);
 
 		// _sock.parse(new_socket, header);	// in process
