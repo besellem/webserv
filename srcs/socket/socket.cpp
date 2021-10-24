@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/24 17:45:54 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/24 18:35:45 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,20 +47,24 @@ const struct s_options	g_options[] = {
 Socket::Socket(void) :
 	_port(0),
 	_serverFd(-1),
-	_addrLen(sizeof(sockaddr_in))
+	_addrLen(sizeof(sockaddr_in)),
+	header(nullptr)
 {
 	this->header = new HttpHeader;
 }
 
 Socket::~Socket(void)
 {
-	if (this->header != nullptr)
+	if (this->header != nullptr) {
 		delete this->header;
+		this->header = nullptr;
+	}
 }
 
 Socket::Socket(const short& port) :
 	_port(port),
-	_addrLen(sizeof(sockaddr_in))
+	_addrLen(sizeof(sockaddr_in)),
+	header(nullptr)
 {
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverFd < 0)

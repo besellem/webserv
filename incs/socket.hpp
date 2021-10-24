@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/24 17:47:28 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/24 18:31:47 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,17 +30,15 @@ class HttpHeader
 		HttpHeader(void) :
 			data(),
 			request_method(),
-			path_info()
-		{ resetBuffer(); }
+			path_info() { resetBuffer(); }
 
-		HttpHeader(const HttpHeader &x)
-		{ *this = x; }
+		HttpHeader(const HttpHeader &x) { *this = x; }
 
-		~HttpHeader()
-		{}
+		~HttpHeader() {
+			std::cout << "destructor ???\n";
+		}
 
-		pointer		resetBuffer(void)
-		{ return memset(buf, 0, sizeof(buf)); }
+		pointer		resetBuffer(void) { return memset(buf, 0, sizeof(buf)); }
 		
 		HttpHeader&	operator=(const HttpHeader &x)
 		{
