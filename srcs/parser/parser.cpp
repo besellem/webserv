@@ -3,21 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:53:23 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/21 00:58:44 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/21 07:55:31 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 
+
 _BEGIN_NS_WEBSERV
 
 /* Returns 1 if the string is numeric.
 Otherwise, returns 0. */
-
-bool	ft_isNumeric(const std::string &str)
+bool		ft_isNumeric(const std::string &str)
 {
 	for (size_t i = 0; i < str.size(); i++)
 		if (std::isdigit(str[i]) == 0)
@@ -27,8 +27,7 @@ bool	ft_isNumeric(const std::string &str)
 
 /* Cuts str from delimiter.
 Returns the new string. */
-
-std::string    ft_strcut(const std::string& str, char delimiter)
+std::string	ft_strcut(const std::string& str, char delimiter)
 {
 	size_t pos = str.find(delimiter);
 	if (pos == std::string::npos)
@@ -38,7 +37,6 @@ std::string    ft_strcut(const std::string& str, char delimiter)
 
 /* Cuts vector from delimiter.
 Returns the new vector. */
-
 Server::tokens_type	ft_vectorcut(const std::vector<std::string>& vect, char delimiter)
 {
 	size_t pos = 0;
@@ -62,8 +60,7 @@ Server::tokens_type	ft_vectorcut(const std::vector<std::string>& vect, char deli
 /* Breaks a string into a sequence of zero or
 more nonempty tokens delimiter by tabulation or space
 Returns the vector of tokens. */
-
-Server::tokens_type    getTokens(std::string line)
+Server::tokens_type	getTokens(std::string line)
 {
 	std::vector<std::string> tokens;
 
@@ -84,7 +81,6 @@ Server::tokens_type    getTokens(std::string line)
 }
 
 /* Fills the servers with line's data */
-
 void	parse_line(ServerGenerator& servers, std::string line)
 {	
 	line = ft_strcut(line, '#');
@@ -110,12 +106,12 @@ void	parse_line(ServerGenerator& servers, std::string line)
 }
 
 /* Reads the config file and parse it line by line */
-
-void	WebServer::parse(const std::string config_file)
+void	WebServer::parse(const std::string& config_file)
 {
-	std::cout << "=== Parsing ===\n";
-	int pos = config_file.rfind(".conf");
-	if (pos != (int)config_file.size() - 5)
+	if (DEBUG)
+		std::cout << "=== Parsing ===\n";
+	int pos = config_file.rfind(CONFIG_FILETYPE);
+	if (pos != (int)config_file.size() - CONFIG_FILETYPE_LEN)
 		throw ParsingError();
 	std::fstream os;
 	std::string line;
@@ -125,7 +121,9 @@ void	WebServer::parse(const std::string config_file)
 	if (this->_servers.state() != START)
 		throw ParsingError();
 	os.close();
-	std::cout << "\n## ServerGenerator :\n\n" << this->_servers;
+	if (DEBUG)
+		std::cout << "\n## ServerGenerator :\n\n" << this->_servers;
 }
+
 
 _END_NS_WEBSERV

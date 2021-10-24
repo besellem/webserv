@@ -6,14 +6,14 @@
 #    By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/21 16:37:16 by kaye             ###   ########.fr        #
+#    Updated: 2021/10/24 18:19:56 by kaye             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # COMPILATION
 
 CC		= clang++
-CFLAGS 	= -Wall -Wextra -Werror -std=c++98# -fsanitize=address -g3
+CFLAGS 	= -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3
 IFLAGS 	= -I./incs
 
 # DIRECTORIES
@@ -26,13 +26,15 @@ OBJ_DIR 		:= $(BUILD)/obj
 # SUB_DIR 		:= exemple
 SUB_DIR			:= epoll \
 				   socket \
-				   parser
+				   parser \
+				   utils
 DIRS			:= $(OBJ_DIR) $(addprefix $(OBJ_DIR)/, $(SUB_DIR))
 
 # FILES
 
 NAME			:= webserv
-SRC				:= main.cpp
+SRC				:= main.cpp \
+				   webserv.cpp
 SUB_SRC			:= parser.cpp \
 				   Server.cpp \
 				   ServerGenerator.cpp
@@ -44,6 +46,8 @@ SRC				+= $(addprefix parser/, $(SUB_SRC))
 # SRC				+= $(addprefix epoll/, $(SUB_SRC))
 SUB_SRC			:= socket.cpp
 SRC				+= $(addprefix socket/, $(SUB_SRC))
+SUB_SRC			:= utils.cpp
+SRC				+= $(addprefix utils/, $(SUB_SRC))
 SUB_SRC			:= epoll.cpp
 SRC				+= $(addprefix epoll/, $(SUB_SRC))
 OBJ				:= $(SRC:%.cpp=$(OBJ_DIR)/%.o)

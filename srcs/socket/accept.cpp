@@ -1,32 +1,37 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   accept.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/24 17:36:18 by besellem         ###   ########.fr       */
+/*   Created: 2021/10/19 17:40:01 by kaye              #+#    #+#             */
+/*   Updated: 2021/10/22 17:43:46 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
-// #include <stdio.h>
 
-int	main(int ac, char **av, __unused char **env)
+_BEGIN_NS_WEBSERV
+
+int	socketAccept(int fd, sockaddr *addr, socklen_t *addrLen)
 {
-	_INLINE_NAMESPACE::WebServer	serv;
+	int	socketFd = accept(fd, addr, addrLen);
 	
-	try
+	if (socketFd < 0)
 	{
-		serv.parse((ac > 1) ? av[1] : DEFAULT_CONFIG_FILE);
+		std::cout << "Error: accept" << std::endl;
+		exit(EXIT_FAILURE);
 	}
-	catch (std::exception &e)
-	{
-		return (EXCEPT_ERROR), EXIT_FAILURE;
-	}
-
-	serv.createServers();
-	
-	return EXIT_SUCCESS;
+	return socketFd;
 }
+
+int	socketAccept(const Socket &x)
+{
+	sockaddr_in	addr = x.getAddr();
+	size_t		len = x.getAddrLen();
+
+	return socketAccept(x.getServerFd(), (struct sockaddr *)&addr, (socklen_t *)&len);
+}
+
+_END_NS_WEBSERV

@@ -40,7 +40,7 @@ int get_line(int, char *, int);
 void headers(int, const char *);
 void not_found(int);
 void serve_file(int, const char *);
-int startup(u_short *);
+int startSocket(u_short *);
 void unimplemented(int);
 
 /**********************************************************************/
@@ -475,7 +475,7 @@ void serve_file(int client, const char *filename)
  * Parameters: pointer to variable containing the port to connect on
  * Returns: the socket */
 /**********************************************************************/
-int startup(u_short *port)
+int startSocket(u_short *port)
 {
     int httpd = 0;
     struct sockaddr_in name;
@@ -546,7 +546,7 @@ int main(void)
     pthread_t newthread;
 
     /*在对应端口建立 httpd 服务*/
-    server_sock = startup(&port);
+    server_sock = startSocket(&port);
     printf("httpd running on port %d\n", port);
 
     while (1)

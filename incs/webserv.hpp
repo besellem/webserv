@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/21 16:27:18 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/24 17:35:45 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@
 
 _BEGIN_NS_WEBSERV
 
-bool	ft_isNumeric(const std::string &str);
+bool						ft_isNumeric(const std::string &str);
+
 
 class ServerGenerator;
 class Socket;
@@ -28,25 +29,35 @@ class Epoll;
 
 class WebServer {
 	public:
-		WebServer(void) {}
-		~WebServer(void) {}
-
-		WebServer(const WebServer&);
+		WebServer(void);
+		WebServer(const WebServer &);
+		~WebServer();
 		
-		WebServer&	operator=(const WebServer&) { return *this; }
+		WebServer&	operator=(const WebServer &);
 
-		void		parse(const std::string);
+		void				parse(const std::string &);
+		size_t				serverSize(void) const;
+		const Server&		getServer(int);
+
+		void				createServers(void);
 
 	public:
-		class ParsingError : public std::exception {
+		class ParsingError : public std::exception
+		{
 			public:
-				ParsingError() {}
-				virtual const char*	what() const throw() { return "Config File Error"; }
+				virtual const char*	what() const throw();
 		};
 
 	private:
-		ServerGenerator	_servers;
+		ServerGenerator		_servers;
+		Socket				*_socks;
+	
 }; /* class WebServer */
+
+/** @brief function declare */
+int		socketAccept(int fd, sockaddr *addr, socklen_t *addrLen);
+int		socketAccept(const Socket &);
+
 
 _END_NS_WEBSERV
 

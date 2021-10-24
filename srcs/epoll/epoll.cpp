@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/24 18:13:59 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/24 19:05:41 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,6 @@ void	Epoll::updateEvents(int & sockFd) {
 }
 
 void	Epoll::handleAccept(int & newSocket) {
-	// maybe need modify the param in socketAccept()
-	// int newSocket = _sock.socketAccept();
-
-	// testing ...
 	int sockFd = _sock.getServerFd();
 	sockaddr_in clientAddr;
 	socklen_t clientAddrLen = sizeof(clientAddr);
@@ -49,42 +45,32 @@ void	Epoll::handleAccept(int & newSocket) {
 
 	// debug msg
 	std::cout << "Client Connected!: form: [" S_GREEN << inet_ntoa(_sock.getAddr().sin_addr) << S_NONE "]:[" S_GREEN << ntohs(_sock.getAddr().sin_port) << S_NONE "]" << std::endl;
-
-	// _sock.setNonBlock(newSocket);
-	// updateEvents(newSocket, kReadEvent|kWriteEvent, false);
-	// updateEvents(newSocket, kReadEvent, false);
 }
 
-void	Epoll::handleRead(int & sockFd) {
-	char header[30000] = {0};
-	recv(sockFd, header, 30000, 0);
-	std::cout << "\nFrom client(receive):\n" S_GREEN << header << S_NONE << std::endl;
-	// close(sockFd);
+// void	Epoll::handleRead(int & sockFd) {
+// 	// char header[30000] = {0};
+// 	// recv(sockFd, header, 30000, 0);
+// 	// std::cout << "\nFrom client(receive):\n" S_GREEN << header << S_NONE << std::endl;
+// 	// close(sockFd);
 
-	// updateEvents(sockFd, kWriteEvent, false);
-}
+// 	// updateEvents(sockFd, kWriteEvent, false);
+// }
 
-void	Epoll::handleWrite(int & sockFd) {
-	const std::string			const_path = "./www/index.html";
+// void	Epoll::handleWrite(int & sockFd) {
+// 	const std::string			const_path = "./www/index.html";
 
-	_sock.parse(sockFd, const_path);
-	close(sockFd);
-	// updateEvents(sockFd, kReadEvent, true);
+// 	_sock.parse(sockFd, const_path);
+// 	close(sockFd);
+// 	// updateEvents(sockFd, kReadEvent, true);
 	
-	// debug msg
-	std::cout << "\nSend successfully:\n" << std::endl;
-}
+// 	// debug msg
+// 	std::cout << "\nSend successfully:\n" << std::endl;
+// }
 
 void	Epoll::serverLoop(int const & waitMs) {
 	(void)waitMs;
-	// timespec	timeout;
-	// timeout.tv_sec = waitMs / 1000;
-	// timeout.tv_nsec = (waitMs % 1000) * 1000 * 1000;
 
 	const int kMaxEvents = 20;
-	// struct kevent	activeEvs[kMaxEvents];
-
-	// int kevt = kevent(_epollFd, NULL, 0, activeEvs, kMaxEvents, &timeout);
 	int kevt = kevent(_epollFd, _chlist, 1, _evlist, kMaxEvents, NULL);
 	
 	// debug msg
@@ -95,40 +81,34 @@ void	Epoll::serverLoop(int const & waitMs) {
 
 	for (int i = 0; i < kevt; i++) {
 
-		// int sockFd = (int)(intptr_t)activeEvs[i].udata;
-		// int sockFd = activeEvs[i].ident;
-		// int events = activeEvs[i].filter;
-
 		int sockFd = _evlist[i].ident;
 	
 		if (_evlist[i].flags & EV_ERROR)
 			errorExit("EV_ERROR");
 		if (sockFd == _sock.getServerFd()) {
 
+			// int newSocket = -1;
+			// handleAccept(newSocket);
+			// handleRead(newSocket);
+			// handleWrite(newSocket);
+			// close(newSocket);
+
 			int newSocket = -1;
 			handleAccept(newSocket);
-			handleRead(newSocket);
-			handleWrite(newSocket);
+			_sock.readHttpRequest(newSocket);
+			
+			try
+			{
+				_sock.resolveHttpRequest();
+			}
+			catch (std::exception &e)
+			{
+				EXCEPT_WARNING;
+				continue ;
+			}
+			_sock.sendHttpResponse(newSocket);
 			close(newSocket);
 		}
-		// else if (events == EVFILT_READ) {
-		// 	// debug msg
-		// 	std::cout << S_PURPLE "\nhandle Read" S_NONE << std::endl;
-
-		// 	handleRead(sockFd);
-		// }
-		// else if (events == EVFILT_WRITE) {
-		// 	// debug msg
-		// 	std::cout << S_PURPLE "\nhandle Write" S_NONE << std::endl;
-
-		// 	handleWrite(sockFd);
-		// }
-		// else if (activeEvs[i].flags & EV_EOF) {
-		// 	close(sockFd);
-		// 	std::cout << "Client disconneted!" << std::endl;
-		// }
-		// else
-		// 	errorExit("Unknow event");
 	}
 }
 

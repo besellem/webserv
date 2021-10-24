@@ -1,32 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/24 17:36:18 by besellem         ###   ########.fr       */
+/*   Created: 2021/10/22 17:49:10 by besellem          #+#    #+#             */
+/*   Updated: 2021/10/22 17:50:08 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "webserv.hpp"
-// #include <stdio.h>
+#ifndef UTILS_HPP
+# define UTILS_HPP
 
-int	main(int ac, char **av, __unused char **env)
-{
-	_INLINE_NAMESPACE::WebServer	serv;
-	
-	try
-	{
-		serv.parse((ac > 1) ? av[1] : DEFAULT_CONFIG_FILE);
-	}
-	catch (std::exception &e)
-	{
-		return (EXCEPT_ERROR), EXIT_FAILURE;
-	}
+# include "defs.hpp"
 
-	serv.createServers();
-	
-	return EXIT_SUCCESS;
-}
+_BEGIN_NS_WEBSERV
+
+
+std::vector<std::string>	split_string(const std::string& s, const std::string& delim);
+
+
+_END_NS_WEBSERV
+
+#endif /* !defined(UTILS_HPP) */
