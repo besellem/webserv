@@ -6,13 +6,25 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:53:23 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/21 00:58:44 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/24 16:30:43 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 
 _BEGIN_NS_WEBSERV
+
+WebServer::ParsingError::ParsingError() {}
+
+const char*	WebServer::ParsingError::what() const throw() {
+	return "Config File Error";
+}
+const Server&	WebServer::servers(int i) const {
+	return *(this->_servers[i]);
+}
+size_t	WebServer::nServ() const {
+	return this->_servers.size();
+}
 
 /* Returns 1 if the string is numeric.
 Otherwise, returns 0. */

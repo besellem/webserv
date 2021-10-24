@@ -166,7 +166,7 @@ void	Server::newLocation(const tokens_type &tok) {
 void	Server::newLocationDirective(const tokens_type &tok)
 {
     std::string directives[] = {"allow", "rewrite", "root",
-            "index", "autoindex", "cgi"};
+            "index", "autoindex", "cgi_pass"};
 	static method_function1   method_ptr[] = {&Server::setMethods,
 		    &Server::setRedirection, &Server::setRoot, &Server::setIndex,
             &Server::setAutoIndex, &Server::setCgi,};

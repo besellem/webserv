@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/22 14:01:41 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/24 16:42:09 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,48 +15,54 @@
 
 _BEGIN_NS_WEBSERV
 
-void    WebServer::execute_cgi(const t_location& loc, const std::string file, char *envp[])
+CgiError::CgiError() {}
+
+const char*	CgiError::what() const throw() {
+	return "CGI Error";
+}
+
+std::string addHeader(const std::string& content)
+{
+    std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
+    header += std::to_string(content.size());
+    header += "\n\n";
+    return header + content;
+}
+
+std::string execute_cgi(const t_location& loc, const std::string file, char *envp[])
 {
     pid_t               pid;
     int                 status;
-    int                 p[2];
-    const std::string   tmp_file("www/tmp.html");
+    int                 fd[2];
+    char                buffer[4098];
+    std::string		    content;
 
-    errno = 0;
-    std::cout << "trying to executing cgi ...\n";
-	std::fstream os;
-    int fd1 = open(tmp_file.c_str(), O_WRONLY | O_CREAT, 0666);
-    if (fd1 == -1)
-            std::cout << "cgi: " << tmp_file << ": " << strerror(errno) << std::endl;
-    pid = fork();
-    pipe(p);
+    if (pipe(fd) == -1)
+        throw CgiError();
     char *arg[] = {strdup(loc.cgi[0].c_str()), strdup(file.c_str()), NULL};
-    if (pid == 0)
+    if ((pid = fork()) == -1)
+        throw CgiError();
+    else if (pid == 0)
     {
-        if (dup2(p[0], STDIN_FILENO) == -1)
-            std::cout << "cgi: " << strerror(errno) << std::endl;
-        if (dup2(fd1, STDOUT_FILENO) == -1)
-            std::cout << "cgi: " << strerror(errno) << std::endl;
-        close(fd1);
-        close(p[0]);
-        close(p[1]);
+        close(fd[0]);
+        if (dup2(fd[1], STDOUT_FILENO) == -1)
+            throw CgiError();
+        close(fd[1]);
         if (execve(arg[0], arg, envp) == -1)
-            std::cout << "cgi: " << strerror(errno) << std::endl;
+            throw CgiError();
         exit(EXIT_FAILURE);
     }
-    else if (pid < 0)
-        std::cout << "cgi: Fork failed" << std::endl;
-    close(p[0]);
-    close(p[1]);
     waitpid(-1, &status, 0);
-    if (status == 0)
-        std::cout << "====== OK =====" << std::endl;
-    else
-        std::cout << "====== KO ======" << std::endl;
-    std::cout << std::endl;
-    close(fd1);
+    if (status != 0)
+        throw CgiError();
+    close(fd[1]);
+    while ( read(fd[0], buffer, sizeof(buffer)) > 0)
+        content += buffer;
+    close(fd[0]);
     free(arg[0]);
     free(arg[1]);
+
+    return addHeader(content);
 }
 
 _END_NS_WEBSERV

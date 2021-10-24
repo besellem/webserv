@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/22 13:51:59 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/24 16:33:56 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,15 @@
 
 _BEGIN_NS_WEBSERV
 
-bool	ft_isNumeric(const std::string &str);
+bool		ft_isNumeric(const std::string &str);
+std::string	execute_cgi(const t_location &, const std::string, char *envp[]);
+
+class CgiError : public std::exception
+{
+	public:
+		CgiError();
+		virtual const char*	what() const throw();
+};
 
 class ServerGenerator;
 
@@ -65,20 +73,19 @@ class WebServer
 		{}
 		
 		WebServer&	operator=(const WebServer&) { return *this; }
-		const Server&	servers(int i) const { return *(this->_servers[i]); }
-		size_t			nServ() const { return this->_servers.size(); }
+		const Server&	servers(int i) const;
+		size_t			nServ() const;
 
 		void		parse(const std::string);
-		void		execute_cgi(const t_location &, const std::string, char *envp[]);
+		void		execute_cgi(const t_location &, const std::string, int, char *envp[]);
 
 	public:
 		class ParsingError : public std::exception
 		{
             public:
-                ParsingError() {}
-			    virtual const char*	what() const throw() { return "Config File Error"; }
+                ParsingError();
+			    virtual const char*	what() const throw();
 		};
-
 
 	private:
 		ServerGenerator	_servers;
