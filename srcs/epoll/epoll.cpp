@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/24 16:52:03 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/24 18:13:59 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,28 +28,6 @@ Epoll::Epoll(Socket const & sock) : _sock(sock) {
 	_epollFd = kqueue();
 	if (_epollFd < 0)
 		errorExit("epoll create");
-}
-
-void	Epoll::updateEvents(int & sockFd, int const & events, bool const & modify) {
-	struct kevent	evts[EP_EVENTS];
-	int				nEvts = 0;
-
-	if (events & kReadEvent)
-		EV_SET(&evts[nEvts++], sockFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, (void *)(intptr_t)sockFd); // defautl: event is enable, if there have some bug, try : EV_ADD | EV_ENABLE
-	else if (modify == true)
-		EV_SET(&evts[nEvts++], sockFd, EVFILT_READ, EV_DELETE, 0, 0, (void *)(intptr_t)sockFd);
-	
-	if (events & kWriteEvent)
-		EV_SET(&evts[nEvts++], sockFd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, (void *)(intptr_t)sockFd); // defautl: event is enable, if there have some bug, try : EV_ADD | EV_ENABLE
-	else if (modify == true)
-		EV_SET(&evts[nEvts++], sockFd, EVFILT_WRITE, EV_DELETE, 0, 0, (void *)(intptr_t)sockFd);
-
-	// debug msg
-	std::cout << "\n" << (modify == true ? "[" S_GREEN "MODIFY" S_NONE "] fd: [" S_GREEN : "[" S_GREEN "ADD" S_NONE "] fd: [" S_GREEN) << sockFd << S_NONE "] events: [" S_GREEN << ((events & kReadEvent) ? "Read" S_NONE : "NOTHING" S_NONE) << "] & [" S_GREEN << ((events & kWriteEvent) ? "Write" S_NONE "]" : "NOTHING" S_NONE "]") << "\n" << std::endl;
-
-	if (kevent(_epollFd, evts, nEvts, NULL, 0, NULL) < 0)
-		errorExit("kevent failed");
-	// kevent(_epollFd, evts, nEvts, NULL, 0, NULL);
 }
 
 void	Epoll::updateEvents(int & sockFd) {
