@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/24 16:11:27 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/24 17:35:10 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,9 +47,8 @@
 # define OFF     0
 # define ON      1
 
-/** @brief epoll */
-# define kReadEvent  1
-# define kWriteEvent 2
+/** @brief epoll utils define */
+# define EP_EVENTS 2 // 2: read / write
 
 /* Compare two strings. Returns a bool */
 # define CMP_STRINGS(s1, s2) (0 == std::strcmp((s1), (s2)))

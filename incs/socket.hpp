@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/24 17:23:53 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/24 17:47:28 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,9 +78,7 @@ class HttpHeader
 
 };
 
-class Socket
-{
-	
+class Socket {
 	public:
 	/** @brief constructor / destructor */
 
@@ -107,8 +105,10 @@ class Socket
 		const char*	getStatusMessage(int) const;
 		size_t		getContentLength(void) const;
 		std::string	getFileContent(void);
-		void		sendHttpResponse(int, const Server *);
+		void		sendHttpResponse(int);
 
+		void		setNonBlock(int & fd);
+		int			socketAccept(void);
 
 	private:
 		void	errorExit(const std::string &) const;
@@ -129,7 +129,6 @@ class Socket
 	friend class HttpHeader;
 	
 };
-
 
 _END_NS_WEBSERV
 

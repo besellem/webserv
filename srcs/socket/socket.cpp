@@ -6,12 +6,11 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/24 17:24:11 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/24 17:45:54 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "socket.hpp"
-
 
 _BEGIN_NS_WEBSERV
 
@@ -106,6 +105,15 @@ void	Socket::startSocket(void)
 {
 	bindStep(_serverFd, _addr);
 	listenStep(_serverFd);
+}
+
+void	Socket::setNonBlock(int & fd)
+{
+	if (fcntl(fd, F_SETFL, O_NONBLOCK))
+	{
+		std::cout << "Error: set non block" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 }
 
 /* Read the socket's http request */
@@ -251,7 +259,7 @@ std::string	Socket::getFileContent(void)
 	return content;
 }
 
-void		Socket::sendHttpResponse(int socket_fd, const Server *ref)
+void		Socket::sendHttpResponse(int socket_fd)
 {
 	std::string			response;
 	const std::string	path = ROOT_PATH + header->path_info;
@@ -272,8 +280,6 @@ void		Socket::sendHttpResponse(int socket_fd, const Server *ref)
 
 	// -- Send --
 	send(socket_fd, response.c_str(), response.length(), 0);
-
-	(void)ref;
 
 	if (DEBUG)
 	{
@@ -302,6 +308,5 @@ void	Socket::listenStep(const int& serverFd)
 	if (listen(serverFd, 20) < 0)
 		errorExit("listen step");
 }
-
 
 _END_NS_WEBSERV

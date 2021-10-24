@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/24 17:08:08 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/24 17:50:17 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,6 @@ const Server&		WebServer::getServer(int i)
 void				WebServer::createServers(void)
 {
 	const size_t	server_size = _servers.size();
-	HttpHeader		header;
-	int				sock_fd;
 	Socket			cur;
 
 	// create a socket for each server declared in the config file
@@ -72,22 +70,13 @@ void				WebServer::createServers(void)
 
 		cur = _socks[i];
 		cur.startSocket();
+		webserv::Epoll _epoll(cur);
+		int fd = cur.getServerFd();
+
+		_epoll.updateEvents(fd);
 		while (true)
 		{
-			sock_fd = socketAccept(cur);
-			cur.readHttpRequest(sock_fd);
-			
-			try
-			{
-				cur.resolveHttpRequest();
-			}
-			catch (std::exception &e)
-			{
-				EXCEPT_WARNING;
-				continue ;
-			}
-			cur.sendHttpResponse(sock_fd, _servers[i]);
-			close(sock_fd);
+			_epoll.serverLoop(1);
 		}
 	} // for each server
 }

@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/24 13:19:31 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/24 17:35:45 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 # include "defs.hpp"
 # include "ServerGenerator.hpp"
 # include "socket.hpp"
-
+# include "epoll.hpp"
 
 _BEGIN_NS_WEBSERV
 
@@ -24,10 +24,10 @@ bool						ft_isNumeric(const std::string &str);
 
 
 class ServerGenerator;
+class Socket;
+class Epoll;
 
-class WebServer
-{
-	
+class WebServer {
 	public:
 		WebServer(void);
 		WebServer(const WebServer &);
@@ -41,14 +41,12 @@ class WebServer
 
 		void				createServers(void);
 
-
 	public:
 		class ParsingError : public std::exception
 		{
 			public:
 				virtual const char*	what() const throw();
 		};
-
 
 	private:
 		ServerGenerator		_servers;
