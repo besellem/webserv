@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/24 19:03:01 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/24 19:26:27 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ void				WebServer::createServers(void)
 	{
 		// init each socket with each server's port
 		_socks[i] = Socket(_servers[i]->port());
-		// std::cout << i << " here\n"; // add a cout -> no seg
+		std::cout << "\n"; // add a cout -> no seg
 
 		cur = _socks[i];
 		cur.startSocket();

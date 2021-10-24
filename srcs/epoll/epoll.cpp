@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/24 19:05:41 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/24 19:26:23 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ Epoll::Epoll(void) : _sock(0) {}
 Epoll::~Epoll(void) {}
 
 Epoll::Epoll(Socket const & sock) : _sock(sock) {
+	// _epollFd = kqueue();
 	_epollFd = kqueue();
 	if (_epollFd < 0)
 		errorExit("epoll create");
@@ -44,28 +45,8 @@ void	Epoll::handleAccept(int & newSocket) {
 		errorExit("accept failed");
 
 	// debug msg
-	std::cout << "Client Connected!: form: [" S_GREEN << inet_ntoa(_sock.getAddr().sin_addr) << S_NONE "]:[" S_GREEN << ntohs(_sock.getAddr().sin_port) << S_NONE "]" << std::endl;
+	std::cout << "Client Connected!: form: [" S_GREEN << inet_ntoa(clientAddr.sin_addr) << S_NONE "]:[" S_GREEN << ntohs(clientAddr.sin_port) << S_NONE "]" << std::endl;
 }
-
-// void	Epoll::handleRead(int & sockFd) {
-// 	// char header[30000] = {0};
-// 	// recv(sockFd, header, 30000, 0);
-// 	// std::cout << "\nFrom client(receive):\n" S_GREEN << header << S_NONE << std::endl;
-// 	// close(sockFd);
-
-// 	// updateEvents(sockFd, kWriteEvent, false);
-// }
-
-// void	Epoll::handleWrite(int & sockFd) {
-// 	const std::string			const_path = "./www/index.html";
-
-// 	_sock.parse(sockFd, const_path);
-// 	close(sockFd);
-// 	// updateEvents(sockFd, kReadEvent, true);
-	
-// 	// debug msg
-// 	std::cout << "\nSend successfully:\n" << std::endl;
-// }
 
 void	Epoll::serverLoop(int const & waitMs) {
 	(void)waitMs;
@@ -86,12 +67,6 @@ void	Epoll::serverLoop(int const & waitMs) {
 		if (_evlist[i].flags & EV_ERROR)
 			errorExit("EV_ERROR");
 		if (sockFd == _sock.getServerFd()) {
-
-			// int newSocket = -1;
-			// handleAccept(newSocket);
-			// handleRead(newSocket);
-			// handleWrite(newSocket);
-			// close(newSocket);
 
 			int newSocket = -1;
 			handleAccept(newSocket);

@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 14:27:23 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/24 16:49:24 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/24 19:08:18 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,8 @@ class Epoll {
 		explicit Epoll(Socket const & sock);
 		~Epoll(void);
 
-		void	updateEvents(int &, int const &, bool const &);
 		void	updateEvents(int &);
 		void	handleAccept(int &);
-		void	handleRead(int & sockFd);
-		void	handleWrite(int & sockFd);
-
 		void	serverLoop(int const & waitMs);
 
 	private:

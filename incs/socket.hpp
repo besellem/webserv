@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/24 18:31:47 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/24 19:19:32 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ class HttpHeader
 		HttpHeader(const HttpHeader &x) { *this = x; }
 
 		~HttpHeader() {
-			std::cout << "destructor ???\n";
+			// std::cout << "destructor ???\n";
 		}
 
 		pointer		resetBuffer(void) { return memset(buf, 0, sizeof(buf)); }
