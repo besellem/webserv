@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/25 14:56:00 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/25 16:11:43 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,10 +73,7 @@ void				WebServer::createServers(void)
 		
 		webserv::Epoll _epoll(cur);
 		_epoll.startEpoll();
-		while (true) // <------------- ??? 
-		{
-			_epoll.serverLoop();
-		}
+		_epoll.serverLoop();
 	} // for each server
 }
 

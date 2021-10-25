@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 15:27:46 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/25 16:20:37 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,11 @@ void	Epoll::startEpoll(void) {
 	int sockFd = _sock.getServerFd();
 	addEvents(sockFd);
 
-	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
+	// test non block
+	struct timespec timeout = {0, 0};
+
+	// int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL)
+	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, &timeout);
 	if (kevt < 0)
 		errorExit("epoll start failed!");
 }
@@ -56,18 +60,27 @@ void	Epoll::clientConnect(int & fd) {
 	_sock.setNonBlock(fd);
 	addEvents(fd);
 
-	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
+	// test non block
+	struct timespec timeout = {0, 0};
+
+	// int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
+	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, &timeout);
 	if (kevt < 0)
 		errorExit("kevent failed in clientConnect");
 
 	// debug msg
-	std::cout << "Client Connected!: form: [" S_GREEN << inet_ntoa(clientAddr.sin_addr) << S_NONE "]:[" S_GREEN << ntohs(clientAddr.sin_port) << S_NONE "]" << std::endl;
+	std::cout << "Client Connected form: [" S_GREEN << inet_ntoa(clientAddr.sin_addr)
+		<< S_NONE "]:[" S_GREEN << ntohs(clientAddr.sin_port) << S_NONE "]" << "\n" << std::endl;
 }
 
 void	Epoll::clientDisconnect(int const & fd) {
 	deleteEvents(fd);
 	
-	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
+	// test non block
+	struct timespec timeout = {0, 0};
+
+	// int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
+	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, &timeout);
 	if (kevt < 0)
 		errorExit("kevent failed in clientConnect");
 
@@ -75,6 +88,9 @@ void	Epoll::clientDisconnect(int const & fd) {
 }
 
 void	Epoll::readCase(struct kevent & event) {
+	// debug msg
+	std::cout << S_RED "Reading ..." S_NONE << "\n" << std::endl;
+
 	_sock.readHttpRequest(event.ident);			
 	try {
 		_sock.resolveHttpRequest();
@@ -89,33 +105,46 @@ void	Epoll::readCase(struct kevent & event) {
 }
 
 void	Epoll::eofCase(struct kevent & event) {
+	// debug msg
+	std::cout << S_RED "Closing ..." S_NONE << "\n" << std::endl;
+
 	clientDisconnect(event.ident);
 }
 
 void	Epoll::serverLoop(void) {
-	int kevt = kevent(_epollFd, NULL, 0, _evlist, maxEvent, NULL);
-	if (kevt < 0)
-		errorExit("kevent failed in loop");
-	
-	// debug msg
-	std::cout << "Num of request: [" S_GREEN << kevt << S_NONE "]" << std::endl;
+	for(;;) {
 
-	for (int i = 0; i < kevt; i++) {
-		struct kevent currentEvt = _evlist[i];
-		int currentSocket = -1;
-		int currentFd = currentEvt.ident;
-	
-		if (currentFd == _sock.getServerFd()) {
-			clientConnect(currentSocket);
-		}
-		else {
-			if (currentEvt.flags & EVFILT_READ) {
-				std::cout << "READ CASE\n"; 
-				readCase(currentEvt);
+		// struct timespec timeout;
+		// timeout.tv_sec = 10000 / 1000;
+		// timeout.tv_nsec = (10000 % 1000) * 1000 * 1000;
+
+		// test non block
+		struct timespec timeout = {0, 0};
+
+		// int kevt = kevent(_epollFd, NULL, 0, _evlist, maxEvent, NULL); // NULL in last param means block indefinitely.
+		int kevt = kevent(_epollFd, NULL, 0, _evlist, maxEvent, &timeout); // so if set a 0 time, means, kevent return immediately
+		if (kevt < 0)
+			errorExit("kevent failed in loop");
+
+		if (kevt > 0)		
+		// debug msg
+		std::cout << "---\nStar: Num of request: [" S_GREEN << kevt << S_NONE "]" << "\n---\n" << std::endl;
+
+		for (int i = 0; i < kevt; i++) {
+			struct kevent currentEvt = _evlist[i];
+			int currentSocket = -1;
+			int currentFd = currentEvt.ident;
+		
+			if (currentFd == _sock.getServerFd()) {
+				clientConnect(currentSocket);
 			}
-			if (currentEvt.flags & EV_EOF) {
-				std::cout << "EOF CASE\n";
-				eofCase(currentEvt);
+			else {
+				if (currentEvt.flags & EVFILT_READ)
+					readCase(currentEvt);
+				if (currentEvt.flags & EV_EOF)
+					eofCase(currentEvt);
+				else
+					continue ;
 			}
 		}
 	}
