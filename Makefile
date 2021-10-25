@@ -6,14 +6,14 @@
 #    By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/24 18:19:56 by kaye             ###   ########.fr        #
+#    Updated: 2021/10/25 13:51:20 by kaye             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # COMPILATION
 
 CC		= clang++
-CFLAGS 	= -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3
+CFLAGS 	= -Wall -Wextra -Werror -std=c++98# -fsanitize=address -g3
 IFLAGS 	= -I./incs
 
 # DIRECTORIES

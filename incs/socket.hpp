@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/24 19:19:32 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/25 13:51:06 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,8 @@ class HttpHeader
 		HttpHeader(void) :
 			data(),
 			request_method(),
-			path_info() { resetBuffer(); }
+			path_info()
+		{ this->resetBuffer(); }
 
 		HttpHeader(const HttpHeader &x) { *this = x; }
 
@@ -38,8 +39,6 @@ class HttpHeader
 			// std::cout << "destructor ???\n";
 		}
 
-		pointer		resetBuffer(void) { return memset(buf, 0, sizeof(buf)); }
-		
 		HttpHeader&	operator=(const HttpHeader &x)
 		{
 			if (this == &x)
@@ -50,7 +49,10 @@ class HttpHeader
 			memcpy(buf, x.buf, sizeof(buf));
 			return *this;
 		}
-	
+
+		pointer		resetBuffer(void)
+		{ return std::memset(buf, 0, sizeof(buf)); }
+		
 	
 	public:
 		class HttpHeaderParsingError : public std::exception
@@ -121,7 +123,7 @@ class Socket {
 		int			_serverFd;
 		sockaddr_in	_addr;
 		size_t		_addrLen;
-		HttpHeader	*header;
+		HttpHeader	header;
 	
 	
 	friend class HttpHeader;
