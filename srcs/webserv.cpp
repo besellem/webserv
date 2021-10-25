@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/25 16:58:03 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/25 17:58:14 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,18 +66,38 @@ void			WebServer::createServers(void)
 	for (size_t i = 0; i < server_size; ++i)
 	{
 		// init each socket with each server's port
-		_socks[i] = Socket(*_servers[i]);
+		_socks[i] = Socket(_servers[i]->port());
 
 		cur = _socks[i];
+		LOG;
 		cur.startSocket();
-		webserv::Epoll _epoll(cur);
-		int fd = cur.getServerFd();
-
-		_epoll.updateEvents(fd);
+		LOG;
 		while (true)
 		{
-			_epoll.serverLoop(1);
+			int sock_fd = socketAccept(cur);
+
+			LOG;
+			cur.readHttpRequest(sock_fd);
+			LOG;
+			
+			try
+			{
+				cur.resolveHttpRequest();
+			}
+			catch (std::exception &e)
+			{
+				EXCEPT_WARNING;
+				continue ;
+			}
+			LOG;
+			cur.sendHttpResponse(sock_fd);
+			LOG;
+			close(sock_fd);
 		}
+		
+		// Epoll	_epoll(cur);
+		// _epoll.startEpoll();
+		// _epoll.serverLoop();
 	} // for each server
 }
 

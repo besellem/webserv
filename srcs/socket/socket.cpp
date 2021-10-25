@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 17:06:39 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/25 17:56:42 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ const struct s_options	g_options[] = {
 
 
 Socket::Socket(void) :
+	// _server_block(nullptr),
 	_port(0),
 	_serverFd(SYSCALL_ERR),
 	_addrLen(sizeof(sockaddr_in)),
@@ -55,9 +56,11 @@ Socket::Socket(void) :
 Socket::~Socket(void)
 {}
 
-Socket::Socket(const Server &ref) :
-	_server_block(ref),
-	_port(ref.port()),
+// Socket::Socket(Server *serv) :
+Socket::Socket(short const & port) :
+	// _server_block(serv),
+	// _port(serv->port()),
+	_port(port),
 	_addrLen(sizeof(sockaddr_in)),
 	header()
 {
@@ -75,7 +78,7 @@ Socket::Socket(const Server &ref) :
 		close(_serverFd);
 		errorExit("set opt");
 	}
-	setNonBlock(_serverFd);
+	// setNonBlock(_serverFd);
 }
 
 Socket::Socket(const Socket &x)
@@ -85,6 +88,7 @@ Socket&		Socket::operator=(const Socket &x)
 {
 	if (this == &x)
 		return *this;
+	// _server_block = x._server_block;
 	_port = x._port;
 	_serverFd = x._serverFd;
 	_addrLen = x._addrLen;
@@ -108,7 +112,7 @@ void	Socket::startSocket(void)
 
 void	Socket::setNonBlock(int & fd)
 {
-	if (fcntl(fd, F_SETFL, O_NONBLOCK))
+	if (SYSCALL_ERR == fcntl(fd, F_SETFL, O_NONBLOCK))
 	{
 		std::cout << "Error: set non block" << std::endl;
 		exit(EXIT_FAILURE);
@@ -291,13 +295,13 @@ void	Socket::errorExit(const std::string& str) const
 
 void	Socket::bindStep(const int& serverFd, const sockaddr_in& addr)
 {
-	if (bind(serverFd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+	if (SYSCALL_ERR == bind(serverFd, (struct sockaddr *)&addr, sizeof(addr)))
 		errorExit("bind step");
 }
 
 void	Socket::listenStep(const int& serverFd)
 {
-	if (listen(serverFd, 20) < 0)
+	if (SYSCALL_ERR == listen(serverFd, SOMAXCONN))
 		errorExit("listen step");
 }
 

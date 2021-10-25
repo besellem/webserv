@@ -6,7 +6,7 @@
 #    By: besellem <besellem@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/25 16:10:39 by besellem         ###   ########.fr        #
+#    Updated: 2021/10/25 17:56:04 by besellem         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -44,7 +44,8 @@ SRC				+= $(addprefix parser/, $(SUB_SRC))
 # SUB_SRC			:= epoll.cpp
 # SRC				+= $(addprefix exemple/, $(SUB_SRC))
 # SRC				+= $(addprefix epoll/, $(SUB_SRC))
-SUB_SRC			:= socket.cpp \
+SUB_SRC			:= accept.cpp \
+				   socket.cpp \
 				   HttpHeader.cpp
 SRC				+= $(addprefix socket/, $(SUB_SRC))
 SUB_SRC			:= utils.cpp
