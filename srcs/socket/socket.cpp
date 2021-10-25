@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/24 17:45:54 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/25 12:33:08 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,49 +47,38 @@ const struct s_options	g_options[] = {
 Socket::Socket(void) :
 	_port(0),
 	_serverFd(-1),
-	_addrLen(sizeof(sockaddr_in))
-{
-	this->header = new HttpHeader;
-}
+	_addrLen(sizeof(sockaddr_in)),
+	header()
+{}
 
 Socket::~Socket(void)
-{
-	if (this->header != nullptr)
-		delete this->header;
-}
+{}
 
 Socket::Socket(const short& port) :
 	_port(port),
-	_addrLen(sizeof(sockaddr_in))
+	_addrLen(sizeof(sockaddr_in)),
+	header()
 {
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverFd < 0)
 		errorExit("socket init");
-
 	_addr.sin_family = AF_INET;
 	_addr.sin_addr.s_addr = INADDR_ANY;
 	_addr.sin_port = htons(port);
 	memset(_addr.sin_zero, 0, sizeof(_addr.sin_zero));
-	
-	this->header = new HttpHeader;
 }
 
 Socket::Socket(const Socket &x)
-{
-	*this = x;
-}
+{ *this = x; }
 
 Socket&		Socket::operator=(const Socket &x)
 {
 	if (this == &x)
 		return *this;
-	
-	if (this->header != nullptr)
-		delete this->header;
 	_port = x._port;
 	_serverFd = x._serverFd;
 	_addrLen = x._addrLen;
-	header = new HttpHeader(*(x.header));
+	header = x.header;
 	memcpy(&_addr, &x._addr, sizeof(sockaddr_in));
 	return *this;
 }
@@ -121,13 +110,13 @@ void	Socket::readHttpRequest(int socket_fd)
 {
 	int	ret;
 
-	header->resetBuffer();
-	ret = recv(socket_fd, header->buf, sizeof(header->buf), 0);
+	header.resetBuffer();
+	ret = recv(socket_fd, header.buf, sizeof(header.buf), 0);
 	
 	if (!DEBUG)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++" << std::endl;
-		write(STDOUT_FILENO, header->buf, ret); // (?) may be chunked
+		write(STDOUT_FILENO, header.buf, ret); // (?) may be chunked
 		std::cout << "++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
 	}
 }
@@ -164,7 +153,7 @@ void	Socket::checkHttpHeaderLine(const std::string& __line)
 		// }
 		if (CMP_STRINGS(key.data(), g_options[i].token))
 		{
-			header->data[key] = split_string(value, g_options[i].delim);
+			header.data[key] = split_string(value, g_options[i].delim);
 		}
 	}
 }
@@ -173,7 +162,7 @@ void	Socket::resolveHttpRequest(void)
 {
 	typedef std::vector<std::string>     vector_type;
 	
-	vector_type				buffer = split_string(this->header->buf, "\n");
+	vector_type				buffer = split_string(this->header.buf, "\n");
 	vector_type::iterator	line = buffer.begin();
 
 
@@ -182,8 +171,8 @@ void	Socket::resolveHttpRequest(void)
 	if (first_line.size() != 3)
 		throw HttpHeader::HttpBadRequestError();
 	
-	header->request_method = first_line[0];
-	header->path_info = ROOT_PATH + first_line[1];
+	header.request_method = first_line[0];
+	header.path_info = ROOT_PATH + first_line[1];
 	++line;
 
 	/* parse the buffer line by line */
@@ -194,8 +183,8 @@ void	Socket::resolveHttpRequest(void)
 
 
 	// print data parsed
-	HttpHeader::value_type::const_iterator	it = header->data.begin();
-	HttpHeader::value_type::const_iterator	ite = header->data.end();
+	HttpHeader::value_type::const_iterator	it = header.data.begin();
+	HttpHeader::value_type::const_iterator	ite = header.data.end();
 
 	for ( ; it != ite; ++it)
 	{
@@ -206,7 +195,7 @@ void	Socket::resolveHttpRequest(void)
 		std::cout << it->first << std::endl;
 		for ( ; vec_it != vec_ite; ++vec_it)
 		{
-			std::cout << "    " << *vec_it << std::endl;
+			std::cout << S_RED "    " << *vec_it << S_NONE << std::endl;
 		}
 	}
 }
@@ -225,7 +214,7 @@ const char *	Socket::getStatusMessage(int status_code) const
 
 size_t		Socket::getContentLength(void) const
 {
-	std::ifstream	ifs(header->path_info, std::ios::binary | std::ios::ate);
+	std::ifstream	ifs(header.path_info, std::ios::binary | std::ios::ate);
 
 	if (ifs.is_open())
 	{
@@ -239,7 +228,7 @@ size_t		Socket::getContentLength(void) const
 std::string	Socket::getFileContent(void)
 {
 	std::string		content;
-	std::ifstream	ifs(header->path_info, std::ios::in);
+	std::ifstream	ifs(header.path_info, std::ios::in);
 
 	std::string		gline;
 	if (ifs.is_open())
@@ -262,7 +251,7 @@ std::string	Socket::getFileContent(void)
 void		Socket::sendHttpResponse(int socket_fd)
 {
 	std::string			response;
-	const std::string	path = ROOT_PATH + header->path_info;
+	const std::string	path = ROOT_PATH + header.path_info;
 	const int			status_code = getStatusCode();
 	const std::string	status_message = getStatusMessage(status_code);
 	const size_t		content_length = getContentLength();

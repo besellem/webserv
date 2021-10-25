@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/24 17:47:57 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/25 12:22:15 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,12 +108,6 @@ void	Epoll::serverLoop(int const & waitMs) {
 		if (_evlist[i].flags & EV_ERROR)
 			errorExit("EV_ERROR");
 		if (sockFd == _sock.getServerFd()) {
-
-			// int newSocket = -1;
-			// handleAccept(newSocket);
-			// handleRead(newSocket);
-			// handleWrite(newSocket);
-			// close(newSocket);
 
 			int newSocket = -1;
 			handleAccept(newSocket);
