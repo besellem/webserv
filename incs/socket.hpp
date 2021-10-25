@@ -6,54 +6,116 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/21 04:45:49 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/24 17:47:28 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SOCKET_HPP
 # define SOCKET_HPP
 
-#include "webserv.hpp"
+# include "defs.hpp"
+# include "Server.hpp"
 
 
 _BEGIN_NS_WEBSERV
 
-// class HttpHeader
-// {
-	
-// };
-
-class Socket
+class HttpHeader
 {
+
+	public:
+		typedef	void*                                                pointer;
+		typedef std::map<std::string, std::vector<std::string> >     value_type;
 	
+	public:
+		HttpHeader(void) :
+			data(),
+			request_method(),
+			path_info()
+		{ resetBuffer(); }
+
+		HttpHeader(const HttpHeader &x)
+		{ *this = x; }
+
+		~HttpHeader()
+		{}
+
+		pointer		resetBuffer(void)
+		{ return memset(buf, 0, sizeof(buf)); }
+		
+		HttpHeader&	operator=(const HttpHeader &x)
+		{
+			if (this == &x)
+				return *this;
+			data = x.data;
+			request_method = x.request_method;
+			path_info = x.path_info;
+			memcpy(buf, x.buf, sizeof(buf));
+			return *this;
+		}
+	
+	
+	public:
+		class HttpHeaderParsingError : public std::exception
+		{
+			public:
+				virtual const char*	what() const throw()
+				{ return "incomplete http header received"; }
+		};
+
+		class HttpBadRequestError : public std::exception
+		{
+			public:
+				virtual const char*	what() const throw()
+				{ return "bad http request"; }
+		};
+
+
+	public: // TO REMOVE
+		value_type		data;
+		std::string		request_method;
+		std::string		path_info;
+		char			buf[BUFSIZ];
+
+};
+
+class Socket {
 	public:
 	/** @brief constructor / destructor */
 
-		explicit Socket(const short& port);
-		~Socket(void);
+		explicit Socket(void);
+		explicit Socket(const short &);
+		Socket(const Socket &);
+		~Socket();
+
+		Socket&		operator=(const Socket &);
+
 
 		short		getPort(void) const;
 		int			getServerFd(void) const;
 		sockaddr_in	getAddr(void) const;
 		size_t		getAddrLen(void) const;
 
+
 		/** @brief init socket */
-		void		startUp(void);
+		void		startSocket(void);
+		
+		void		readHttpRequest(int);
+		void		resolveHttpRequest(void);
+		int			getStatusCode(void) const;
+		const char*	getStatusMessage(int) const;
+		size_t		getContentLength(void) const;
+		std::string	getFileContent(void);
+		void		sendHttpResponse(int);
 
-		void		parse(int skt, const char *);
-		void		parse(int skt, const std::string &);
-
+		void		setNonBlock(int & fd);
+		int			socketAccept(void);
 
 	private:
-		Socket(void);
-
 		void	errorExit(const std::string &) const;
 		void	bindStep(const int &, const sockaddr_in &);
 		void	listenStep(const int &);
-
-		void	getParsing(int skt, const char *); // -- in process
-		void	getParsing(int skt, const std::string &); // TO REMOVE
-		void	_parse_wrapper(const char *);
+		
+		void	checkHttpHeaderLine(const std::string &);
 
 
 	private:
@@ -61,9 +123,12 @@ class Socket
 		int			_serverFd;
 		sockaddr_in	_addr;
 		size_t		_addrLen;
+		HttpHeader	*header;
+	
+	
+	friend class HttpHeader;
 	
 };
-
 
 _END_NS_WEBSERV
 

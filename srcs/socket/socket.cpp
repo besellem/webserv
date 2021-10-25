@@ -6,17 +6,57 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/21 04:41:22 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/24 17:45:54 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "socket.hpp"
 
-
 _BEGIN_NS_WEBSERV
 
-Socket::Socket(void)  {}
-Socket::~Socket(void) {}
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc++11-compat-deprecated-writable-strings"
+
+struct s_options
+{
+	char	*token;
+	char	*delim;
+};
+
+const char	*g_methods[] = {
+	"GET",
+	"POST",
+	"DELETE",
+	NULL
+};
+
+const struct s_options	g_options[] = {
+	{"Host",            " " },
+	{"Connection",      " " },
+	{"Accept",          "," },
+	{"User-Agent",      ""  },
+	{"Accept-Language", " " },
+	{"Referer",         " " },
+	{"Accept-Encoding", ", "},
+	{NULL, NULL}
+};
+
+#pragma clang diagnostic pop
+
+
+Socket::Socket(void) :
+	_port(0),
+	_serverFd(-1),
+	_addrLen(sizeof(sockaddr_in))
+{
+	this->header = new HttpHeader;
+}
+
+Socket::~Socket(void)
+{
+	if (this->header != nullptr)
+		delete this->header;
+}
 
 Socket::Socket(const short& port) :
 	_port(port),
@@ -30,6 +70,28 @@ Socket::Socket(const short& port) :
 	_addr.sin_addr.s_addr = INADDR_ANY;
 	_addr.sin_port = htons(port);
 	memset(_addr.sin_zero, 0, sizeof(_addr.sin_zero));
+	
+	this->header = new HttpHeader;
+}
+
+Socket::Socket(const Socket &x)
+{
+	*this = x;
+}
+
+Socket&		Socket::operator=(const Socket &x)
+{
+	if (this == &x)
+		return *this;
+	
+	if (this->header != nullptr)
+		delete this->header;
+	_port = x._port;
+	_serverFd = x._serverFd;
+	_addrLen = x._addrLen;
+	header = new HttpHeader(*(x.header));
+	memcpy(&_addr, &x._addr, sizeof(sockaddr_in));
+	return *this;
 }
 
 /** @brief public function */
@@ -39,37 +101,192 @@ int			Socket::getServerFd(void) const { return _serverFd; }
 sockaddr_in	Socket::getAddr(void)     const { return _addr; }
 size_t		Socket::getAddrLen(void)  const { return _addrLen; }
 
-void	Socket::startUp(void)
+void	Socket::startSocket(void)
 {
 	bindStep(_serverFd, _addr);
 	listenStep(_serverFd);
 }
 
-void	Socket::_parse_wrapper(const char* http_header)
+void	Socket::setNonBlock(int & fd)
 {
-	// std::map<std::string, std::string>
-	std::string		head(http_header);
-	std::string		content;
-
-	do
+	if (fcntl(fd, F_SETFL, O_NONBLOCK))
 	{
-		size_t pos = head.find('\n');
-		if (pos == std::string::npos)
-			break ;
-		// head.substr(0, );
-	} while (true);
+		std::cout << "Error: set non block" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 }
 
-// -- in process --
-void	Socket::parse(int skt, const char* http_header)
+/* Read the socket's http request */
+void	Socket::readHttpRequest(int socket_fd)
 {
-	getParsing(skt, http_header);
+	int	ret;
+
+	header->resetBuffer();
+	ret = recv(socket_fd, header->buf, sizeof(header->buf), 0);
+	
+	if (!DEBUG)
+	{
+		std::cout << "++++++++++++++ REQUEST +++++++++++++++" << std::endl;
+		write(STDOUT_FILENO, header->buf, ret); // (?) may be chunked
+		std::cout << "++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
+	}
 }
 
-// TO REMOVE
-void	Socket::parse(int skt, const std::string& path)
+void	Socket::checkHttpHeaderLine(const std::string& __line)
 {
-	getParsing(skt, path);
+	typedef std::vector<std::string>                                vector_type;
+	
+	vector_type					methods;
+	vector_type					opts;
+	vector_type::const_iterator	opt_it;
+	vector_type::const_iterator	method_it;
+	
+	std::string					key = __line;
+	std::string					value = __line;
+	const size_t				pos = __line.find_first_of(": ");
+	
+	
+	if (pos == std::string::npos) // (?) HTTP_REQUEST_ERROR;
+	{
+		// throw HttpHeader::HttpHeaderParsingError();
+		return ;
+	}
+	
+	key.substr(0, pos); // get only the key (eg: "Host" or "User-Agent")
+	value.substr(pos);  // get only the value (eg: "localhost:8080")
+	
+
+	for (size_t i = 0; g_options[i].token; ++i)
+	{
+		// for (size_t j = 0; g_methods[j].token; ++j)
+		// {
+			
+		// }
+		if (CMP_STRINGS(key.data(), g_options[i].token))
+		{
+			header->data[key] = split_string(value, g_options[i].delim);
+		}
+	}
+}
+
+void	Socket::resolveHttpRequest(void)
+{
+	typedef std::vector<std::string>     vector_type;
+	
+	vector_type				buffer = split_string(this->header->buf, "\n");
+	vector_type::iterator	line = buffer.begin();
+
+
+	/* parse first line of request */
+	vector_type				first_line = split_string(*line, " ");
+	if (first_line.size() != 3)
+		throw HttpHeader::HttpBadRequestError();
+	
+	header->request_method = first_line[0];
+	header->path_info = ROOT_PATH + first_line[1];
+	++line;
+
+	/* parse the buffer line by line */
+	for ( ; line != buffer.end(); ++line)
+	{
+		this->checkHttpHeaderLine(*line);
+	}
+
+
+	// print data parsed
+	HttpHeader::value_type::const_iterator	it = header->data.begin();
+	HttpHeader::value_type::const_iterator	ite = header->data.end();
+
+	for ( ; it != ite; ++it)
+	{
+		vector_type					tmp = it->second;
+		vector_type::const_iterator	vec_it = tmp.begin();
+		vector_type::const_iterator	vec_ite = tmp.end();
+	
+		std::cout << it->first << std::endl;
+		for ( ; vec_it != vec_ite; ++vec_it)
+		{
+			std::cout << "    " << *vec_it << std::endl;
+		}
+	}
+}
+
+int		Socket::getStatusCode(void) const
+{
+	return 200;
+}
+
+const char *	Socket::getStatusMessage(int status_code) const
+{
+	if (200 == status_code)
+		return "OK";
+	return "";
+}
+
+size_t		Socket::getContentLength(void) const
+{
+	std::ifstream	ifs(header->path_info, std::ios::binary | std::ios::ate);
+
+	if (ifs.is_open())
+	{
+		size_t	size = ifs.tellg();
+		ifs.close();
+		return size;
+	}
+	return 0; // may want to throw an error or something
+}
+
+std::string	Socket::getFileContent(void)
+{
+	std::string		content;
+	std::ifstream	ifs(header->path_info, std::ios::in);
+
+	std::string		gline;
+	if (ifs.is_open())
+	{
+		do
+		{
+			std::getline(ifs, gline);
+			content += gline;
+			if (ifs.eof())
+				break ;
+			content += "\n";
+		} while (true);
+	}
+	else
+		std::cout << "open file error: for get content" << std::endl;
+	ifs.close();
+	return content;
+}
+
+void		Socket::sendHttpResponse(int socket_fd)
+{
+	std::string			response;
+	const std::string	path = ROOT_PATH + header->path_info;
+	const int			status_code = getStatusCode();
+	const std::string	status_message = getStatusMessage(status_code);
+	const size_t		content_length = getContentLength();
+
+	// header
+	response =  "HTTP/1.1 ";
+	response += std::to_string(status_code) + " ";
+	response += status_message + NEW_LINE;
+
+	response += "Content-Length: " + std::to_string(content_length);
+	response += "\n\n";
+
+	// content
+	response += getFileContent();
+
+	// -- Send --
+	send(socket_fd, response.c_str(), response.length(), 0);
+
+	if (DEBUG)
+	{
+		std::cout << "------------- RESPONSE ---------------" << std::endl;
+		std::cout << response.c_str() << std::endl;
+		std::cout << "--------------------------------------" << std::endl << std::endl;
+	}
 }
 
 /** @brief private function */
@@ -91,76 +308,5 @@ void	Socket::listenStep(const int& serverFd)
 	if (listen(serverFd, 20) < 0)
 		errorExit("listen step");
 }
-
-// -- in process --
-void	Socket::getParsing(int skt, const char* http_header)
-{
-	std::string		content = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
-
-	std::ifstream	ifs(http_header, std::ios::binary | std::ios::ate);
-	if (ifs.is_open())
-	{
-		int	fileSize = ifs.tellg();
-		ifs.close();
-		content += std::to_string(fileSize);
-		content += "\n\n";
-	}
-	else
-		std::cout << "open file error: for found size of file" << std::endl;
-
-	ifs.open(http_header, std::ios::in);
-	std::string	gline;
-	if (ifs.is_open())
-	{
-		do
-		{
-			std::getline(ifs, gline);
-			content += gline;
-			if (ifs.eof() == true)
-				break ;
-			content += "\n";
-		} while (true);
-		send(skt, content.c_str(), content.length(), 0);
-	}
-	else
-		std::cout << "open file error: for get content";
-	ifs.close();
-}
-
-// TO REMOVE
-void	Socket::getParsing(int skt, const std::string& path)
-{
-	std::string		content = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
-
-	std::ifstream	ifs(path, std::ios::binary | std::ios::ate);
-	if (ifs.is_open())
-	{
-		int	fileSize = ifs.tellg();
-		ifs.close();
-		content += std::to_string(fileSize);
-		content += "\n\n";
-	}
-	else
-		std::cout << "open file error: for found size of file" << std::endl;
-
-	ifs.open(path, std::ios::in);
-	std::string	gline;
-	if (ifs.is_open())
-	{
-		do
-		{
-			std::getline(ifs, gline);
-			content += gline;
-			if (ifs.eof() == true)
-				break ;
-			content += "\n";
-		} while (true);
-		send(skt, content.c_str(), content.length(), 0);
-	}
-	else
-		std::cout << "open file error: for get content";
-	ifs.close();
-}
-
 
 _END_NS_WEBSERV

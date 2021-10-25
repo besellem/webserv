@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 00:36:05 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/25 01:21:16 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 11:06:51 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ class WebServer;
 class cgi
 {
 	public:
-		cgi(const Server *, const t_location *, const std::string &, const std::string &);
+		cgi(const HttpHeader &);
 		~cgi();
 		
 		char**			getEnv() const;
@@ -34,7 +34,7 @@ class cgi
 		cgi();
 		cgi(const cgi &);
 		cgi& 			operator=(const cgi &);
-		void			setEnv();
+		void			setEnv(const HttpHeader &head);
 		
 	public:
 		class CgiError : public std::exception
@@ -46,10 +46,6 @@ class cgi
 		
 	private:
 		char 				**_env;
-		const Server		*_server;
-		const t_location	*_location;
-		std::string			_fileName; // ou fd ?
-		std::string			_method;
 		
 };
 

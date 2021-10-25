@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/25 01:47:20 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 11:06:13 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,8 @@ const char*	cgi::CgiError::what() const throw() {
 	return "CGI Error";
 }
 
-cgi::cgi(const Server *server, const t_location *loc, const std::string &file, const std::string &method) :
-_server(server), _location(loc), _fileName(file), _method(method) {
-    this->setEnv();
+cgi::cgi(const HttpHeader &head) {
+    this->setEnv(head);
 }
 
 cgi::~cgi() {
@@ -48,18 +47,18 @@ char**	cgi::getEnv() const {
 CGI Environment variables contain data about the transaction
 between the client and the server. */
 
-void cgi::setEnv()
+void cgi::setEnv(const HttpHeader &head)
 {
     std::map<std::string, std::string>  env;
     
     env["SERVER_SOFTWARE"] = "HTTP/1.1";
-    env["SERVER_NAME"] = this->_server->name()[0];
+    env["SERVER_NAME"] = "";
     env["GATEWAY_INTERFACE"] = "CGI/1.1";
 
     env["SERVER_PROTOCOL"] = "webserv/0.0";
-    env["SERVER_PORT"] = std::to_string(this->_server->port());
-    env["REQUEST_METHOD"] = this->_method;
-    env["PATH_INFO"] = this->_location->cgi[0];
+    env["SERVER_PORT"] = "";
+    env["REQUEST_METHOD"] = "";
+    env["PATH_INFO"] = "";
     env["SCRIPT_NAME"] = "";
     env["QUERY_STRING"] = "";
     env["REMOTE_HOST"] = "";
