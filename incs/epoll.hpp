@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 14:27:23 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/24 19:08:18 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/25 15:17:09 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,25 +23,32 @@ class Epoll {
 		explicit Epoll(Socket const & sock);
 		~Epoll(void);
 
-		void	updateEvents(int &);
-		void	handleAccept(int &);
-		void	serverLoop(int const & waitMs);
+		void	startEpoll(void);
+
+		void	addEvents(int const &);
+		void	deleteEvents(int const &);
+
+		void	clientConnect(int &);
+		void	clientDisconnect(int const &);
+
+		void	readCase(struct kevent &);
+		void	eofCase(struct kevent &);
+
+		void	serverLoop(void);
 
 	private:
 		Epoll(void);
 
 		void	errorExit(const std::string &) const;
 
-	public:
-		static short const kReadEvent;
-		static short const kWriteEvent;
-
 	private:
-		Socket			_sock;
-		int				_epollFd;
+		Socket				_sock;
+		int					_epollFd;
 
-		struct kevent	_chlist[1]; // listen event
-		struct kevent	_evlist[1]; // tigger event
+		static const int	maxEvent = 32; // why 32? IDK
+
+		struct kevent		_chlist[1]; // listen event
+		struct kevent		_evlist[maxEvent]; // tigger event
 };
 
 _END_NS_WEBSERV

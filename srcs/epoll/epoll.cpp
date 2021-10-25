@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 13:51:11 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/25 15:27:46 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,75 +14,109 @@
 
 _BEGIN_NS_WEBSERV
 
-/** @brief static val */
-
-short const	Epoll::kReadEvent = 1;
-short const	Epoll::kWriteEvent = 2;
-
 /** @brief public function */
 
 Epoll::Epoll(void) : _sock(0) {}
 Epoll::~Epoll(void) {}
 
-Epoll::Epoll(Socket const & sock) : _sock(sock) {
-	// _epollFd = kqueue();
+Epoll::Epoll(Socket const & sock) :
+	_sock(sock),
+	_epollFd(-1) {}
+
+void	Epoll::startEpoll(void) {
 	_epollFd = kqueue();
 	if (_epollFd < 0)
 		errorExit("epoll create");
+	
+	int sockFd = _sock.getServerFd();
+	addEvents(sockFd);
+
+	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
+	if (kevt < 0)
+		errorExit("epoll start failed!");
 }
 
-void	Epoll::updateEvents(int & sockFd) {
-	EV_SET(_chlist, sockFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+void	Epoll::addEvents(int const & sockFd) {
+	EV_SET(_chlist, sockFd, EVFILT_READ, EV_ADD, 0, 0, 0);
 }
 
-void	Epoll::handleAccept(int & newSocket) {
+void	Epoll::deleteEvents(int const & sockFd) {
+	EV_SET(_chlist, sockFd, EVFILT_READ, EV_DELETE, 0, 0, 0);
+}
+
+void	Epoll::clientConnect(int & fd) {
 	int sockFd = _sock.getServerFd();
 	sockaddr_in clientAddr;
 	socklen_t clientAddrLen = sizeof(clientAddr);
-	newSocket = accept(sockFd, (sockaddr *)&clientAddr, &clientAddrLen);
+	fd = accept(sockFd, (sockaddr *)&clientAddr, &clientAddrLen);
 
-	if (newSocket < 0)
+	if (fd < 0)
 		errorExit("accept failed");
+
+	_sock.setNonBlock(fd);
+	addEvents(fd);
+
+	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
+	if (kevt < 0)
+		errorExit("kevent failed in clientConnect");
 
 	// debug msg
 	std::cout << "Client Connected!: form: [" S_GREEN << inet_ntoa(clientAddr.sin_addr) << S_NONE "]:[" S_GREEN << ntohs(clientAddr.sin_port) << S_NONE "]" << std::endl;
 }
 
-void	Epoll::serverLoop(int const & waitMs) {
-	(void)waitMs;
+void	Epoll::clientDisconnect(int const & fd) {
+	deleteEvents(fd);
+	
+	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
+	if (kevt < 0)
+		errorExit("kevent failed in clientConnect");
 
-	const int kMaxEvents = 20;
-	int kevt = kevent(_epollFd, _chlist, 1, _evlist, kMaxEvents, NULL);
+	close(fd);
+}
+
+void	Epoll::readCase(struct kevent & event) {
+	_sock.readHttpRequest(event.ident);			
+	try {
+		_sock.resolveHttpRequest();
+	}
+	catch (std::exception &e) {
+		EXCEPT_WARNING;
+		event.flags |= EV_EOF;
+		return ;
+	}
+	_sock.sendHttpResponse(event.ident);
+	event.flags |= EV_EOF;
+}
+
+void	Epoll::eofCase(struct kevent & event) {
+	clientDisconnect(event.ident);
+}
+
+void	Epoll::serverLoop(void) {
+	int kevt = kevent(_epollFd, NULL, 0, _evlist, maxEvent, NULL);
+	if (kevt < 0)
+		errorExit("kevent failed in loop");
 	
 	// debug msg
 	std::cout << "Num of request: [" S_GREEN << kevt << S_NONE "]" << std::endl;
 
-	if (_evlist[0].flags & EV_EOF)
-			errorExit("EV_EOF");
-
 	for (int i = 0; i < kevt; i++) {
-
-		int sockFd = _evlist[i].ident;
+		struct kevent currentEvt = _evlist[i];
+		int currentSocket = -1;
+		int currentFd = currentEvt.ident;
 	
-		if (_evlist[i].flags & EV_ERROR)
-			errorExit("EV_ERROR");
-		if (sockFd == _sock.getServerFd()) {
-
-			int newSocket = -1;
-			handleAccept(newSocket);
-			_sock.readHttpRequest(newSocket);
-			
-			try
-			{
-				_sock.resolveHttpRequest();
+		if (currentFd == _sock.getServerFd()) {
+			clientConnect(currentSocket);
+		}
+		else {
+			if (currentEvt.flags & EVFILT_READ) {
+				std::cout << "READ CASE\n"; 
+				readCase(currentEvt);
 			}
-			catch (std::exception &e)
-			{
-				EXCEPT_WARNING;
-				continue ;
+			if (currentEvt.flags & EV_EOF) {
+				std::cout << "EOF CASE\n";
+				eofCase(currentEvt);
 			}
-			_sock.sendHttpResponse(newSocket);
-			close(newSocket);
 		}
 	}
 }

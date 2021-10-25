@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 13:51:33 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/25 14:36:04 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,15 @@ Socket::Socket(const short& port) :
 	_addr.sin_addr.s_addr = INADDR_ANY;
 	_addr.sin_port = htons(port);
 	memset(_addr.sin_zero, 0, sizeof(_addr.sin_zero));
+
+	int optval = 1;
+	if ((setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int))) == -1) // can rebind
+	{
+		close(_serverFd);
+		errorExit("set opt");
+	}
+
+	setNonBlock(_serverFd); // set non-blocking
 }
 
 Socket::Socket(const Socket &x)
@@ -294,7 +303,7 @@ void	Socket::bindStep(const int& serverFd, const sockaddr_in& addr)
 
 void	Socket::listenStep(const int& serverFd)
 {
-	if (listen(serverFd, 20) < 0)
+	if (listen(serverFd, SOMAXCONN) < 0)
 		errorExit("listen step");
 }
 

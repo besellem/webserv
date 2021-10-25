@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 13:51:06 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/25 14:32:47 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,9 @@ _BEGIN_NS_WEBSERV
 
 class HttpHeader
 {
-
 	public:
-		typedef	void*                                                pointer;
-		typedef std::map<std::string, std::vector<std::string> >     value_type;
+		typedef	void*												pointer;
+		typedef std::map<std::string, std::vector<std::string> >	value_type;
 	
 	public:
 		HttpHeader(void) :
@@ -35,9 +34,7 @@ class HttpHeader
 
 		HttpHeader(const HttpHeader &x) { *this = x; }
 
-		~HttpHeader() {
-			// std::cout << "destructor ???\n";
-		}
+		~HttpHeader() {}
 
 		HttpHeader&	operator=(const HttpHeader &x)
 		{
@@ -124,7 +121,6 @@ class Socket {
 		sockaddr_in	_addr;
 		size_t		_addrLen;
 		HttpHeader	header;
-	
 	
 	friend class HttpHeader;
 	

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   defs.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/24 17:35:10 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/25 14:35:59 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,10 @@
 /* Http response new lines (may change based on the sytem -- to check) */
 # define NEW_LINE "\r\n"
 
+/* Listen Backlog */
+#ifndef SOMAXCONN
+# define SOMAXCONN 128
+#endif
 
 /*
 ** -- Includes --
