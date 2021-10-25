@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 17:48:08 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/25 21:22:10 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,13 +31,11 @@ void	Epoll::startEpoll(void) {
 	int sockFd = _sock.getServerFd();
 	addEvents(sockFd);
 
-	std::cout << "inside getServerFd: " << sockFd << std::endl;
-
 	// test non block
 	__unused struct timespec timeout = {0, 0};
 
 	// int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL)
-	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
+	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, &timeout);
 	if (kevt < 0)
 		errorExit("epoll start failed!");
 }
@@ -66,7 +64,7 @@ void	Epoll::clientConnect(int & fd) {
 	__unused struct timespec timeout = {0, 0};
 
 	// int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
-	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
+	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, &timeout);
 	if (kevt < 0)
 		errorExit("kevent failed in clientConnect");
 
@@ -82,7 +80,7 @@ void	Epoll::clientDisconnect(int const & fd) {
 	__unused struct timespec timeout = {0, 0};
 
 	// int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
-	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
+	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, &timeout);
 	if (kevt < 0)
 		errorExit("kevent failed in clientConnect");
 
@@ -124,9 +122,7 @@ void	Epoll::serverLoop(void) {
 		__unused struct timespec timeout = {0, 0};
 
 		// int kevt = kevent(_epollFd, NULL, 0, _evlist, maxEvent, NULL); // NULL in last param means block indefinitely.
-		LOG;
 		int kevt = kevent(_epollFd, NULL, 0, _evlist, maxEvent, NULL); // so if set a 0 time, means, kevent return immediately
-		LOG;
 		if (kevt < 0)
 			errorExit("kevent failed in loop");
 

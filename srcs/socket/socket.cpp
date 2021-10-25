@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 17:56:42 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/25 21:21:02 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,6 @@ const struct s_options	g_options[] = {
 
 
 Socket::Socket(void) :
-	// _server_block(nullptr),
 	_port(0),
 	_serverFd(SYSCALL_ERR),
 	_addrLen(sizeof(sockaddr_in)),
@@ -56,11 +55,9 @@ Socket::Socket(void) :
 Socket::~Socket(void)
 {}
 
-// Socket::Socket(Server *serv) :
-Socket::Socket(short const & port) :
-	// _server_block(serv),
-	// _port(serv->port()),
-	_port(port),
+Socket::Socket(const Server& serv) :
+	_server_block(serv),
+	_port(serv.port()),
 	_addrLen(sizeof(sockaddr_in)),
 	header()
 {
@@ -69,7 +66,7 @@ Socket::Socket(short const & port) :
 		errorExit("socket init");
 	_addr.sin_family = AF_INET;
 	_addr.sin_addr.s_addr = INADDR_ANY;
-	_addr.sin_port = _port;
+	_addr.sin_port = htons(_port);
 	memset(_addr.sin_zero, 0, sizeof(_addr.sin_zero));
 
 	int	optval = 1;
@@ -88,7 +85,7 @@ Socket&		Socket::operator=(const Socket &x)
 {
 	if (this == &x)
 		return *this;
-	// _server_block = x._server_block;
+	_server_block = x._server_block;
 	_port = x._port;
 	_serverFd = x._serverFd;
 	_addrLen = x._addrLen;
