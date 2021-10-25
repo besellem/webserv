@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 12:20:57 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/25 12:29:25 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 13:48:08 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ int	main(int ac, char **av)
  		}
  		catch(const std::exception& e)
  		{
- 			std::cerr << e.what() << '\n';
+			EXCEPT_WARNING;
  		}
 
  		// _sock.parse(new_socket, header);	// in process

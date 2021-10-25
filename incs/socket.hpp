@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 12:12:45 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 14:17:24 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,7 @@ class Socket {
 		size_t		getContentLength(void) const;
 		std::string	getFileContent(void);
 		void		sendHttpResponse(int);
+		HttpHeader&	getHeader() const { return *this->header; }
 
 		void		setNonBlock(int & fd);
 		int			socketAccept(void);

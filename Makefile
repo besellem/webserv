@@ -6,7 +6,7 @@
 #    By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/25 12:18:36 by adbenoit         ###   ########.fr        #
+#    Updated: 2021/10/25 13:41:14 by adbenoit         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -47,7 +47,8 @@ SUB_SRC			:= parser.cpp \
 SRC				+= $(addprefix parser/, $(SUB_SRC))
 SUB_SRC			:= cgi.cpp 
 SRC				+= $(addprefix cgi/, $(SUB_SRC))
-SUB_SRC			:= socket.cpp
+SUB_SRC			:= socket.cpp \
+					accept.cpp
 SRC				+= $(addprefix socket/, $(SUB_SRC))
 SUB_SRC			:= utils.cpp
 SRC				+= $(addprefix utils/, $(SUB_SRC))

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/25 12:11:37 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 14:17:41 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ void cgi::setEnv()
     env["PATH_INFO"] = "";
     env["SCRIPT_NAME"] = "";
     env["QUERY_STRING"] = "";
-    env["REMOTE_HOST"] = "";
+    env["REMOTE_HOST"] = this->_socket.getHeader().data["Host"][0];
     env["REMOTE_ADDR"] = "";
     env["AUTH_TYPE"] = "";
     env["REMOTE_USER"] = "";
@@ -70,9 +70,9 @@ void cgi::setEnv()
     env["CONTENT_TYPE"] = "";
     env["CONTENT_LENGTH"] = "";
     
-    env["HTTP_ACCEPT"] = "*/*";
-    env["HTTP_ACCEPT_LANGUAGE"] = "en-US,en;q=0.5";
-    env["HTTP_USER_AGENT"] = "Safari/12.1.2";
+    env["HTTP_ACCEPT"] = this->_socket.getHeader().data["Accept"][0];
+    env["HTTP_ACCEPT_LANGUAGE"] = this->_socket.getHeader().data["Accept-Language"][0];;
+    env["HTTP_USER_AGENT"] = this->_socket.getHeader().data["User-Agent"][0];
     env["HTTP_COOKIE"] = "";
     env["HTTP_REFERER"] = "";
     
@@ -89,6 +89,7 @@ void cgi::setEnv()
         this->_env[i] = strdup(str.c_str());
         if (!this->_env[i])
             throw std::bad_alloc();
+        std::cout << this->_env[i] << std::endl;
     }
     this->_env[i] = 0;
 }
@@ -130,7 +131,7 @@ std::string cgi::execute(const std::string &fileName)
     }
     waitpid(-1, &status, 0);
     // if (status != 0)
-    //     throw CgiError();
+        // throw CgiError();
     close(fd[1]);
     while (read(fd[0], buffer, sizeof(buffer)) > 0)
         content += buffer;
