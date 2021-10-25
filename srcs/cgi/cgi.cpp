@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/25 14:17:41 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 16:56:46 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,20 +59,20 @@ void cgi::setEnv()
     env["SERVER_PROTOCOL"] = "webserv/0.0";
     env["SERVER_PORT"] = std::to_string(this->_socket.getPort());
     env["REQUEST_METHOD"] = "";
-    env["PATH_INFO"] = "";
-    env["SCRIPT_NAME"] = "";
+    env["PATH_INFO"] = "test.php";
+    env["SCRIPT_NAME"] = "test.php";
     env["QUERY_STRING"] = "";
-    env["REMOTE_HOST"] = this->_socket.getHeader().data["Host"][0];
+    env["REMOTE_HOST"] = "127.0.0.1";
     env["REMOTE_ADDR"] = "";
     env["AUTH_TYPE"] = "";
     env["REMOTE_USER"] = "";
     env["REMOTE_IDENT"] = "";
     env["CONTENT_TYPE"] = "";
-    env["CONTENT_LENGTH"] = "";
+    env["CONTENT_LENGTH"] = "10";
     
-    env["HTTP_ACCEPT"] = this->_socket.getHeader().data["Accept"][0];
-    env["HTTP_ACCEPT_LANGUAGE"] = this->_socket.getHeader().data["Accept-Language"][0];;
-    env["HTTP_USER_AGENT"] = this->_socket.getHeader().data["User-Agent"][0];
+    env["HTTP_ACCEPT"] = "*/*";
+    env["HTTP_ACCEPT_LANGUAGE"] = "";
+    env["HTTP_USER_AGENT"] = "";
     env["HTTP_COOKIE"] = "";
     env["HTTP_REFERER"] = "";
     
@@ -94,14 +94,6 @@ void cgi::setEnv()
     this->_env[i] = 0;
 }
 
-std::string addHeader(const std::string& content)
-{
-    std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
-    header += std::to_string(content.size());
-    header += "\n\n";
-    return header + content;
-}
-
 /* Executes the CGI program on a file.
 Returns the output in a string */
 
@@ -117,13 +109,17 @@ std::string cgi::execute(const std::string &fileName)
         throw CgiError();
     char *arg[] = {strdup(this->_program.c_str()),
             strdup(fileName.c_str()), NULL};
+    std::cout << "arg: " << arg[0] << ", " << arg[1] << std::endl;
     if ((pid = fork()) == -1)
         throw CgiError();
     else if (pid == 0)
     {
         close(fd[0]);
         if (dup2(fd[1], STDOUT_FILENO) == -1)
+        {
+            close(fd[1]);
             throw CgiError();
+        }
         close(fd[1]);
         if (execve(arg[0], arg, this->_env)== -1)
             throw CgiError();
@@ -139,8 +135,7 @@ std::string cgi::execute(const std::string &fileName)
     free(arg[0]);
     free(arg[1]);
     std::cout << "content: \n" << content << std::endl;
-
-    return addHeader(content);
+    return content;
 }
 
 _END_NS_WEBSERV

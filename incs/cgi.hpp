@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 00:36:05 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/25 12:13:25 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 16:57:56 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 # include "socket.hpp"
 
 _BEGIN_NS_WEBSERV
+
+class Socket;
 
 class cgi
 {

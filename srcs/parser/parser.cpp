@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:53:23 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/25 11:47:22 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 16:49:46 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,58 +14,13 @@
 
 _BEGIN_NS_WEBSERV
 
-/* Returns 1 if the string is numeric.
-Otherwise, returns 0. */
-
-bool	ft_isNumeric(const std::string &str)
-{
-	for (size_t i = 0; i < str.size(); i++)
-		if (std::isdigit(str[i]) == 0)
-			return 0;
-	return 1;
-}
-
-/* Cuts str from delimiter.
-Returns the new string. */
-
-std::string    ft_strcut(const std::string& str, char delimiter)
-{
-	size_t pos = str.find(delimiter);
-	if (pos == std::string::npos)
-		return str;
-	return str.substr(0, pos);
-}
-
-/* Cuts vector from delimiter.
-Returns the new vector. */
-
-Server::tokens_type	ft_vectorcut(const std::vector<std::string>& vect, char delimiter)
-{
-	size_t pos = 0;
-	std::vector<std::string> newVect(vect);
-	std::vector<std::string>::const_iterator it;
-
-	for(it = newVect.begin(); it != newVect.end(); it++, pos++)
-	{
-		if (*it != ft_strcut(*it, delimiter))
-		{
-			newVect[pos] = ft_strcut(*it, delimiter);
-			if (!newVect[pos].empty())
-				it++;
-			break ;
-		}
-	}
-	newVect.erase(it, newVect.end());
-	return newVect;
-}
-
 /* Breaks a string into a sequence of zero or
 more nonempty tokens delimiter by tabulation or space
 Returns the vector of tokens. */
 
 Server::tokens_type    getTokens(std::string line)
 {
-	std::vector<std::string> tokens;
+	Server::tokens_type tokens;
 
 	size_t pos = line.find(' ');
 	pos = (line.find('\t', pos) != std::string::npos) ? line.find('\t', pos) : pos;
@@ -114,8 +69,7 @@ void	parse_line(ServerGenerator& servers, std::string line)
 void	WebServer::parse(const std::string config_file)
 {
 	std::cout << "=== Parsing ===\n";
-	int pos = config_file.rfind(".conf");
-	if (pos != (int)config_file.size() - 5)
+	if (getExtension(config_file) != ".conf")
 		throw ParsingError();
 	std::fstream os;
 	std::string line;

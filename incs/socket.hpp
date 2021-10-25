@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 14:17:24 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 17:04:31 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,16 +29,15 @@ class HttpHeader
 		HttpHeader(void) :
 			data(),
 			request_method(),
-			path_info() { resetBuffer(); }
+			path_info()
+		{ this->resetBuffer(); }
 
-		HttpHeader(const HttpHeader &x) { *this = x; }
+		HttpHeader(const HttpHeader &x)
+		{ *this = x; }
 
-		~HttpHeader() {
-			std::cout << "destructor ???\n";
-		}
+		~HttpHeader()
+		{}
 
-		pointer		resetBuffer(void) { return memset(buf, 0, sizeof(buf)); }
-		
 		HttpHeader&	operator=(const HttpHeader &x)
 		{
 			if (this == &x)
@@ -49,7 +48,10 @@ class HttpHeader
 			memcpy(buf, x.buf, sizeof(buf));
 			return *this;
 		}
-	
+
+		pointer		resetBuffer(void)
+		{ return std::memset(buf, 0, sizeof(buf)); }
+		
 	
 	public:
 		class HttpHeaderParsingError : public std::exception
@@ -75,7 +77,8 @@ class HttpHeader
 
 };
 
-class Socket {
+class Socket
+{
 	public:
 	/** @brief constructor / destructor */
 
@@ -103,7 +106,7 @@ class Socket {
 		size_t		getContentLength(void) const;
 		std::string	getFileContent(void);
 		void		sendHttpResponse(int);
-		HttpHeader&	getHeader() const { return *this->header; }
+		HttpHeader&	getHeader() { return this->header; }
 
 		void		setNonBlock(int & fd);
 		int			socketAccept(void);
@@ -121,7 +124,7 @@ class Socket {
 		int			_serverFd;
 		sockaddr_in	_addr;
 		size_t		_addrLen;
-		HttpHeader	*header;
+		HttpHeader	header;
 	
 	
 	friend class HttpHeader;

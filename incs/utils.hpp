@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 17:49:10 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/22 17:50:08 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/25 16:51:22 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,10 @@
 
 _BEGIN_NS_WEBSERV
 
-
 std::vector<std::string>	split_string(const std::string& s, const std::string& delim);
-
+std::string	                getExtension(const std::string& fileName);
+std::string                 ft_strcut(const std::string& str, char delimiter);
+std::vector<std::string>	ft_vectorcut(const std::vector<std::string>& vect, char delimiter);
 
 _END_NS_WEBSERV
 

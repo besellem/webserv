@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 12:20:57 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/25 13:48:08 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 15:13:56 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ int	main(int ac, char **av)
  		try
  		{
  			webserv::cgi newCgi(_sock, webServ.getServer(0).locations(0).cgi[0]);
- 			std::string content = newCgi.execute("test.php");
+ 			std::string content = newCgi.execute("test.py");
  			send(new_socket, content.c_str(), content.length(), 0);
 
  		}
