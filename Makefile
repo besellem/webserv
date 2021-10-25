@@ -6,7 +6,7 @@
 #    By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/24 22:10:30 by adbenoit         ###   ########.fr        #
+#    Updated: 2021/10/25 11:51:01 by adbenoit         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,27 +27,32 @@ OBJ_DIR 		:= $(BUILD)/obj
 SUB_DIR			:= epoll \
 				   socket \
 				   parser \
-				   cgi
+				   cgi \
+				   utils
 DIRS			:= $(OBJ_DIR) $(addprefix $(OBJ_DIR)/, $(SUB_DIR))
 
 # FILES
 
 NAME			:= webserv
-SRC				:= main.cpp
-SUB_SRC			:= parser.cpp \
-				   Server.cpp \
-				   ServerGenerator.cpp
-SRC				+= $(addprefix parser/, $(SUB_SRC))
-SUB_SRC			:= cgi.cpp
-SRC				+= $(addprefix cgi/, $(SUB_SRC))
+SRC				:= main.cpp \
+				   webserv.cpp
 ## all sub file add here: (check exemple)
 # SUB_SRC			:= exemple.cpp
 # SUB_SRC			:= epoll.cpp
 # SRC				+= $(addprefix exemple/, $(SUB_SRC))
 # SRC				+= $(addprefix epoll/, $(SUB_SRC))
-SUB_SRC			:= socket.cpp \
-				   accept.cpp
+SUB_SRC			:= parser.cpp \
+				   Server.cpp \
+				   ServerGenerator.cpp
+SRC				+= $(addprefix parser/, $(SUB_SRC))
+SUB_SRC			:= cgi.cpp 
+SRC				+= $(addprefix cgi/, $(SUB_SRC))
+SUB_SRC			:= socket.cpp
 SRC				+= $(addprefix socket/, $(SUB_SRC))
+SUB_SRC			:= utils.cpp
+SRC				+= $(addprefix utils/, $(SUB_SRC))
+SUB_SRC			:= epoll.cpp
+SRC				+= $(addprefix epoll/, $(SUB_SRC))
 OBJ				:= $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 
 # COLORS
@@ -85,7 +90,6 @@ re: fclean all
 debug:
 	@echo SRC = $(SRC)
 	@echo OBJ = $(OBJ)
-	@echo DIRS = $(DIRS)
 
 .PHONY: all clean fclean re debug
 

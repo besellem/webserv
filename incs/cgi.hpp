@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 00:36:05 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/25 11:06:51 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 11:48:45 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,10 @@
 
 # include "webserv.hpp"
 
-
 _BEGIN_NS_WEBSERV
 
 class WebServer;
+class HttpHeader;
 
 class cgi
 {

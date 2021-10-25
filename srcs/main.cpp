@@ -3,67 +3,30 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/25 01:16:10 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/24 17:36:18 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
-#include <stdio.h>
+// #include <stdio.h>
 
-int	main(int ac, char **av)
+int	main(int ac, char **av, __unused char **env)
 {
-	webserv::WebServer	webServ;
-	std::string			conf = (ac > 1) ? av[1] : DEFAULT_CONFIG_FILE;
+	_INLINE_NAMESPACE::WebServer	serv;
 	
 	try
 	{
-		webServ.parse(conf);
+		serv.parse((ac > 1) ? av[1] : DEFAULT_CONFIG_FILE);
 	}
-	catch(const std::exception& e)
+	catch (std::exception &e)
 	{
-		std::cerr << e.what() << '\n';
+		return (EXCEPT_ERROR), EXIT_FAILURE;
 	}
+
+	serv.createServers();
 	
-	const int					port = webServ.servers(0).port();
-	const std::string			const_path = "./www/tmp.html";
-	webserv::Socket		_sock(port);
-
-	int			new_socket;
-	ssize_t		valread;
-
-	_sock.startUp();
-	while (true)
-	{
-		printf("+++++++ Waiting for new connection ++++++++\n\n");
-		int			svrfd = _sock.getServerFd();
-		sockaddr_in	addr = _sock.getAddr();
-		size_t		len = _sock.getAddrLen();
-
-		new_socket = _INLINE_NAMESPACE::socketAccept(svrfd, (struct sockaddr *)&addr, (socklen_t*)&len);
-		
-		char	header[30000] = {0};
-		valread = recv(new_socket, header, 30000, 0);
-		printf("%s\n", header);
-		try
-		{
-			webserv::cgi newCgi(&webServ.servers(0), &webServ.servers(0).locations(0), "test.php", "GET");
-			std::string content = newCgi.execute();
-			send(new_socket, content.c_str(), content.length(), 0);
-
-		}
-		catch(const std::exception& e)
-		{
-			std::cerr << e.what() << '\n';
-		}
-
-		// _sock.parse(new_socket, header);	// in process
-		// _sock.parse(new_socket, const_path);		// TO REMOVE
-		// printf("------------------Hello message sent-------------------\n");
-		close(new_socket);
-	}
-	
-	return 0;
+	return EXIT_SUCCESS;
 }
