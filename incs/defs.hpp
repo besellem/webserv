@@ -6,14 +6,14 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/25 16:31:09 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/25 19:24:51 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef DEFS_HPP
 # define DEFS_HPP
 
-# define DEBUG     true // print some logs
+# define DEBUG     false // print some logs
 
 /** @brief Anscii code */
 # define S_NONE    "\033[0m"
