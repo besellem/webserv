@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 12:33:08 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/25 15:36:00 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,14 @@ Socket::Socket(const short& port) :
 	_addr.sin_addr.s_addr = INADDR_ANY;
 	_addr.sin_port = htons(port);
 	memset(_addr.sin_zero, 0, sizeof(_addr.sin_zero));
+
+	int	optval = 1;
+	if ((setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int))) == -1) // can rebind
+	{
+		close(_serverFd);
+		errorExit("set opt");
+	}
+	setNonBlock(_serverFd); // set non-blocking
 }
 
 Socket::Socket(const Socket &x)
@@ -113,7 +121,7 @@ void	Socket::readHttpRequest(int socket_fd)
 	header.resetBuffer();
 	ret = recv(socket_fd, header.buf, sizeof(header.buf), 0);
 	
-	if (!DEBUG)
+	if (DEBUG)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++" << std::endl;
 		write(STDOUT_FILENO, header.buf, ret); // (?) may be chunked
@@ -122,9 +130,7 @@ void	Socket::readHttpRequest(int socket_fd)
 }
 
 void	Socket::checkHttpHeaderLine(const std::string& __line)
-{
-	typedef std::vector<std::string>                                vector_type;
-	
+{	
 	vector_type					methods;
 	vector_type					opts;
 	vector_type::const_iterator	opt_it;
@@ -151,84 +157,64 @@ void	Socket::checkHttpHeaderLine(const std::string& __line)
 		// {
 			
 		// }
-		if (CMP_STRINGS(key.data(), g_options[i].token))
+		if (CMP_STRINGS(key.c_str(), g_options[i].token))
 		{
 			header.data[key] = split_string(value, g_options[i].delim);
 		}
 	}
 }
 
+std::string	Socket::constructPath(void) const
+{
+	// const std::string	path = this->header.path;
+	// std::string			parent_dir = path.substr(0, path.find_last_of("/"));
+	// std::string			real;
+
+	
+	return ROOT_PATH + this->header.path;
+}
+
 void	Socket::resolveHttpRequest(void)
 {
-	typedef std::vector<std::string>     vector_type;
-	
 	vector_type				buffer = split_string(this->header.buf, "\n");
 	vector_type::iterator	line = buffer.begin();
 
-
-	/* parse first line of request */
+	/*
+	** Parse first line of request. Must be formatted like so:
+	**   GET /index.html HTTP/1.1
+	*/
 	vector_type				first_line = split_string(*line, " ");
 	if (first_line.size() != 3)
-		throw HttpHeader::HttpBadRequestError();
-	
+		throw HttpHeader::HttpBadRequestError();	
 	header.request_method = first_line[0];
-	header.path_info = ROOT_PATH + first_line[1];
+	header.path = first_line[1];
+	header.path_constructed = constructPath();
 	++line;
 
-	/* parse the buffer line by line */
+	/* Parse the remaining buffer line by line */
 	for ( ; line != buffer.end(); ++line)
 	{
 		this->checkHttpHeaderLine(*line);
 	}
-
-
-	// print data parsed
-	HttpHeader::value_type::const_iterator	it = header.data.begin();
-	HttpHeader::value_type::const_iterator	ite = header.data.end();
-
-	for ( ; it != ite; ++it)
-	{
-		vector_type					tmp = it->second;
-		vector_type::const_iterator	vec_it = tmp.begin();
-		vector_type::const_iterator	vec_ite = tmp.end();
-	
-		std::cout << it->first << std::endl;
-		for ( ; vec_it != vec_ite; ++vec_it)
-		{
-			std::cout << S_RED "    " << *vec_it << S_NONE << std::endl;
-		}
-	}
 }
 
-int		Socket::getStatusCode(void) const
+ssize_t		Socket::getFileLength(const std::string& path)
 {
-	return 200;
-}
-
-const char *	Socket::getStatusMessage(int status_code) const
-{
-	if (200 == status_code)
-		return "OK";
-	return "";
-}
-
-size_t		Socket::getContentLength(void) const
-{
-	std::ifstream	ifs(header.path_info, std::ios::binary | std::ios::ate);
+	std::ifstream	ifs(path, std::ios::binary | std::ios::ate);
 
 	if (ifs.is_open())
 	{
-		size_t	size = ifs.tellg();
+		ssize_t	size = ifs.tellg();
 		ifs.close();
 		return size;
 	}
-	return 0; // may want to throw an error or something
+	return SYSCALL_ERR; // may want to throw an error or something
 }
 
-std::string	Socket::getFileContent(void)
+std::string	Socket::getFileContent(const std::string& path)
 {
 	std::string		content;
-	std::ifstream	ifs(header.path_info, std::ios::in);
+	std::ifstream	ifs(path, std::ios::in);
 
 	std::string		gline;
 	if (ifs.is_open())
@@ -248,26 +234,35 @@ std::string	Socket::getFileContent(void)
 	return content;
 }
 
+Socket::pair_type	Socket::getStatus(void) const
+{
+	return std::make_pair<int, std::string>(200, "OK");
+}
+
+// new one - in process
+Socket::pair_type	Socket::getStatus(__unused const std::string& path) const
+{
+	return std::make_pair<int, std::string>(200, "OK");
+}
+
 void		Socket::sendHttpResponse(int socket_fd)
 {
 	std::string			response;
-	const std::string	path = ROOT_PATH + header.path_info;
-	const int			status_code = getStatusCode();
-	const std::string	status_message = getStatusMessage(status_code);
-	const size_t		content_length = getContentLength();
+	pair_type			status = getStatus(header.path_constructed);
+	const ssize_t		content_length = getFileLength(header.path_constructed);
 
-	// header
-	response =  "HTTP/1.1 ";
-	response += std::to_string(status_code) + " ";
-	response += status_message + NEW_LINE;
+	// Header
+	response =  HTTP_PROTOCOL_VERSION " ";
+	response += std::to_string(status.first) + " ";
+	response += status.second + NEW_LINE;
 
 	response += "Content-Length: " + std::to_string(content_length);
 	response += "\n\n";
 
-	// content
-	response += getFileContent();
+	// Content
+	response += getFileContent(header.path_constructed);
 
-	// -- Send --
+	// -- Send to client --
 	send(socket_fd, response.c_str(), response.length(), 0);
 
 	if (DEBUG)

@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 12:29:04 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/25 15:27:01 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,8 @@ class HttpHeader
 		HttpHeader(void) :
 			data(),
 			request_method(),
-			path_info()
+			path(),
+			path_constructed()
 		{ this->resetBuffer(); }
 
 		HttpHeader(const HttpHeader &x)
@@ -45,7 +46,8 @@ class HttpHeader
 				return *this;
 			data = x.data;
 			request_method = x.request_method;
-			path_info = x.path_info;
+			path = x.path;
+			path_constructed = x.path_constructed;
 			memcpy(buf, x.buf, sizeof(buf));
 			return *this;
 		}
@@ -70,15 +72,24 @@ class HttpHeader
 		};
 
 
-	public: // TO REMOVE
+	private:
 		value_type		data;
 		std::string		request_method;
-		std::string		path_info;
+		std::string		path;
+		std::string		path_constructed;
 		char			buf[BUFSIZ];
+
+	friend class Socket;
 
 };
 
-class Socket {
+class Socket
+{
+
+	public:
+		typedef std::vector<std::string>                       vector_type;
+		typedef std::pair<int, std::string>                    pair_type;
+
 	public:
 	/** @brief constructor / destructor */
 
@@ -98,25 +109,32 @@ class Socket {
 
 		/** @brief init socket */
 		void		startSocket(void);
+
 		
 		void		readHttpRequest(int);
 		void		resolveHttpRequest(void);
-		int			getStatusCode(void) const;
-		const char*	getStatusMessage(int) const;
-		size_t		getContentLength(void) const;
-		std::string	getFileContent(void);
+		pair_type	getStatus(void) const;                // old - to remove
+		pair_type	getStatus(const std::string &) const; // (?) may be static
 		void		sendHttpResponse(int);
 
 		void		setNonBlock(int & fd);
 		int			socketAccept(void);
 
-	private:
-		void	errorExit(const std::string &) const;
-		void	bindStep(const int &, const sockaddr_in &);
-		void	listenStep(const int &);
-		
-		void	checkHttpHeaderLine(const std::string &);
 
+	/* Static public functions */
+	public:
+		static ssize_t		getFileLength(const std::string &);
+		static std::string	getFileContent(const std::string &);
+
+
+	private:
+		void		errorExit(const std::string &) const;
+		void		bindStep(const int &, const sockaddr_in &);
+		void		listenStep(const int &);
+		
+		void		checkHttpHeaderLine(const std::string &);
+		std::string	constructPath(void) const;
+		std::string	generateAutoindexPage(void) const;
 
 	private:
 		short		_port;
@@ -124,9 +142,6 @@ class Socket {
 		sockaddr_in	_addr;
 		size_t		_addrLen;
 		HttpHeader	header;
-	
-	
-	friend class HttpHeader;
 	
 };
 
