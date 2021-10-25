@@ -88,7 +88,7 @@ void	Server::setErrorPages(const tokens_type &tok) {
         std::stringstream(*it) >> error_code;
         if (this->_errorPages.find(error_code) != this->_errorPages.end())
             this->_errorPages.erase(error_code);
-        this->_errorPages.insert(std::make_pair(error_code, *(tok.end() - 1)));
+        this->_errorPages[error_code] = tok.back();
     }
 }
 
