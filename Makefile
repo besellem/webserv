@@ -6,7 +6,7 @@
 #    By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/25 11:51:01 by adbenoit         ###   ########.fr        #
+#    Updated: 2021/10/25 12:18:36 by adbenoit         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,7 +34,7 @@ DIRS			:= $(OBJ_DIR) $(addprefix $(OBJ_DIR)/, $(SUB_DIR))
 # FILES
 
 NAME			:= webserv
-SRC				:= main.cpp \
+SRC				:= test.cpp \
 				   webserv.cpp
 ## all sub file add here: (check exemple)
 # SUB_SRC			:= exemple.cpp

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/25 11:47:34 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 12:16:44 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,8 @@ void				WebServer::createServers(void)
 	} // for each server
 }
 
+
+WebServer::ParsingError::ParsingError() {}
 
 const char*			WebServer::ParsingError::what() const throw()
 { return "Config File Error"; }

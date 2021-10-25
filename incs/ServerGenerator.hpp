@@ -6,19 +6,16 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:17 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/20 23:05:45 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 12:14:23 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVERGENERATOR_HPP
 # define SERVERGENERATOR_HPP
 
-# include "webserv.hpp"
 # include "Server.hpp"
 
 _BEGIN_NS_WEBSERV
-
-class WebServer;
 
 /* Config file states */
 

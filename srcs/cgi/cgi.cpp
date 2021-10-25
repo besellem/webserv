@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/25 11:06:13 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 12:11:37 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,9 @@ const char*	cgi::CgiError::what() const throw() {
 	return "CGI Error";
 }
 
-cgi::cgi(const HttpHeader &head) {
-    this->setEnv(head);
+cgi::cgi(const Socket &socket, const std::string &program) :
+    _socket(socket), _program(program) {
+    this->setEnv();
 }
 
 cgi::~cgi() {
@@ -47,7 +48,7 @@ char**	cgi::getEnv() const {
 CGI Environment variables contain data about the transaction
 between the client and the server. */
 
-void cgi::setEnv(const HttpHeader &head)
+void cgi::setEnv()
 {
     std::map<std::string, std::string>  env;
     
@@ -56,7 +57,7 @@ void cgi::setEnv(const HttpHeader &head)
     env["GATEWAY_INTERFACE"] = "CGI/1.1";
 
     env["SERVER_PROTOCOL"] = "webserv/0.0";
-    env["SERVER_PORT"] = "";
+    env["SERVER_PORT"] = std::to_string(this->_socket.getPort());
     env["REQUEST_METHOD"] = "";
     env["PATH_INFO"] = "";
     env["SCRIPT_NAME"] = "";
@@ -103,7 +104,7 @@ std::string addHeader(const std::string& content)
 /* Executes the CGI program on a file.
 Returns the output in a string */
 
-std::string cgi::execute()
+std::string cgi::execute(const std::string &fileName)
 {
     pid_t               pid;
     int                 status;
@@ -113,8 +114,8 @@ std::string cgi::execute()
 
     if (pipe(fd) == -1)
         throw CgiError();
-    char *arg[] = {strdup(this->_location->cgi[0].c_str()),
-            strdup(this->_fileName.c_str()), NULL};
+    char *arg[] = {strdup(this->_program.c_str()),
+            strdup(fileName.c_str()), NULL};
     if ((pid = fork()) == -1)
         throw CgiError();
     else if (pid == 0)

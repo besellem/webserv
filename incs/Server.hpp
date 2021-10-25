@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/24 17:48:54 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 12:14:44 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,8 @@
 # include <iomanip>
 # include <map>
 # include <vector>
-# include "webserv.hpp"
 
 _BEGIN_NS_WEBSERV
-
-class WebServer;
 
 typedef struct s_location
 {

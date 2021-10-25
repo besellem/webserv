@@ -1,63 +1,68 @@
-#include <stdio.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <netinet/in.h>
-#include <string.h>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   test.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/10/25 12:20:57 by adbenoit          #+#    #+#             */
+/*   Updated: 2021/10/25 12:29:25 by adbenoit         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#define PORT 8080
-int main(int argc, char const *argv[])
+#include "webserv.hpp"
+
+int	main(int ac, char **av)
 {
-    int server_fd;
-	int new_socket;
-	long valread;
-    struct sockaddr_in address;
-    int addrlen = sizeof(address);
-    
-    // Only this line has been changed. Everything is same.
-    char *hello = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\n\nHello world!";
-    
-    // Creating socket file descriptor
-    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
-    {
-        perror("In socket");
-        exit(EXIT_FAILURE);
-    }
-    
+	webserv::WebServer	webServ;
+ 	std::string			conf = (ac > 1) ? av[1] : DEFAULT_CONFIG_FILE;
 
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons( PORT );
-    
-    memset(address.sin_zero, '\0', sizeof address.sin_zero);
-    
-    
-    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0)
-    {
-        perror("In bind");
-        exit(EXIT_FAILURE);
-    }
-    if (listen(server_fd, 10) < 0)
-    {
-        perror("In listen");
-        exit(EXIT_FAILURE);
-    }
-    while(1)
-    {
-        printf("\n+++++++ Waiting for new connection ++++++++\n\n");
-        if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0)
-        {
-            perror("In accept");
-            exit(EXIT_FAILURE);
-        }
-        
-        char buffer[30000] = {0};
-        valread = read(new_socket , buffer, 30000);
-        printf("sock:\n%s\n", buffer);
-        // write(new_socket, buffer , valread);
-		// write(new_socket, "hello", sizeof("hello"));
-        printf("------------------Hello message sent-------------------");
-		close(new_socket);
-    }
-    return 0;
+	try
+ 	{
+ 		webServ.parse(conf);
+	}
+	 catch(const std::exception& e)
+ 	{
+ 		std::cerr << e.what() << '\n';
+ 		return (EXCEPT_ERROR), EXIT_FAILURE;
+ 	}
+	 
+	const int			port = webServ.getServer(0).port();
+ 	const std::string	const_path = "./www/tmp.html";
+ 	webserv::Socket		_sock(port);
+
+ 	int			new_socket;
+ 	ssize_t		valread;
+
+ 	_sock.startSocket();
+ 	while (true)
+ 	{
+ 		printf("+++++++ Waiting for new connection ++++++++\n\n");
+ 		int			svrfd = _sock.getServerFd();
+ 		sockaddr_in	addr = _sock.getAddr();
+ 		size_t		len = _sock.getAddrLen();
+
+ 		new_socket = _INLINE_NAMESPACE::socketAccept(svrfd, (struct sockaddr *)&addr, (socklen_t*)&len);
+
+ 		char	header[30000] = {0};
+ 		valread = recv(new_socket, header, 30000, 0);
+ 		printf("%s\n", header);
+ 		try
+ 		{
+ 			webserv::cgi newCgi(_sock, webServ.getServer(0).locations(0).cgi[0]);
+ 			std::string content = newCgi.execute("test.php");
+ 			send(new_socket, content.c_str(), content.length(), 0);
+
+ 		}
+ 		catch(const std::exception& e)
+ 		{
+ 			std::cerr << e.what() << '\n';
+ 		}
+
+ 		// _sock.parse(new_socket, header);	// in process
+ 		// _sock.parse(new_socket, const_path);		// TO REMOVE
+ 		// printf("------------------Hello message sent-------------------\n");
+ 		close(new_socket);
+ 	}
+	return EXIT_SUCCESS;
 }
