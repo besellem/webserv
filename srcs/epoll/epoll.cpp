@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 12:22:15 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/25 17:09:04 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ short const	Epoll::kWriteEvent = 2;
 
 /** @brief public function */
 
-Epoll::Epoll(void) : _sock(0) {}
+// Epoll::Epoll(void) : _sock() {}
 Epoll::~Epoll(void) {}
 
 Epoll::Epoll(Socket const & sock) : _sock(sock) {
@@ -110,8 +110,11 @@ void	Epoll::serverLoop(int const & waitMs) {
 		if (sockFd == _sock.getServerFd()) {
 
 			int newSocket = -1;
+			LOG;
 			handleAccept(newSocket);
+			LOG;
 			_sock.readHttpRequest(newSocket);
+			LOG;
 			
 			try
 			{

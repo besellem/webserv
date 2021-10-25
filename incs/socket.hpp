@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 15:27:01 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/25 17:03:40 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,73 +15,10 @@
 
 # include "defs.hpp"
 # include "Server.hpp"
+# include "HttpHeader.hpp"
 
 
 _BEGIN_NS_WEBSERV
-
-class HttpHeader
-{
-
-	public:
-		typedef	void*                                                pointer;
-		typedef std::map<std::string, std::vector<std::string> >     value_type;
-	
-	public:
-		HttpHeader(void) :
-			data(),
-			request_method(),
-			path(),
-			path_constructed()
-		{ this->resetBuffer(); }
-
-		HttpHeader(const HttpHeader &x)
-		{ *this = x; }
-
-		~HttpHeader()
-		{}
-
-		HttpHeader&	operator=(const HttpHeader &x)
-		{
-			if (this == &x)
-				return *this;
-			data = x.data;
-			request_method = x.request_method;
-			path = x.path;
-			path_constructed = x.path_constructed;
-			memcpy(buf, x.buf, sizeof(buf));
-			return *this;
-		}
-
-		pointer		resetBuffer(void)
-		{ return std::memset(buf, 0, sizeof(buf)); }
-		
-	
-	public:
-		class HttpHeaderParsingError : public std::exception
-		{
-			public:
-				virtual const char*	what() const throw()
-				{ return "incomplete http header received"; }
-		};
-
-		class HttpBadRequestError : public std::exception
-		{
-			public:
-				virtual const char*	what() const throw()
-				{ return "bad http request"; }
-		};
-
-
-	private:
-		value_type		data;
-		std::string		request_method;
-		std::string		path;
-		std::string		path_constructed;
-		char			buf[BUFSIZ];
-
-	friend class Socket;
-
-};
 
 class Socket
 {
@@ -94,7 +31,7 @@ class Socket
 	/** @brief constructor / destructor */
 
 		explicit Socket(void);
-		explicit Socket(const short &);
+		explicit Socket(const Server &);
 		Socket(const Socket &);
 		~Socket();
 
@@ -137,14 +74,16 @@ class Socket
 		std::string	generateAutoindexPage(void) const;
 
 	private:
+		Server		_server_block; // which was parsed
 		short		_port;
 		int			_serverFd;
 		sockaddr_in	_addr;
 		size_t		_addrLen;
 		HttpHeader	header;
 	
-};
+}; /* class Socket */
+
 
 _END_NS_WEBSERV
 
-#endif
+#endif /* !defined(SOCKET_HPP) */

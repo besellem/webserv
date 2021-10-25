@@ -6,11 +6,12 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 15:36:00 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/25 17:06:39 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "socket.hpp"
+
 
 _BEGIN_NS_WEBSERV
 
@@ -46,7 +47,7 @@ const struct s_options	g_options[] = {
 
 Socket::Socket(void) :
 	_port(0),
-	_serverFd(-1),
+	_serverFd(SYSCALL_ERR),
 	_addrLen(sizeof(sockaddr_in)),
 	header()
 {}
@@ -54,26 +55,27 @@ Socket::Socket(void) :
 Socket::~Socket(void)
 {}
 
-Socket::Socket(const short& port) :
-	_port(port),
+Socket::Socket(const Server &ref) :
+	_server_block(ref),
+	_port(ref.port()),
 	_addrLen(sizeof(sockaddr_in)),
 	header()
 {
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
-	if (_serverFd < 0)
+	if (SYSCALL_ERR == _serverFd)
 		errorExit("socket init");
 	_addr.sin_family = AF_INET;
 	_addr.sin_addr.s_addr = INADDR_ANY;
-	_addr.sin_port = htons(port);
+	_addr.sin_port = _port;
 	memset(_addr.sin_zero, 0, sizeof(_addr.sin_zero));
 
 	int	optval = 1;
-	if ((setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int))) == -1) // can rebind
+	if (SYSCALL_ERR == setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int))) // can rebind
 	{
 		close(_serverFd);
 		errorExit("set opt");
 	}
-	setNonBlock(_serverFd); // set non-blocking
+	setNonBlock(_serverFd);
 }
 
 Socket::Socket(const Socket &x)
@@ -170,7 +172,11 @@ std::string	Socket::constructPath(void) const
 	// std::string			parent_dir = path.substr(0, path.find_last_of("/"));
 	// std::string			real;
 
+	// if (parent_dir == )
+
+	// ROOT_PATH + 
 	
+	// return real;
 	return ROOT_PATH + this->header.path;
 }
 
@@ -196,6 +202,8 @@ void	Socket::resolveHttpRequest(void)
 	{
 		this->checkHttpHeaderLine(*line);
 	}
+
+	// std::cout << S_RED "path_constructed: " S_NONE << header.path_constructed << std::endl;
 }
 
 ssize_t		Socket::getFileLength(const std::string& path)
@@ -247,9 +255,9 @@ Socket::pair_type	Socket::getStatus(__unused const std::string& path) const
 
 void		Socket::sendHttpResponse(int socket_fd)
 {
-	std::string			response;
-	pair_type			status = getStatus(header.path_constructed);
-	const ssize_t		content_length = getFileLength(header.path_constructed);
+	std::string		response;
+	pair_type		status = getStatus(header.path_constructed);
+	const ssize_t	content_length = getFileLength(header.path_constructed);
 
 	// Header
 	response =  HTTP_PROTOCOL_VERSION " ";
