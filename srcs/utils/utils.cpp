@@ -6,13 +6,14 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 17:41:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/26 22:50:23 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 23:59:21 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.hpp"
 
 _BEGIN_NS_WEBSERV
+
 
 /* Returns the extension of a file */
 std::string	getExtension(const std::string& fileName)
@@ -89,5 +90,22 @@ std::vector<std::string>	ft_vectorcut(const std::vector<std::string>& vect, char
 	newVect.erase(it, newVect.end());
 	return newVect;
 }
+
+/* Joins all the strings of a vector separate by a space.
+Returns the new string */
+
+std::string vectorJoin(const std::vector<std::string> &vect)
+{
+    if (vect.empty())
+        return std::string("");
+    std::string str = vect[0];
+    for (size_t i = 1; i < vect.size(); i++)
+    {
+        str += " ";
+        str += vect[i];
+    }
+    return str;
+}
+
 
 _END_NS_WEBSERV

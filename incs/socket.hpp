@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 23:12:15 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/27 00:08:01 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ class Socket
 		void		resolveHttpRequest(void);
 		pair_type	getStatus(void) const;                // old - to remove
 		pair_type	getStatus(const std::string &) const; // (?) may be static
-		std::string	getRequestData(const std::string &);
+		std::string	getCgiEnv(const std::string &);
 		void		sendHttpResponse(int);
 
 		void		setNonBlock(int & fd);

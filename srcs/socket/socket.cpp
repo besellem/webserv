@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 23:51:54 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/27 00:10:33 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 
 _BEGIN_NS_WEBSERV
+
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc++11-compat-deprecated-writable-strings"
@@ -417,5 +418,52 @@ std::string	Socket::generateAutoindexPage(void) const {
 
 	return content;
 }
+
+
+/* Returns the value of a cgi environment variables */
+std::string	Socket::getCgiEnv(const std::string &varName)
+{
+    std::string envVar[] = {"SERVER_PORT", "REQUEST_METHOD", "PATH_INFO",
+        "SCRIPT_NAME", "REMOTE_HOST", "REMOTE_ADDR", "CONTENT_LENGTH", "HTTP_ACCEPT",
+        "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER", "SERVER_SOFTWARE",
+        "GATEWAY_INTERFACE", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS"};
+    std::string str;
+    size_t      pos;
+    int         i = 0;
+    
+    for (;i < 16; i++)
+        if (varName == envVar[i])
+            break ;
+    switch (i)
+    {
+    case 0:
+        str = vectorJoin(this->header.data["Host"]);
+        pos = str.find(":");
+        if (pos == std::string::npos)
+            return std::string("");
+       return str.substr(pos + 1);
+    case 1: return this->header.request_method;
+    case 2: return this->header.path_constructed;
+    case 3: return std::string(CGI_PROGRAM);
+    case 4: return ft_strcut(vectorJoin(this->header.data["Host"]), ':');
+    case 5: return vectorJoin(this->header.data["Host"]);
+    case 6: return std::to_string(this->getFileLength(this->header.path_constructed));
+    case 7: return vectorJoin(this->header.data["Accept"]);
+    case 8: return vectorJoin(this->header.data["Accept-Language"]);
+    case 9: return vectorJoin(this->header.data["User-Agent"]);
+    case 10: return vectorJoin(this->header.data["Referer"]);
+    case 11: return std::string(HTTP_PROTOCOL_VERSION);
+    case 12: return std::string("CGI/1.1");
+    case 13: return std::string("");
+    case 14:
+        pos = vectorJoin(this->header.data["Referer"]).find("?");
+        if (pos == std::string::npos)
+            return std::string("");
+       return this->header.path.substr(pos);
+    case 15: return std::string("CGI");
+    default: return std::string();
+    }
+}
+
 
 _END_NS_WEBSERV
