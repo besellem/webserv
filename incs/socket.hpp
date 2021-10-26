@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/24 18:31:47 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/26 13:52:34 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,73 +15,24 @@
 
 # include "defs.hpp"
 # include "Server.hpp"
+# include "HttpHeader.hpp"
 
 
 _BEGIN_NS_WEBSERV
 
-class HttpHeader
+class Socket
 {
 
 	public:
-		typedef	void*                                                pointer;
-		typedef std::map<std::string, std::vector<std::string> >     value_type;
-	
-	public:
-		HttpHeader(void) :
-			data(),
-			request_method(),
-			path_info() { resetBuffer(); }
+		typedef std::vector<std::string>                       vector_type;
+		typedef std::pair<int, std::string>                    pair_type;
 
-		HttpHeader(const HttpHeader &x) { *this = x; }
-
-		~HttpHeader() {
-			std::cout << "destructor ???\n";
-		}
-
-		pointer		resetBuffer(void) { return memset(buf, 0, sizeof(buf)); }
-		
-		HttpHeader&	operator=(const HttpHeader &x)
-		{
-			if (this == &x)
-				return *this;
-			data = x.data;
-			request_method = x.request_method;
-			path_info = x.path_info;
-			memcpy(buf, x.buf, sizeof(buf));
-			return *this;
-		}
-	
-	
-	public:
-		class HttpHeaderParsingError : public std::exception
-		{
-			public:
-				virtual const char*	what() const throw()
-				{ return "incomplete http header received"; }
-		};
-
-		class HttpBadRequestError : public std::exception
-		{
-			public:
-				virtual const char*	what() const throw()
-				{ return "bad http request"; }
-		};
-
-
-	public: // TO REMOVE
-		value_type		data;
-		std::string		request_method;
-		std::string		path_info;
-		char			buf[BUFSIZ];
-
-};
-
-class Socket {
 	public:
 	/** @brief constructor / destructor */
 
 		explicit Socket(void);
-		explicit Socket(const short &);
+		explicit Socket(const Server &);
+		// explicit Socket(short const &);
 		Socket(const Socket &);
 		~Socket();
 
@@ -96,38 +47,44 @@ class Socket {
 
 		/** @brief init socket */
 		void		startSocket(void);
+
 		
 		void		readHttpRequest(int);
 		void		resolveHttpRequest(void);
-		int			getStatusCode(void) const;
-		const char*	getStatusMessage(int) const;
-		size_t		getContentLength(void) const;
-		std::string	getFileContent(void);
+		pair_type	getStatus(void) const;                // old - to remove
+		pair_type	getStatus(const std::string &) const; // (?) may be static
 		void		sendHttpResponse(int);
 
 		void		setNonBlock(int & fd);
 		int			socketAccept(void);
 
+
+	/* Static public functions */
+	public:
+		static ssize_t		getFileLength(const std::string &);
+		static std::string	getFileContent(const std::string &);
+
+
 	private:
-		void	errorExit(const std::string &) const;
-		void	bindStep(const int &, const sockaddr_in &);
-		void	listenStep(const int &);
+		void		errorExit(const std::string &) const;
+		void		bindStep(const int &, const sockaddr_in &);
+		void		listenStep(const int &);
 		
-		void	checkHttpHeaderLine(const std::string &);
-
+		void		checkHttpHeaderLine(const std::string &);
+		std::string	constructPath(void) const;
+		std::string	generateAutoindexPage(void) const;
 
 	private:
+		Server		_server_block; // which was parsed
 		short		_port;
 		int			_serverFd;
 		sockaddr_in	_addr;
 		size_t		_addrLen;
-		HttpHeader	*header;
+		HttpHeader	header;
 	
-	
-	friend class HttpHeader;
-	
-};
+}; /* class Socket */
+
 
 _END_NS_WEBSERV
 
-#endif
+#endif /* !defined(SOCKET_HPP) */

@@ -3,17 +3,17 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+         #
+#    By: besellem <besellem@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/24 18:19:56 by kaye             ###   ########.fr        #
+#    Updated: 2021/10/26 13:52:14 by besellem         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # COMPILATION
 
 CC		= clang++
-CFLAGS 	= -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3
+CFLAGS 	= -Wall -Wextra -Werror -std=c++98# -fsanitize=address -g3
 IFLAGS 	= -I./incs
 
 # DIRECTORIES
@@ -44,7 +44,9 @@ SRC				+= $(addprefix parser/, $(SUB_SRC))
 # SUB_SRC			:= epoll.cpp
 # SRC				+= $(addprefix exemple/, $(SUB_SRC))
 # SRC				+= $(addprefix epoll/, $(SUB_SRC))
-SUB_SRC			:= socket.cpp
+SUB_SRC			:= accept.cpp \
+				   socket.cpp \
+				   HttpHeader.cpp
 SRC				+= $(addprefix socket/, $(SUB_SRC))
 SUB_SRC			:= utils.cpp
 SRC				+= $(addprefix utils/, $(SUB_SRC))
