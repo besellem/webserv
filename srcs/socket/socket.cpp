@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 23:41:54 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 23:51:54 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,12 +254,11 @@ void		Socket::sendHttpResponse(int socket_fd)
 	ssize_t			content_length;
 
 	// Content
-	if (getExtension(header.path) == ".php")
+	if (getExtension(header.path) == ".php") // replace with location.cgi[0] + check if cgi exist
 	{
 		try
 		{
-			// cgi cgi(*this, "/Users/adbenoit/.brew/bin/php");
-			cgi cgi(*this, "/usr/local/bin/php-cgi");
+			cgi cgi(*this, CGI_PROGRAM); // replace with location.cgi[1]
 			content = cgi.execute(header.path_constructed);
 			content_length = cgi.getContentLength();
 		}
