@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/25 12:16:44 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 14:37:14 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ WebServer::~WebServer()
 }
 
 // TO DO but unused
-WebServer&	WebServer::operator=(const WebServer& x)
+WebServer&		WebServer::operator=(const WebServer& x)
 {
 	if (this == &x)
 		return *this;
@@ -50,13 +50,13 @@ WebServer&	WebServer::operator=(const WebServer& x)
 ** void		WebServer::parse(const std::string&);
 */
 
-size_t				WebServer::serverSize(void) const
+size_t			WebServer::serverSize(void) const
 { return this->_servers.size(); }
 
-const Server&		WebServer::getServer(int i) const
+const Server&	WebServer::getServer(int i) const
 { return *(this->_servers[i]); }
 
-void				WebServer::createServers(void)
+void			WebServer::createServers(void)
 {
 	const size_t	server_size = _servers.size();
 	Socket			cur;
@@ -65,27 +65,21 @@ void				WebServer::createServers(void)
 	_socks = new Socket[server_size];
 	for (size_t i = 0; i < server_size; ++i)
 	{
-		// init each socket with each server's port
-		_socks[i] = Socket(_servers[i]->port());
-		// std::cout << i << " here\n"; // add a cout -> no seg
+		// init each socket
+		_socks[i] = Socket(*_servers[i]);
 
 		cur = _socks[i];
 		cur.startSocket();
-		webserv::Epoll _epoll(cur);
-		int fd = cur.getServerFd();
-
-		_epoll.updateEvents(fd);
-		while (true) // <------------- ??? 
-		{
-			_epoll.serverLoop(1);
-		}
+		
+		Epoll	_epoll(cur);
+		_epoll.startEpoll();
+		_epoll.serverLoop();
 	} // for each server
 }
 
-
 WebServer::ParsingError::ParsingError() {}
 
-const char*			WebServer::ParsingError::what() const throw()
+const char*		WebServer::ParsingError::what() const throw()
 { return "Config File Error"; }
 
 

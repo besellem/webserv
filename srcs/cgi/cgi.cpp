@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/26 13:55:20 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 16:26:59 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,52 +44,90 @@ char**	cgi::getEnv() const {
     return this->_env;
 }
 
+std::string	Socket::getRequestData(const std::string &name)
+{
+    if (this->header.data.find("Host") == this->header.data.end())
+    {
+        std::cout << "!!!!! ERROR !!!!!" << std::endl;
+        this->header.data["Host"].push_back("");
+        this->header.data["Accept"].push_back("");
+        this->header.data["User-Agent"].push_back("");
+        this->header.data["Accept-Language"].push_back("");
+        this->header.data["Referer"].push_back("");
+    }
+    std::cout << this->header.data["Host"][0] << std::endl; 
+    std::string dataNames[] = {"SERVER_PORT", "REQUEST_METHOD", "PATH_INFO",
+        "SCRIPT_NAME", "REMOTE_HOST", "REMOTE_ADDR", "CONTENT_LENGTH", "HTTP_ACCEPT",
+        "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER"};
+    std::string  values[] = {std::to_string(this->_port), this->header.request_method,
+        this->header.path_constructed, this->header.path_constructed, this->header.data["Host"][0],
+        this->header.data["Host"][0], std::to_string(this->getFileLength(this->header.path_constructed)),
+        this->header.data["Accept"][0], this->header.data["Accept-Language"][0],
+        this->header.data["User-Agent"][0], this->header.data["Referer"][0]};
+
+    if (name == "QUERY_STRING")
+    {
+        size_t pos = this->header.data["Referer"][0].find("?");
+        if (pos == std::string::npos)
+            return std::string("");
+       return this->header.path.substr(pos, this->header.path.size());
+    }
+    else if ("SERVER_SOFTWARE")
+        return "HTTP/1.1";
+    else if ("GATEWAY_INTERFACE")
+        return "CGI/1.1";
+    else if (name == "REDIRECT_STATUS")
+        return std::to_string(this->getStatus().first);
+    else if (name == "CONTENT_TYPE")
+        return "php";
+    for (size_t i = 0; i < 11; i++)
+    {
+        if (name == dataNames[i])
+        {
+            std::cout << values[i] << std::endl;
+            return values[i];
+        }
+    }
+    std::cout << "!!!!! ERROR !!!!!" << std::endl;
+    return std::string();
+}
+
 /* Set the CGI environment variables.
 CGI Environment variables contain data about the transaction
 between the client and the server. */
 
 void cgi::setEnv()
 {
-    std::map<std::string, std::string>  env;
+    std::string dataNames[] = {"SERVER_PORT", "REQUEST_METHOD", "PATH_INFO",
+        "SCRIPT_NAME", "REMOTE_HOST", "REMOTE_ADDR", "CONTENT_LENGTH", "HTTP_ACCEPT",
+        "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER"};
     
-    env["SERVER_SOFTWARE"] = "HTTP/1.1";
-    env["SERVER_NAME"] = "";
-    env["GATEWAY_INTERFACE"] = "CGI/1.1";
-
-    env["SERVER_PROTOCOL"] = "webserv/0.0";
-    env["SERVER_PORT"] = std::to_string(this->_socket.getPort());
-    env["REQUEST_METHOD"] = "";
-    env["PATH_INFO"] = this->_socket.getHeader().path_info;
-    env["SCRIPT_NAME"] = "test.php";
-    env["QUERY_STRING"] = "";
-    env["REMOTE_HOST"] = "127.0.0.1";
-    env["REMOTE_ADDR"] = "";
-    env["AUTH_TYPE"] = "";
-    env["REMOTE_USER"] = "";
-    env["REMOTE_IDENT"] = "";
-    env["CONTENT_TYPE"] = "php";
-    env["CONTENT_LENGTH"] = "10";
-    
-    env["HTTP_ACCEPT"] = "*/*";
-    env["HTTP_ACCEPT_LANGUAGE"] = "";
-    env["HTTP_USER_AGENT"] = this->_socket.getHeader().data["User-Agent"][0];
-    env["HTTP_COOKIE"] = "";
-    env["HTTP_REFERER"] = "";
-    
-    env["REDIRECT_STATUS"] = "200";
+    // ["SERVER_NAME"] = "";
+    // ["SERVER_PROTOCOL"] = "webserv/0.0";
+    // ["AUTH_TYPE"] = "";
+    // ["REMOTE_USER"] = "";
+    // ["REMOTE_IDENT"] = "";
 
     size_t i = 0;
+    size_t size = 11;
     std::string str;
-    this->_env = (char **)malloc(sizeof(char *) * (env.size() + 1));
+    this->_env = (char **)malloc(sizeof(char *) * (size + 1));
     if (!this->_env)
         throw std::bad_alloc();
-    for (std::map<std::string, std::string>::iterator  it = env.begin(); it != env.end(); it++, i++)
+    while (i < size)
     {
-        str = it->first + "=" + it->second;
+        LOG;
+        std::cout << "i = " << i << " name = " << dataNames[i] << std::endl;
+        str = dataNames[i] + "=" + this->_socket.getRequestData(dataNames[i]);
+        LOG;
         this->_env[i] = strdup(str.c_str());
+        LOG;
         if (!this->_env[i])
             throw std::bad_alloc();
+        LOG;
         std::cout << this->_env[i] << std::endl;
+        LOG;
+        ++i;
     }
     this->_env[i] = 0;
 }

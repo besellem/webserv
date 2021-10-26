@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/24 17:47:57 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/25 21:22:10 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,122 +14,138 @@
 
 _BEGIN_NS_WEBSERV
 
-/** @brief static val */
-
-short const	Epoll::kReadEvent = 1;
-short const	Epoll::kWriteEvent = 2;
-
 /** @brief public function */
 
-Epoll::Epoll(void) : _sock(0) {}
+Epoll::Epoll(void) : _sock() {}
 Epoll::~Epoll(void) {}
 
-Epoll::Epoll(Socket const & sock) : _sock(sock) {
+Epoll::Epoll(Socket const & sock) :
+	_sock(sock),
+	_epollFd(-1) {}
+
+void	Epoll::startEpoll(void) {
 	_epollFd = kqueue();
 	if (_epollFd < 0)
 		errorExit("epoll create");
-}
-
-void	Epoll::updateEvents(int & sockFd, int const & events, bool const & modify) {
-	struct kevent	evts[EP_EVENTS];
-	int				nEvts = 0;
-
-	if (events & kReadEvent)
-		EV_SET(&evts[nEvts++], sockFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, (void *)(intptr_t)sockFd); // defautl: event is enable, if there have some bug, try : EV_ADD | EV_ENABLE
-	else if (modify == true)
-		EV_SET(&evts[nEvts++], sockFd, EVFILT_READ, EV_DELETE, 0, 0, (void *)(intptr_t)sockFd);
 	
-	if (events & kWriteEvent)
-		EV_SET(&evts[nEvts++], sockFd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, (void *)(intptr_t)sockFd); // defautl: event is enable, if there have some bug, try : EV_ADD | EV_ENABLE
-	else if (modify == true)
-		EV_SET(&evts[nEvts++], sockFd, EVFILT_WRITE, EV_DELETE, 0, 0, (void *)(intptr_t)sockFd);
+	int sockFd = _sock.getServerFd();
+	addEvents(sockFd);
 
-	// debug msg
-	std::cout << "\n" << (modify == true ? "[" S_GREEN "MODIFY" S_NONE "] fd: [" S_GREEN : "[" S_GREEN "ADD" S_NONE "] fd: [" S_GREEN) << sockFd << S_NONE "] events: [" S_GREEN << ((events & kReadEvent) ? "Read" S_NONE : "NOTHING" S_NONE) << "] & [" S_GREEN << ((events & kWriteEvent) ? "Write" S_NONE "]" : "NOTHING" S_NONE "]") << "\n" << std::endl;
+	// test non block
+	__unused struct timespec timeout = {0, 0};
 
-	if (kevent(_epollFd, evts, nEvts, NULL, 0, NULL) < 0)
-		errorExit("kevent failed");
-	// kevent(_epollFd, evts, nEvts, NULL, 0, NULL);
+	// int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL)
+	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, &timeout);
+	if (kevt < 0)
+		errorExit("epoll start failed!");
 }
 
-void	Epoll::updateEvents(int & sockFd) {
-	EV_SET(_chlist, sockFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+void	Epoll::addEvents(int const & sockFd) {
+	EV_SET(_chlist, sockFd, EVFILT_READ, EV_ADD, 0, 0, 0);
 }
 
-void	Epoll::handleAccept(int & newSocket) {
+void	Epoll::deleteEvents(int const & sockFd) {
+	EV_SET(_chlist, sockFd, EVFILT_READ, EV_DELETE, 0, 0, 0);
+}
+
+void	Epoll::clientConnect(int & fd) {
 	int sockFd = _sock.getServerFd();
 	sockaddr_in clientAddr;
 	socklen_t clientAddrLen = sizeof(clientAddr);
-	newSocket = accept(sockFd, (sockaddr *)&clientAddr, &clientAddrLen);
+	fd = accept(sockFd, (sockaddr *)&clientAddr, &clientAddrLen);
 
-	if (newSocket < 0)
+	if (fd < 0)
 		errorExit("accept failed");
 
+	_sock.setNonBlock(fd);
+	addEvents(fd);
+
+	// test non block
+	__unused struct timespec timeout = {0, 0};
+
+	// int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
+	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, &timeout);
+	if (kevt < 0)
+		errorExit("kevent failed in clientConnect");
+
 	// debug msg
-	std::cout << "Client Connected!: form: [" S_GREEN << inet_ntoa(_sock.getAddr().sin_addr) << S_NONE "]:[" S_GREEN << ntohs(_sock.getAddr().sin_port) << S_NONE "]" << std::endl;
+	std::cout << "Client Connected form: [" S_GREEN << inet_ntoa(clientAddr.sin_addr)
+		<< S_NONE "]:[" S_GREEN << ntohs(clientAddr.sin_port) << S_NONE "]" << "\n" << std::endl;
 }
 
-// void	Epoll::handleRead(int & sockFd) {
-// 	// char header[30000] = {0};
-// 	// recv(sockFd, header, 30000, 0);
-// 	// std::cout << "\nFrom client(receive):\n" S_GREEN << header << S_NONE << std::endl;
-// 	// close(sockFd);
-
-// 	// updateEvents(sockFd, kWriteEvent, false);
-// }
-
-// void	Epoll::handleWrite(int & sockFd) {
-// 	const std::string			const_path = "./www/index.html";
-
-// 	_sock.parse(sockFd, const_path);
-// 	close(sockFd);
-// 	// updateEvents(sockFd, kReadEvent, true);
+void	Epoll::clientDisconnect(int const & fd) {
+	deleteEvents(fd);
 	
-// 	// debug msg
-// 	std::cout << "\nSend successfully:\n" << std::endl;
-// }
+	// test non block
+	__unused struct timespec timeout = {0, 0};
 
-void	Epoll::serverLoop(int const & waitMs) {
-	(void)waitMs;
+	// int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
+	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, &timeout);
+	if (kevt < 0)
+		errorExit("kevent failed in clientConnect");
 
-	const int kMaxEvents = 20;
-	int kevt = kevent(_epollFd, _chlist, 1, _evlist, kMaxEvents, NULL);
-	
+	close(fd);
+}
+
+void	Epoll::readCase(struct kevent & event) {
 	// debug msg
-	std::cout << "Num of request: [" S_GREEN << kevt << S_NONE "]" << std::endl;
+	std::cout << S_RED "Reading ..." S_NONE << "\n" << std::endl;
 
-	if (_evlist[0].flags & EV_EOF)
-			errorExit("EV_EOF");
+	_sock.readHttpRequest(event.ident);			
+	try {
+		_sock.resolveHttpRequest();
+	}
+	catch (std::exception &e) {
+		EXCEPT_WARNING;
+		event.flags |= EV_EOF;
+		return ;
+	}
+	_sock.sendHttpResponse(event.ident);
+	event.flags |= EV_EOF;
+}
 
-	for (int i = 0; i < kevt; i++) {
+void	Epoll::eofCase(struct kevent & event) {
+	// debug msg
+	std::cout << S_RED "Closing ..." S_NONE << "\n" << std::endl;
 
-		int sockFd = _evlist[i].ident;
-	
-		if (_evlist[i].flags & EV_ERROR)
-			errorExit("EV_ERROR");
-		if (sockFd == _sock.getServerFd()) {
+	clientDisconnect(event.ident);
+}
 
-			// int newSocket = -1;
-			// handleAccept(newSocket);
-			// handleRead(newSocket);
-			// handleWrite(newSocket);
-			// close(newSocket);
+void	Epoll::serverLoop(void) {
+	for(;;) {
 
-			int newSocket = -1;
-			handleAccept(newSocket);
-			_sock.readHttpRequest(newSocket);
-			
-			try
-			{
-				_sock.resolveHttpRequest();
+		// struct timespec timeout;
+		// timeout.tv_sec = 10000 / 1000;
+		// timeout.tv_nsec = (10000 % 1000) * 1000 * 1000;
+
+		// test non block
+		__unused struct timespec timeout = {0, 0};
+
+		// int kevt = kevent(_epollFd, NULL, 0, _evlist, maxEvent, NULL); // NULL in last param means block indefinitely.
+		int kevt = kevent(_epollFd, NULL, 0, _evlist, maxEvent, NULL); // so if set a 0 time, means, kevent return immediately
+		if (kevt < 0)
+			errorExit("kevent failed in loop");
+
+		if (kevt > 0)		
+		// debug msg
+		std::cout << "---\nStar: Num of request: [" S_GREEN << kevt << S_NONE "]" << "\n---\n" << std::endl;
+
+		for (int i = 0; i < kevt; i++) {
+			struct kevent currentEvt = _evlist[i];
+			int currentSocket = -1;
+			int currentFd = currentEvt.ident;
+		
+			if (currentFd == _sock.getServerFd()) {
+				clientConnect(currentSocket);
 			}
-			catch (std::exception &e)
-			{
-				EXCEPT_WARNING;
-				continue ;
+			else {
+				if (currentEvt.flags & EVFILT_READ)
+					readCase(currentEvt);
+				if (currentEvt.flags & EV_EOF)
+					eofCase(currentEvt);
+				// else
+				// 	continue ;
 			}
-			_sock.sendHttpResponse(newSocket);
-			close(newSocket);
 		}
 	}
 }
@@ -140,5 +156,6 @@ void	Epoll::errorExit(const std::string &str) const {
 	std::cout << "Exit: " << str << std::endl;
 	exit(EXIT_FAILURE);
 }
+
 
 _END_NS_WEBSERV

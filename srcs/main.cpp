@@ -3,15 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/25 17:06:56 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/25 17:16:42 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
-// #include <stdio.h>
 
 int	main(int ac, char **av, __unused char **env)
 {

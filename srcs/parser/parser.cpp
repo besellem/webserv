@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:53:23 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/25 16:49:46 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 14:38:32 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ void	parse_line(ServerGenerator& servers, std::string line)
 
 /* Reads the config file and parse it line by line */
 
-void	WebServer::parse(const std::string config_file)
+void	WebServer::parse(const std::string &config_file)
 {
 	std::cout << "=== Parsing ===\n";
 	if (getExtension(config_file) != ".conf")

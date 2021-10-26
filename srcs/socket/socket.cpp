@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 13:00:27 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 16:22:32 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ const struct s_options	g_options[] = {
 
 Socket::Socket(void) :
 	_port(0),
-	_serverFd(-1),
+	_serverFd(SYSCALL_ERR),
 	_addrLen(sizeof(sockaddr_in)),
 	header()
 {}
@@ -55,18 +55,27 @@ Socket::Socket(void) :
 Socket::~Socket(void)
 {}
 
-Socket::Socket(const short& port) :
-	_port(port),
+Socket::Socket(const Server& serv) :
+	_server_block(&serv),
+	_port(serv.port()),
 	_addrLen(sizeof(sockaddr_in)),
 	header()
 {
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
-	if (_serverFd < 0)
+	if (SYSCALL_ERR == _serverFd)
 		errorExit("socket init");
 	_addr.sin_family = AF_INET;
 	_addr.sin_addr.s_addr = INADDR_ANY;
-	_addr.sin_port = htons(port);
+	_addr.sin_port = htons(_port);
 	memset(_addr.sin_zero, 0, sizeof(_addr.sin_zero));
+
+	int	optval = 1;
+	if (SYSCALL_ERR == setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int))) // can rebind
+	{
+		close(_serverFd);
+		errorExit("set opt");
+	}
+	// setNonBlock(_serverFd);
 }
 
 Socket::Socket(const Socket &x)
@@ -76,6 +85,7 @@ Socket&		Socket::operator=(const Socket &x)
 {
 	if (this == &x)
 		return *this;
+	_server_block = x._server_block;
 	_port = x._port;
 	_serverFd = x._serverFd;
 	_addrLen = x._addrLen;
@@ -99,7 +109,7 @@ void	Socket::startSocket(void)
 
 void	Socket::setNonBlock(int & fd)
 {
-	if (fcntl(fd, F_SETFL, O_NONBLOCK))
+	if (SYSCALL_ERR == fcntl(fd, F_SETFL, O_NONBLOCK))
 	{
 		std::cout << "Error: set non block" << std::endl;
 		exit(EXIT_FAILURE);
@@ -113,6 +123,7 @@ void	Socket::readHttpRequest(int socket_fd)
 
 	header.resetBuffer();
 	ret = recv(socket_fd, header.buf, sizeof(header.buf), 0);
+	
 	if (DEBUG)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++" << std::endl;
@@ -122,9 +133,7 @@ void	Socket::readHttpRequest(int socket_fd)
 }
 
 void	Socket::checkHttpHeaderLine(const std::string& __line)
-{
-	typedef std::vector<std::string>                                vector_type;
-	
+{	
 	vector_type					methods;
 	vector_type					opts;
 	vector_type::const_iterator	opt_it;
@@ -141,8 +150,8 @@ void	Socket::checkHttpHeaderLine(const std::string& __line)
 		return ;
 	}
 	
-	key.substr(0, pos); // get only the key (eg: "Host" or "User-Agent")
-	value.substr(pos);  // get only the value (eg: "localhost:8080")
+	key = key.substr(0, pos); // get only the key (eg: "Host" or "User-Agent")
+	value = value.substr(pos);  // get only the value (eg: "localhost:8080")
 	
 
 	for (size_t i = 0; g_options[i].token; ++i)
@@ -151,84 +160,70 @@ void	Socket::checkHttpHeaderLine(const std::string& __line)
 		// {
 			
 		// }
-		if (CMP_STRINGS(key.data(), g_options[i].token))
+		if (CMP_STRINGS(key.c_str(), g_options[i].token))
 		{
 			header.data[key] = split_string(value, g_options[i].delim);
 		}
 	}
 }
 
+std::string	Socket::constructPath(void) const
+{
+	// const std::string	path = this->header.path;
+	// std::string			parent_dir = path.substr(0, path.find_last_of("/"));
+	// std::string			real;
+
+	// if (parent_dir == )
+
+	// ROOT_PATH + 
+	
+	// return real;
+	return ROOT_PATH + this->header.path;
+}
+
 void	Socket::resolveHttpRequest(void)
 {
-	typedef std::vector<std::string>     vector_type;
-
 	vector_type				buffer = split_string(this->header.buf, "\n");
 	vector_type::iterator	line = buffer.begin();
 
-
-	/* parse first line of request */
+	/*
+	** Parse first line of request. Must be formatted like so:
+	**   GET /index.html HTTP/1.1
+	*/
 	vector_type				first_line = split_string(*line, " ");
 	if (first_line.size() != 3)
-		throw HttpHeader::HttpBadRequestError();
-	
+		throw HttpHeader::HttpBadRequestError();	
 	header.request_method = first_line[0];
-	header.path_info = ROOT_PATH + first_line[1];
+	header.path = first_line[1];
+	header.path_constructed = constructPath();
 	++line;
 
-	/* parse the buffer line by line */
+	/* Parse the remaining buffer line by line */
 	for ( ; line != buffer.end(); ++line)
 	{
 		this->checkHttpHeaderLine(*line);
 	}
 
-
-	// print data parsed
-	HttpHeader::value_type::const_iterator	it = header.data.begin();
-	HttpHeader::value_type::const_iterator	ite = header.data.end();
-
-	for ( ; it != ite; ++it)
-	{
-		vector_type					tmp = it->second;
-		vector_type::const_iterator	vec_it = tmp.begin();
-		vector_type::const_iterator	vec_ite = tmp.end();
-	
-		std::cout << it->first << std::endl;
-		for ( ; vec_it != vec_ite; ++vec_it)
-		{
-			std::cout << S_RED "    " << *vec_it << S_NONE << std::endl;
-		}
-	}
+	// std::cout << S_RED "path_constructed: " S_NONE << header.path_constructed << std::endl;
 }
 
-int		Socket::getStatusCode(void) const
+ssize_t		Socket::getFileLength(const std::string& path)
 {
-	return 200;
-}
-
-const char *	Socket::getStatusMessage(int status_code) const
-{
-	if (200 == status_code)
-		return "OK";
-	return "";
-}
-
-size_t		Socket::getContentLength(void) const
-{
-	std::ifstream	ifs(header.path_info, std::ios::binary | std::ios::ate);
+	std::ifstream	ifs(path, std::ios::binary | std::ios::ate);
 
 	if (ifs.is_open())
 	{
-		size_t	size = ifs.tellg();
+		ssize_t	size = ifs.tellg();
 		ifs.close();
 		return size;
 	}
-	return 0; // may want to throw an error or something
+	return SYSCALL_ERR; // may want to throw an error or something
 }
 
-std::string	Socket::getFileContent(void)
+std::string	Socket::getFileContent(const std::string& path)
 {
 	std::string		content;
-	std::ifstream	ifs(header.path_info, std::ios::in);
+	std::ifstream	ifs(path, std::ios::in);
 
 	std::string		gline;
 	if (ifs.is_open())
@@ -248,30 +243,40 @@ std::string	Socket::getFileContent(void)
 	return content;
 }
 
+Socket::pair_type	Socket::getStatus(void) const
+{
+	return std::make_pair<int, std::string>(200, "OK");
+}
+
+// new one - in process
+Socket::pair_type	Socket::getStatus(__unused const std::string& path) const
+{
+	return std::make_pair<int, std::string>(200, "OK");
+}
+
+
 void		Socket::sendHttpResponse(int socket_fd)
 {
-	std::string			response;
-	const std::string	path = ROOT_PATH + header.path_info;
-	const int			status_code = getStatusCode();
-	const std::string	status_message = getStatusMessage(status_code);
-	const size_t		content_length = getContentLength();
+	std::string		response;
+	pair_type		status = getStatus(header.path_constructed);
+	const ssize_t	content_length = getFileLength(header.path_constructed);
 
-	// header
-	response =  "HTTP/1.1 ";
-	response += std::to_string(status_code) + " ";
-	response += status_message + NEW_LINE;
+	// Header
+	response =  HTTP_PROTOCOL_VERSION " ";
+	response += std::to_string(status.first) + " ";
+	response += status.second + NEW_LINE;
 
 	response += "Content-Length: " + std::to_string(content_length);
 	response += "\n\n";
 
-	// content
-	if (getExtension(header.path_info) == ".php")
+	// Content
+		if (getExtension(header.path) == ".php")
 	{
 		try
 		{
 			// cgi cgi(*this, "/Users/adbenoit/.brew/bin/php");
 			cgi cgi(*this, "/Users/adbenoit/.brew/bin/php-cgi");
-			response += cgi.execute(header.path_info);
+			response += cgi.execute(header.path);
 		}
 		catch(const std::exception& e)
 		{
@@ -279,15 +284,13 @@ void		Socket::sendHttpResponse(int socket_fd)
 		}
 	}
 	else
-		response += getFileContent();
+		response += getFileContent(header.path_constructed);
 
-	// -- Send --
+	// -- Send to client --
 	send(socket_fd, response.c_str(), response.length(), 0);
 
 	if (DEBUG)
 	{
-
-		std::cout << "path_info: " << header.path_info << std::endl;
 		std::cout << "------------- RESPONSE ---------------" << std::endl;
 		std::cout << response.c_str() << std::endl;
 		std::cout << "--------------------------------------" << std::endl << std::endl;
@@ -304,13 +307,13 @@ void	Socket::errorExit(const std::string& str) const
 
 void	Socket::bindStep(const int& serverFd, const sockaddr_in& addr)
 {
-	if (bind(serverFd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+	if (SYSCALL_ERR == bind(serverFd, (struct sockaddr *)&addr, sizeof(addr)))
 		errorExit("bind step");
 }
 
 void	Socket::listenStep(const int& serverFd)
 {
-	if (listen(serverFd, 20) < 0)
+	if (SYSCALL_ERR == listen(serverFd, SOMAXCONN))
 		errorExit("listen step");
 }
 

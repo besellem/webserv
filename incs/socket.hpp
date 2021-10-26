@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 17:04:31 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 15:33:11 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,75 +15,24 @@
 
 # include "defs.hpp"
 # include "Server.hpp"
+# include "HttpHeader.hpp"
+
 
 _BEGIN_NS_WEBSERV
 
-class HttpHeader
-{
-
-	public:
-		typedef	void*                                                pointer;
-		typedef std::map<std::string, std::vector<std::string> >     value_type;
-	
-	public:
-		HttpHeader(void) :
-			data(),
-			request_method(),
-			path_info()
-		{ this->resetBuffer(); }
-
-		HttpHeader(const HttpHeader &x)
-		{ *this = x; }
-
-		~HttpHeader()
-		{}
-
-		HttpHeader&	operator=(const HttpHeader &x)
-		{
-			if (this == &x)
-				return *this;
-			data = x.data;
-			request_method = x.request_method;
-			path_info = x.path_info;
-			memcpy(buf, x.buf, sizeof(buf));
-			return *this;
-		}
-
-		pointer		resetBuffer(void)
-		{ return std::memset(buf, 0, sizeof(buf)); }
-		
-	
-	public:
-		class HttpHeaderParsingError : public std::exception
-		{
-			public:
-				virtual const char*	what() const throw()
-				{ return "incomplete http header received"; }
-		};
-
-		class HttpBadRequestError : public std::exception
-		{
-			public:
-				virtual const char*	what() const throw()
-				{ return "bad http request"; }
-		};
-
-
-	public: // TO REMOVE
-		value_type		data;
-		std::string		request_method;
-		std::string		path_info;
-		char			buf[BUFSIZ];
-
-};
-
 class Socket
 {
+
+	public:
+		typedef std::vector<std::string>                       vector_type;
+		typedef std::pair<int, std::string>                    pair_type;
+
 	public:
 	/** @brief constructor / destructor */
 
 		explicit Socket(void);
-		explicit Socket(const short &);
+		explicit Socket(const Server &);
+		// explicit Socket(short const &);
 		Socket(const Socket &);
 		~Socket();
 
@@ -98,39 +47,45 @@ class Socket
 
 		/** @brief init socket */
 		void		startSocket(void);
+
 		
 		void		readHttpRequest(int);
 		void		resolveHttpRequest(void);
-		int			getStatusCode(void) const;
-		const char*	getStatusMessage(int) const;
-		size_t		getContentLength(void) const;
-		std::string	getFileContent(void);
+		pair_type	getStatus(void) const;                // old - to remove
+		pair_type	getStatus(const std::string &) const; // (?) may be static
+		std::string	getRequestData(const std::string &);
 		void		sendHttpResponse(int);
-		HttpHeader&	getHeader() { return this->header; }
 
 		void		setNonBlock(int & fd);
 		int			socketAccept(void);
 
+
+	/* Static public functions */
+	public:
+		static ssize_t		getFileLength(const std::string &);
+		static std::string	getFileContent(const std::string &);
+
+
 	private:
-		void	errorExit(const std::string &) const;
-		void	bindStep(const int &, const sockaddr_in &);
-		void	listenStep(const int &);
+		void		errorExit(const std::string &) const;
+		void		bindStep(const int &, const sockaddr_in &);
+		void		listenStep(const int &);
 		
-		void	checkHttpHeaderLine(const std::string &);
-
+		void		checkHttpHeaderLine(const std::string &);
+		std::string	constructPath(void) const;
+		std::string	generateAutoindexPage(void) const;
 
 	private:
-		short		_port;
-		int			_serverFd;
-		sockaddr_in	_addr;
-		size_t		_addrLen;
-		HttpHeader	header;
+		const Server*	_server_block; // which was parsed
+		short			_port;
+		int				_serverFd;
+		sockaddr_in		_addr;
+		size_t			_addrLen;
+		HttpHeader		header;
 	
-	
-	friend class HttpHeader;
-	
-};
+}; /* class Socket */
+
 
 _END_NS_WEBSERV
 
-#endif
+#endif /* !defined(SOCKET_HPP) */
