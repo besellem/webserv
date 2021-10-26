@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   ServerGenerator.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:19 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/21 07:37:55 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 23:06:43 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 
-
 _BEGIN_NS_WEBSERV
+
 
 ServerGenerator::ServerGenerator() { this->_state = START; }
 

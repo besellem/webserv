@@ -3,17 +3,17 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: besellem <besellem@student.42.fr>          +#+  +:+       +#+         #
+#    By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/26 14:41:01 by besellem         ###   ########.fr        #
+#    Updated: 2021/10/26 22:47:59 by adbenoit         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # COMPILATION
 
 CC		= clang++
-CFLAGS 	= -Wall -Wextra -Werror -std=c++98# -fsanitize=address -g3
+CFLAGS 	= -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3
 IFLAGS 	= -I./incs
 
 # DIRECTORIES
@@ -27,7 +27,8 @@ OBJ_DIR 		:= $(BUILD)/obj
 SUB_DIR			:= epoll \
 				   socket \
 				   parser \
-				   utils
+				   utils \
+				   cgi
 DIRS			:= $(OBJ_DIR) $(addprefix $(OBJ_DIR)/, $(SUB_DIR))
 
 # FILES
@@ -35,15 +36,15 @@ DIRS			:= $(OBJ_DIR) $(addprefix $(OBJ_DIR)/, $(SUB_DIR))
 NAME			:= webserv
 SRC				:= main.cpp \
 				   webserv.cpp
-SUB_SRC			:= parser.cpp \
-				   Server.cpp \
-				   ServerGenerator.cpp
-SRC				+= $(addprefix parser/, $(SUB_SRC))
 ## all sub file add here: (check exemple)
 # SUB_SRC			:= exemple.cpp
 # SUB_SRC			:= epoll.cpp
 # SRC				+= $(addprefix exemple/, $(SUB_SRC))
 # SRC				+= $(addprefix epoll/, $(SUB_SRC))
+SUB_SRC			:= parser.cpp \
+				   Server.cpp \
+				   ServerGenerator.cpp
+SRC				+= $(addprefix parser/, $(SUB_SRC))
 SUB_SRC			:= accept.cpp \
 				   socket.cpp \
 				   HttpHeader.cpp
@@ -52,6 +53,9 @@ SUB_SRC			:= utils.cpp
 SRC				+= $(addprefix utils/, $(SUB_SRC))
 SUB_SRC			:= epoll.cpp
 SRC				+= $(addprefix epoll/, $(SUB_SRC))
+SUB_SRC			:= cgi.cpp 
+SRC				+= $(addprefix cgi/, $(SUB_SRC))
+
 OBJ				:= $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 
 # COLORS

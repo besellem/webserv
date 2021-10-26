@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpHeader.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 16:04:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/25 18:07:12 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 23:08:26 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,10 @@
 
 # include "defs.hpp"
 
-
 _BEGIN_NS_WEBSERV
 
 class HttpHeader
 {
-
 	public:
 		typedef	void*                                                pointer;
 		typedef std::map<std::string, std::vector<std::string> >     value_type;
@@ -48,7 +46,7 @@ class HttpHeader
 		};
 
 
-	private:
+	public:
 		value_type		data;
 		std::string		request_method;
 		std::string		path;

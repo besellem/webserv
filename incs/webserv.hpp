@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/25 16:40:03 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 23:13:33 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include "defs.hpp"
 # include "ServerGenerator.hpp"
+# include "cgi.hpp"
 # include "socket.hpp"
 # include "epoll.hpp"
 
@@ -24,6 +25,7 @@ bool						ft_isNumeric(const std::string &str);
 
 
 class ServerGenerator;
+class cgi;
 class Socket;
 class Epoll;
 
@@ -37,7 +39,7 @@ class WebServer {
 
 		void				parse(const std::string &);
 		size_t				serverSize(void) const;
-		const Server&		getServer(int);
+		const Server&		getServer(int) const ;
 
 		void				createServers(void);
 
@@ -45,6 +47,7 @@ class WebServer {
 		class ParsingError : public std::exception
 		{
 			public:
+                ParsingError();
 				virtual const char*	what() const throw();
 		};
 

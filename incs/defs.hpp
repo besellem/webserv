@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   defs.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/26 18:08:06 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/26 23:50:07 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@
 # define DEFAULT_CONFIG_FILE  CONFIG_DEFAULT_PATH "/default" CONFIG_FILETYPE
 
 # define ROOT_PATH            "./www"
-
+# define CGI_PROGRAM		  "/usr/local/bin/php-cgi"
 
 # define GET     (1L << 0)
 # define POST    (1L << 1)
@@ -98,6 +98,7 @@
 # include <string>
 # include <cstring>
 # include <cstdio>
+# include <cstdlib>
 # include <cctype>
 # include <iostream>
 # include <iomanip>

@@ -3,47 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 19:08:50 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/27 00:10:33 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "socket.hpp"
+#include "cgi.hpp"
 
 
 _BEGIN_NS_WEBSERV
 
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc++11-compat-deprecated-writable-strings"
-
-struct s_options
-{
-	char	*token;
-	char	*delim;
-};
-
-const char	*g_methods[] = {
-	"GET",
-	"POST",
-	"DELETE",
-	NULL
-};
-
-const struct s_options	g_options[] = {
-	{"Host",            " " },
-	{"Connection",      " " },
-	{"Accept",          "," },
-	{"User-Agent",      ""  },
-	{"Accept-Language", " " },
-	{"Referer",         " " },
-	{"Accept-Encoding", ", "},
-	{NULL, NULL}
-};
-
 #pragma clang diagnostic pop
-
 
 Socket::Socket(void) :
 	_port(0),
@@ -55,9 +31,9 @@ Socket::Socket(void) :
 Socket::~Socket(void)
 {}
 
-Socket::Socket(const Server& serv) :
+Socket::Socket(const Server *serv) :
 	_server_block(serv),
-	_port(serv.port()),
+	_port(serv->port()),
 	_addrLen(sizeof(sockaddr_in)),
 	header()
 {
@@ -133,36 +109,45 @@ void	Socket::readHttpRequest(int socket_fd)
 }
 
 void	Socket::checkHttpHeaderLine(const std::string& __line)
-{	
-	vector_type					methods;
-	vector_type					opts;
-	vector_type::const_iterator	opt_it;
-	vector_type::const_iterator	method_it;
+{
+	typedef std::map<std::string, std::string>                 map_type;
 	
+
 	std::string					key = __line;
 	std::string					value = __line;
-	const size_t				pos = __line.find_first_of(": ");
-	
+	const size_t				pos = __line.find(": ");
 	
 	if (pos == std::string::npos) // (?) HTTP_REQUEST_ERROR;
 	{
 		// throw HttpHeader::HttpHeaderParsingError();
 		return ;
 	}
-	
-	key.substr(0, pos); // get only the key (eg: "Host" or "User-Agent")
-	value.substr(pos);  // get only the value (eg: "localhost:8080")
-	
 
-	for (size_t i = 0; g_options[i].token; ++i)
+	vector_type					methods;
+	vector_type::const_iterator	method_it;
+	map_type					opts;
+	map_type::const_iterator	opt_it;
+
+	methods.push_back("GET");
+	methods.push_back("POST");
+	methods.push_back("DELETE");
+
+	opts.insert(std::make_pair("Host",            " " ));
+	opts.insert(std::make_pair("Connection",      " " ));
+	opts.insert(std::make_pair("Accept",          "," ));
+	opts.insert(std::make_pair("User-Agent",      ""  ));
+	opts.insert(std::make_pair("Accept-Language", " " ));
+	opts.insert(std::make_pair("Referer",         " " ));
+	opts.insert(std::make_pair("Accept-Encoding", ", "));
+
+
+	key = key.substr(0, pos); // get only the key (eg: "Host" or "User-Agent")
+	value = value.substr(pos + 2);  // get only the value (eg: "localhost:8080")
+	for (opt_it = opts.begin(); opt_it != opts.end(); ++opt_it)
 	{
-		// for (size_t j = 0; g_methods[j].token; ++j)
-		// {
-			
-		// }
-		if (CMP_STRINGS(key.c_str(), g_options[i].token))
+		if (opt_it->first == key)
 		{
-			header.data[key] = split_string(value, g_options[i].delim);
+			header.data[key] = split_string(value, opt_it->second);
 		}
 	}
 }
@@ -197,6 +182,8 @@ void	Socket::resolveHttpRequest(void)
 	header.path = first_line[1];
 	header.path_constructed = constructPath();
 	++line;
+
+	std::cout << "Contructed Path -> [" S_CYAN << header.path_constructed << S_NONE "]\n";
 
 	/* Parse the remaining buffer line by line */
 	for ( ; line != buffer.end(); ++line)
@@ -264,28 +251,42 @@ Socket::pair_type	Socket::getStatus(__unused const std::string& path) const
 void		Socket::sendHttpResponse(int socket_fd)
 {
 	std::string		response;
-	pair_type		status = getStatus(header.path_constructed);
-	const ssize_t	content_length = getFileLength(header.path_constructed);
+	std::string		content;
+	ssize_t			content_length;
 
+	// Content
+	if (getExtension(header.path) == ".php") // replace with location.cgi[0] + check if cgi exist
+	{
+		try
+		{
+			cgi cgi(*this, CGI_PROGRAM); // replace with location.cgi[1]
+			content = cgi.execute(header.path_constructed);
+			content_length = cgi.getContentLength();
+		}
+		catch(const std::exception& e)
+		{
+			EXCEPT_WARNING;
+		}
+	}
+	else
+	{
+		content = getFileContent(header.path_constructed);
+		if (content.empty())
+			content = generateAutoindexPage();
+		content_length = content.size();
+		content = "\n" + content;
+	}
+	
 	// Header
+	pair_type		status = getStatus(header.path_constructed);
 	response =  HTTP_PROTOCOL_VERSION " ";
 	response += std::to_string(status.first) + " ";
 	response += status.second + NEW_LINE;
-
-	// Content + autoindex
-	std::string content = getFileContent(header.path_constructed);
+	response += "Content-Length: " + std::to_string(content_length);
+	response += "\n";
 	
-	if (content_length != 0)
-		response += "Content-Length: " + std::to_string(content_length);
-	else {
-		if (content == "")
-			content = generateAutoindexPage();
-		response += "Content-Length: " + std::to_string(content.length());
-	}
-	response += "\n\n";
-
 	response += content;
-
+	
 	// -- Send to client --
 	send(socket_fd, response.c_str(), response.length(), 0);
 
@@ -417,5 +418,52 @@ std::string	Socket::generateAutoindexPage(void) const {
 
 	return content;
 }
+
+
+/* Returns the value of a cgi environment variables */
+std::string	Socket::getCgiEnv(const std::string &varName)
+{
+    std::string envVar[] = {"SERVER_PORT", "REQUEST_METHOD", "PATH_INFO",
+        "SCRIPT_NAME", "REMOTE_HOST", "REMOTE_ADDR", "CONTENT_LENGTH", "HTTP_ACCEPT",
+        "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER", "SERVER_SOFTWARE",
+        "GATEWAY_INTERFACE", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS"};
+    std::string str;
+    size_t      pos;
+    int         i = 0;
+    
+    for (;i < 16; i++)
+        if (varName == envVar[i])
+            break ;
+    switch (i)
+    {
+    case 0:
+        str = vectorJoin(this->header.data["Host"]);
+        pos = str.find(":");
+        if (pos == std::string::npos)
+            return std::string("");
+       return str.substr(pos + 1);
+    case 1: return this->header.request_method;
+    case 2: return this->header.path_constructed;
+    case 3: return std::string(CGI_PROGRAM);
+    case 4: return ft_strcut(vectorJoin(this->header.data["Host"]), ':');
+    case 5: return vectorJoin(this->header.data["Host"]);
+    case 6: return std::to_string(this->getFileLength(this->header.path_constructed));
+    case 7: return vectorJoin(this->header.data["Accept"]);
+    case 8: return vectorJoin(this->header.data["Accept-Language"]);
+    case 9: return vectorJoin(this->header.data["User-Agent"]);
+    case 10: return vectorJoin(this->header.data["Referer"]);
+    case 11: return std::string(HTTP_PROTOCOL_VERSION);
+    case 12: return std::string("CGI/1.1");
+    case 13: return std::string("");
+    case 14:
+        pos = vectorJoin(this->header.data["Referer"]).find("?");
+        if (pos == std::string::npos)
+            return std::string("");
+       return this->header.path.substr(pos);
+    case 15: return std::string("CGI");
+    default: return std::string();
+    }
+}
+
 
 _END_NS_WEBSERV

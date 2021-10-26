@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerGenerator.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:17 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/24 15:25:15 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 23:11:26 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,6 @@ class ServerGenerator
 		void		openBlock(const tokens_type &);
 		void		closeBlock(const tokens_type &);
 		
-
 	private:
 		std::vector<Server *>	_servers;
 		int						_state;

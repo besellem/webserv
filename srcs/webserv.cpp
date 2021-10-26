@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/26 14:41:16 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 23:14:22 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ WebServer&		WebServer::operator=(const WebServer& x)
 size_t			WebServer::serverSize(void) const
 { return this->_servers.size(); }
 
-const Server&	WebServer::getServer(int i)
+const Server&	WebServer::getServer(int i) const
 { return *(this->_servers[i]); }
 
 void			WebServer::createServers(void)
@@ -66,7 +66,7 @@ void			WebServer::createServers(void)
 	for (size_t i = 0; i < server_size; ++i)
 	{
 		// init each socket
-		_socks[i] = Socket(*_servers[i]);
+		_socks[i] = Socket(_servers[i]);
 
 		cur = _socks[i];
 		cur.startSocket();
@@ -77,6 +77,7 @@ void			WebServer::createServers(void)
 	} // for each server
 }
 
+WebServer::ParsingError::ParsingError() {}
 
 const char*		WebServer::ParsingError::what() const throw()
 { return "Config File Error"; }

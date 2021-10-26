@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 18:12:13 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/27 00:08:01 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class Socket
 	/** @brief constructor / destructor */
 
 		explicit Socket(void);
-		explicit Socket(const Server &);
+		explicit Socket(const Server *);
 		// explicit Socket(short const &);
 		Socket(const Socket &);
 		~Socket();
@@ -52,6 +52,7 @@ class Socket
 		void		resolveHttpRequest(void);
 		pair_type	getStatus(void) const;                // old - to remove
 		pair_type	getStatus(const std::string &) const; // (?) may be static
+		std::string	getCgiEnv(const std::string &);
 		void		sendHttpResponse(int);
 
 		void		setNonBlock(int & fd);
@@ -71,15 +72,15 @@ class Socket
 		
 		void		checkHttpHeaderLine(const std::string &);
 		std::string	constructPath(void) const;
-		std::string	generateAutoindexPage(void) const; // add a param std::string for root path later...
+		std::string	generateAutoindexPage(void) const;
 
 	private:
-		Server		_server_block; // which was parsed
-		short		_port;
-		int			_serverFd;
-		sockaddr_in	_addr;
-		size_t		_addrLen;
-		HttpHeader	header;
+		const Server*	_server_block; // which was parsed
+		short			_port;
+		int				_serverFd;
+		sockaddr_in		_addr;
+		size_t			_addrLen;
+		HttpHeader		header;
 	
 }; /* class Socket */
 
