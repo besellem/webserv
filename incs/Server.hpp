@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/26 14:33:04 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 14:59:29 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,15 +21,6 @@ _BEGIN_NS_WEBSERV
 
 typedef struct s_location
 {
-	
-	s_location()
-	{
-		methods();
-		redirection("");
-		root("");
-		index();
-	}
-
 	std::string					path;			// location
 	std::vector<std::string>	methods;		// list of accepted HTTP Methods for the root
 	std::string					redirection;	// HTTP redirection

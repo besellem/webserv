@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/25 17:52:25 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 15:59:25 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@
 # define EP_EVENTS 2 // 2: read / write
 
 /* Compare two strings. Returns a bool */
-# define CMP_STRINGS(s1, s2) (0 == std::strcmp((s1), (s2)))
+# define CMP_STRINGS(s1, s2) (0 == std::strcmp(s1, s2))
 
 /* Logs & messages to print */
 # define LOG \

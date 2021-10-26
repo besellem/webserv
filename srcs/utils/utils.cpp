@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 17:41:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/22 17:48:44 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 16:26:06 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,14 @@ std::vector<std::string>	split_string(const std::string& s, const std::string& d
 	std::string					line;
 	size_t						pos = tmp.find(delim);
 
-	while ((pos = tmp.find(delim)) != std::string::npos)
+	if (delim[0] != '\0')
 	{
-		line = tmp.substr(0, pos);
-		v.push_back(line);
-		tmp.erase(0, pos + delim.length());
+		while ((pos = tmp.find(delim)) != std::string::npos)
+		{
+			line = tmp.substr(0, pos);
+			v.push_back(line);
+			tmp.erase(0, pos + delim.length());
+		}
 	}
 	v.push_back(tmp);
 	return v;

@@ -143,6 +143,10 @@ void	Server::newLocation(const tokens_type &tok) {
 		throw WebServer::ParsingError();
 	t_location* loc = new t_location;
 	loc->path = tok[1];
+	// loc->methods = std::vector<std::string>();
+	// loc->redirection = "";
+	// loc->root = std::string;
+	// loc->index = std::vector<std::string>();
 	loc->autoindex = OFF;
 	this->_locations.push_back(loc);
 }

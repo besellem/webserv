@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/25 21:20:30 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 15:09:03 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ void			WebServer::createServers(void)
 	for (size_t i = 0; i < server_size; ++i)
 	{
 		// init each socket
-		_socks[i] = Socket(*_servers[i]);
+		_socks[i] = Socket(_servers[i]);
 
 		cur = _socks[i];
 		cur.startSocket();

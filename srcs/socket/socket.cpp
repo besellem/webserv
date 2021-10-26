@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 14:37:09 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 16:27:22 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,36 +14,6 @@
 
 
 _BEGIN_NS_WEBSERV
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wc++11-compat-deprecated-writable-strings"
-
-struct s_options
-{
-	char	*token;
-	char	*delim;
-};
-
-const char	*g_methods[] = {
-	"GET",
-	"POST",
-	"DELETE",
-	NULL
-};
-
-const struct s_options	g_options[] = {
-	{"Host",            " " },
-	{"Connection",      " " },
-	{"Accept",          "," },
-	{"User-Agent",      ""  },
-	{"Accept-Language", " " },
-	{"Referer",         " " },
-	{"Accept-Encoding", ", "},
-	{NULL, NULL}
-};
-
-#pragma clang diagnostic pop
-
 
 Socket::Socket(void) :
 	_port(0),
@@ -55,9 +25,9 @@ Socket::Socket(void) :
 Socket::~Socket(void)
 {}
 
-Socket::Socket(const Server& serv) :
+Socket::Socket(const Server *serv) :
 	_server_block(serv),
-	_port(serv.port()),
+	_port(serv->port()),
 	_addrLen(sizeof(sockaddr_in)),
 	header()
 {
@@ -75,7 +45,7 @@ Socket::Socket(const Server& serv) :
 		close(_serverFd);
 		errorExit("set opt");
 	}
-	// setNonBlock(_serverFd);
+	setNonBlock(_serverFd);
 }
 
 Socket::Socket(const Socket &x)
@@ -133,62 +103,98 @@ void	Socket::readHttpRequest(int socket_fd)
 }
 
 void	Socket::checkHttpHeaderLine(const std::string& __line)
-{	
-	vector_type					methods;
-	vector_type					opts;
-	vector_type::const_iterator	opt_it;
-	vector_type::const_iterator	method_it;
+{
+	typedef std::map<std::string, std::string>                 map_type;
 	
+
 	std::string					key = __line;
 	std::string					value = __line;
 	const size_t				pos = __line.find_first_of(": ");
-	
 	
 	if (pos == std::string::npos) // (?) HTTP_REQUEST_ERROR;
 	{
 		// throw HttpHeader::HttpHeaderParsingError();
 		return ;
 	}
-	
-	key.substr(0, pos); // get only the key (eg: "Host" or "User-Agent")
-	value.substr(pos);  // get only the value (eg: "localhost:8080")
-	
 
-	for (size_t i = 0; g_options[i].token; ++i)
+	vector_type					methods;
+	vector_type::const_iterator	method_it;
+	map_type					opts;
+	map_type::const_iterator	opt_it;
+
+	methods.push_back("GET");
+	methods.push_back("POST");
+	methods.push_back("DELETE");
+
+	opts.insert(std::make_pair("Host",            " " ));
+	opts.insert(std::make_pair("Connection",      " " ));
+	opts.insert(std::make_pair("Accept",          "," ));
+	opts.insert(std::make_pair("User-Agent",      ""  ));
+	opts.insert(std::make_pair("Accept-Language", " " ));
+	opts.insert(std::make_pair("Referer",         " " ));
+	opts.insert(std::make_pair("Accept-Encoding", ", "));
+
+
+	key = key.substr(0, pos); // get only the key (eg: "Host" or "User-Agent")
+	value = value.substr(pos);  // get only the value (eg: "localhost:8080")
+	
+	for (opt_it = opts.begin(); opt_it != opts.end(); ++opt_it)
 	{
-		// for (size_t j = 0; g_methods[j].token; ++j)
-		// {
-			
-		// }
-		if (CMP_STRINGS(key.c_str(), g_options[i].token))
+		if (opt_it->first == key)
 		{
-			header.data[key] = split_string(value, g_options[i].delim);
+			header.data[key] = split_string(value, opt_it->second);
 		}
 	}
 }
 
 std::string	Socket::constructPath(void) const
 {
-	typedef std::vector<t_location *>                           vector_loc_type;
+	typedef std::vector<t_location *>                             location_type;
 
 	const std::string		path = this->header.path;
-	const vector_loc_type	loc = this->_server_block.locations();	
-	std::string				parent_dir = path.substr(0, path.find_last_of("/"));
-	std::string				ret = ROOT_PATH;
+	const location_type		loc = this->_server_block->locations();
+	
+	std::string		parent_dir = path.substr(0, path.find_last_of("/"));
+	std::string		ret = ROOT_PATH;
 
 
 	std::cout << "parent_dir: [" S_GREEN << parent_dir << S_NONE "]" << std::endl;
 	
-	// find the location based on the path requested
-	for (vector_loc_type::const_iterator it = loc.begin(); it != loc.end(); ++it)
+	/* find the location based on the path requested */
+	for (location_type::const_iterator it = loc.begin(); it != loc.end(); ++it)
 	{
 		std::cout << "location path: [" S_GREEN << (*it)->path << S_NONE "]" << std::endl;
 		if (parent_dir == (*it)->path)
 		{
+
+			/* add root path if it exists */
+			if ((*it)->root.size() != 0)
+			{
+				// remove '/' from the root path if it exists
+				if ((*it)->root[ (*it)->root.size() - 1 ] == '/')
+					ret += "/" + (*it)->root.substr(0, (*it)->root.size() - 1);
+				else
+					ret += "/" + (*it)->root;
+			}
+			
+			ret += path.substr(path.find_last_of("/"));
+			
+			/* if the requested page is a folder */
+			if (ret[ ret.size() - 1 ] == '/')
+			{
+				/* loop through indexes */
+				for (Server::tokens_type::const_iterator idx = (*it)->index.begin(); idx != (*it)->index.end(); ++idx)
+				{
+					std::string	tmp = ret + *idx;
+					// std::cout << "index: " << tmp << std::endl;
+				}
+			}
 			std::cout << "location root: [" S_GREEN << (*it)->root << S_NONE "]" << std::endl;
 			return ret;
 		}
 	}
+
+	/* default case */
 	return ROOT_PATH + this->header.path;
 }
 
@@ -208,6 +214,8 @@ void	Socket::resolveHttpRequest(void)
 	header.path = first_line[1];
 	header.path_constructed = constructPath();
 	++line;
+
+	std::cout << "Contructed Path -> [" S_CYAN << header.path_constructed << S_NONE "]\n";
 
 	/* Parse the remaining buffer line by line */
 	for ( ; line != buffer.end(); ++line)
