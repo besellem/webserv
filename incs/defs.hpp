@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/25 17:52:25 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 14:42:22 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,10 @@
 /* Most syscalls return -1 */
 # define SYSCALL_ERR (-1)
 
+/* Listen Backlog */
+#ifndef SOMAXCONN
+# define SOMAXCONN 128
+#endif
 
 /*
 ** -- Includes --

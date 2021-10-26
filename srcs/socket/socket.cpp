@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 13:52:06 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 14:41:40 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ Socket::Socket(const Server& serv) :
 		close(_serverFd);
 		errorExit("set opt");
 	}
-	// setNonBlock(_serverFd);
+	setNonBlock(_serverFd);
 }
 
 Socket::Socket(const Socket &x)

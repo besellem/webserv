@@ -6,11 +6,13 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 21:22:10 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 14:39:45 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "epoll.hpp"
+
+# define NB false
 
 _BEGIN_NS_WEBSERV
 
@@ -32,10 +34,9 @@ void	Epoll::startEpoll(void) {
 	addEvents(sockFd);
 
 	// test non block
-	__unused struct timespec timeout = {0, 0};
+	struct timespec timeout = {0, 0};
 
-	// int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL)
-	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, &timeout);
+	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, (NB == true) ? &timeout : NULL);
 	if (kevt < 0)
 		errorExit("epoll start failed!");
 }
@@ -61,10 +62,9 @@ void	Epoll::clientConnect(int & fd) {
 	addEvents(fd);
 
 	// test non block
-	__unused struct timespec timeout = {0, 0};
+	struct timespec timeout = {0, 0};
 
-	// int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
-	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, &timeout);
+	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, (NB == true) ? &timeout : NULL);
 	if (kevt < 0)
 		errorExit("kevent failed in clientConnect");
 
@@ -77,10 +77,9 @@ void	Epoll::clientDisconnect(int const & fd) {
 	deleteEvents(fd);
 	
 	// test non block
-	__unused struct timespec timeout = {0, 0};
+	struct timespec timeout = {0, 0};
 
-	// int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
-	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, &timeout);
+	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, (NB == true) ? &timeout : NULL);
 	if (kevt < 0)
 		errorExit("kevent failed in clientConnect");
 
@@ -113,22 +112,16 @@ void	Epoll::eofCase(struct kevent & event) {
 
 void	Epoll::serverLoop(void) {
 	for(;;) {
-
-		// struct timespec timeout;
-		// timeout.tv_sec = 10000 / 1000;
-		// timeout.tv_nsec = (10000 % 1000) * 1000 * 1000;
-
 		// test non block
-		__unused struct timespec timeout = {0, 0};
+		struct timespec timeout = {0, 0};
 
-		// int kevt = kevent(_epollFd, NULL, 0, _evlist, maxEvent, NULL); // NULL in last param means block indefinitely.
-		int kevt = kevent(_epollFd, NULL, 0, _evlist, maxEvent, NULL); // so if set a 0 time, means, kevent return immediately
+		int kevt = kevent(_epollFd, NULL, 0, _evlist, maxEvent, (NB == true) ? &timeout : NULL);
 		if (kevt < 0)
 			errorExit("kevent failed in loop");
 
 		if (kevt > 0)		
-		// debug msg
-		std::cout << "---\nStar: Num of request: [" S_GREEN << kevt << S_NONE "]" << "\n---\n" << std::endl;
+			// debug msg
+			std::cout << "---\nStar: Num of request: [" S_GREEN << kevt << S_NONE "]" << "\n---\n" << std::endl;
 
 		for (int i = 0; i < kevt; i++) {
 			struct kevent currentEvt = _evlist[i];
