@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 21:21:02 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 14:37:09 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,15 +169,26 @@ void	Socket::checkHttpHeaderLine(const std::string& __line)
 
 std::string	Socket::constructPath(void) const
 {
-	// const std::string	path = this->header.path;
-	// std::string			parent_dir = path.substr(0, path.find_last_of("/"));
-	// std::string			real;
+	typedef std::vector<t_location *>                           vector_loc_type;
 
-	// if (parent_dir == )
+	const std::string		path = this->header.path;
+	const vector_loc_type	loc = this->_server_block.locations();	
+	std::string				parent_dir = path.substr(0, path.find_last_of("/"));
+	std::string				ret = ROOT_PATH;
 
-	// ROOT_PATH + 
+
+	std::cout << "parent_dir: [" S_GREEN << parent_dir << S_NONE "]" << std::endl;
 	
-	// return real;
+	// find the location based on the path requested
+	for (vector_loc_type::const_iterator it = loc.begin(); it != loc.end(); ++it)
+	{
+		std::cout << "location path: [" S_GREEN << (*it)->path << S_NONE "]" << std::endl;
+		if (parent_dir == (*it)->path)
+		{
+			std::cout << "location root: [" S_GREEN << (*it)->root << S_NONE "]" << std::endl;
+			return ret;
+		}
+	}
 	return ROOT_PATH + this->header.path;
 }
 
