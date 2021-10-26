@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/26 19:19:37 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 22:23:04 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,10 @@ void    cgi::clear() {
     }
 }
 
+const size_t&	cgi::getContentLength() const {
+    return this->_contentLength;
+}
+
 char**	cgi::getEnv() const {
     return this->_env;
 }
@@ -59,51 +63,47 @@ std::string vectorToStr(const std::vector<std::string> &vect)
 
 std::string	Socket::getRequestData(const std::string &name)
 {
-    if (name == "QUERY_STRING")
+    std::string dataNames[] = {"SERVER_PORT", "REQUEST_METHOD", "PATH_INFO",
+        "SCRIPT_NAME", "REMOTE_HOST", "REMOTE_ADDR", "CONTENT_LENGTH", "HTTP_ACCEPT",
+        "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER", "SERVER_SOFTWARE",
+        "GATEWAY_INTERFACE", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS"};
+    std::string str;
+    size_t pos;
+    int         i = 0;
+    
+    for (;i < 16; i++)
+        if (name == dataNames[i])
+            break ;
+    switch (i)
     {
-        size_t pos = vectorToStr(this->header.data["Referer"]).find("?");
-        if (pos == std::string::npos)
-            return std::string("");
-       return this->header.path.substr(pos);
-    }
-    else if (name == "REMOTE_HOST")
-        return ft_strcut(vectorToStr(this->header.data["Host"]), ':');
-    else if (name == "REQUEST_METHOD")
-        return this->header.request_method;
-    else if (name == "PATH_INFO")
-        return this->header.path_constructed;
-    else if (name == "SCRIPT_NAME")
-        return std::string("/Users/adbenoit/.brew/bin/php-cgi");
-    else if (name == "REMOTE_ADDR")
-        return vectorToStr(this->header.data["Host"]);
-    else if (name == "CONTENT_LENGTH")
-        return std::to_string(this->getFileLength(this->header.path_constructed));
-    else if (name == "HTTP_ACCEPT")
-        return vectorToStr(this->header.data["Accept"]);
-    else if (name == "HTTP_ACCEPT_LANGUAGE")
-        return vectorToStr(this->header.data["Accept-Language"]);
-    else if (name == "HTTP_USER_AGENT")
-        return vectorToStr(this->header.data["User-Agent"]);
-    else if (name == "HTTP_REFERER")
-        return vectorToStr(this->header.data["Referer"]);
-    else if (name == "SERVER_SOFTWARE")
-        return std::string(HTTP_PROTOCOL_VERSION);
-    else if (name == "GATEWAY_INTERFACE")
-        return std::string("CGI/1.1");
-    else if (name == "CONTENT_TYPE")
-        return std::string("");
-    else if (name == "REDIRECT_STATUS")
-        return std::to_string(getStatus(this->header.path_constructed).first);
-    else if (name == "SERVER_PORT")
-    {
-        std::string str = vectorToStr(this->header.data["Host"]);
-        size_t pos = str.find(":");
+    case 0:
+        str = vectorToStr(this->header.data["Host"]);
+        pos = str.find(":");
         if (pos == std::string::npos)
             return std::string("");
        return str.substr(pos + 1);
+    case 1: return this->header.request_method;
+    case 2: return this->header.path_constructed;
+    case 3: return std::string("/Users/adbenoit/.brew/bin/php-cgi");
+    case 4: return ft_strcut(vectorToStr(this->header.data["Host"]), ':');
+    case 5: return vectorToStr(this->header.data["Host"]);
+    // case 6: return std::to_string(this->getFileLength(this->header.path_constructed));
+    case 6: return "5";
+    case 7: return vectorToStr(this->header.data["Accept"]);
+    case 8: return vectorToStr(this->header.data["Accept-Language"]);
+    case 9: return vectorToStr(this->header.data["User-Agent"]);
+    case 10: return vectorToStr(this->header.data["Referer"]);
+    case 11: return std::string(HTTP_PROTOCOL_VERSION);
+    case 12: return std::string("CGI/1.1");
+    case 13: return std::string("");
+    case 14:
+        pos = vectorToStr(this->header.data["Referer"]).find("?");
+        if (pos == std::string::npos)
+            return std::string("");
+       return this->header.path.substr(pos);
+    case 15: return std::string("CGI");
+    default: return std::string();
     }
-    std::cout << "!!!!! ERROR !!!!!" << std::endl;
-    return std::string();
 }
 
 /* Set the CGI environment variables.
@@ -112,36 +112,27 @@ between the client and the server. */
 
 void cgi::setEnv()
 {
-    std::string dataNames[] = {"SERVER_PORT", "REQUEST_METHOD", "PATH_INFO",
-        "SCRIPT_NAME", "REMOTE_HOST", "REMOTE_ADDR", "CONTENT_LENGTH", "HTTP_ACCEPT",
-        "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER", "SERVER_SOFTWARE",
-        "GATEWAY_INTERFACE", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS"};
-    
-    // ["SERVER_NAME"] = "";
-    // ["SERVER_PROTOCOL"] = "webserv/0.0";
-    // ["AUTH_TYPE"] = "";
-    // ["REMOTE_USER"] = "";
-    // ["REMOTE_IDENT"] = "";
-
+    std::string dataNames[] = {"SERVER_PORT", "CONTENT_LENGTH", "PATH_INFO",
+        "SCRIPT_NAME", "REMOTE_HOST", "REMOTE_ADDR", "HTTP_ACCEPT", "HTTP_ACCEPT_LANGUAGE",
+        "HTTP_USER_AGENT", "HTTP_REFERER", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS"};
+    // "REQUEST_METHOD", "SERVER_SOFTWARE", "GATEWAY_INTERFACE" : security error
     size_t i = 0;
-    size_t size = 16;
+    size_t size = 13;
+    
     this->_env = (char **)malloc(sizeof(char *) * (size + 1));
     if (!this->_env)
         throw std::bad_alloc();
     while (i < size)
     {
         std::string str = dataNames[i] + "=" + this->_socket.getRequestData(dataNames[i]);
-        // std::string str = dataNames[i] + "=";
         this->_env[i] = strdup(str.c_str());
         if (!this->_env[i])
             throw std::bad_alloc();
         ++i;
     }
     this->_env[i] = 0;
-    i = -1;
-    while(this->_env[++i])
-        std::cout << this->_env[i] << std::endl;
 }
+
 
 /* Executes the CGI program on a file.
 Returns the output in a string */
@@ -158,7 +149,6 @@ std::string cgi::execute(const std::string &fileName)
         throw CgiError();
     char *arg[] = {strdup(this->_program.c_str()),
             strdup(fileName.c_str()), NULL};
-    std::cout << "arg: " << arg[0] << ", " << arg[1] << std::endl;
     errno = 0;
     if ((pid = fork()) == -1)
         throw CgiError();
@@ -166,11 +156,7 @@ std::string cgi::execute(const std::string &fileName)
     {
         close(fd[0]);
         if (dup2(fd[1], STDOUT_FILENO) == -1)
-        {
-            std::cout << strerror(errno) << std::endl;
-            close(fd[1]);
-            // throw CgiError();
-        }
+            throw CgiError();
         close(fd[1]);
         if (execve(arg[0], arg, this->_env)== -1)
             throw CgiError();
@@ -180,15 +166,28 @@ std::string cgi::execute(const std::string &fileName)
     // if (status != 0)
         // throw CgiError();
     close(fd[1]);
-    while (read(fd[0], buffer, sizeof(buffer)) > 0)
+    int n;
+    while ((n = read(fd[0], buffer, sizeof(buffer))) > 0)
+    {
+        buffer[n] = 0;
         content += buffer;
+    }
     close(fd[0]);
     free(arg[0]);
     free(arg[1]);
+    this->_contentLength = content.size();
+    size_t pos = content.find("\n\r\n");
+    if (pos != std::string::npos)
+        this->_contentLength -= pos + 3;
     if (DEBUG)
     {
+        std::cout << "............ CGI ENVIRON ............." <<std::endl;
+        int i = -1;
+        while(this->_env[++i])
+            std::cout << this->_env[i] << std::endl;
+        std::cout << "......................................" <<std::endl;
         std::cout << "############ CGI OUTPUT ##############" << std::endl;
-        std::cout << "content: \n" << content << std::endl;
+        std::cout << content << std::endl;
         std::cout << "######################################" << std::endl;
     }
     return content;

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 00:36:05 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/25 16:57:56 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 22:19:33 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ class cgi
 		~cgi();
 		
 		char**			getEnv() const;
+		const size_t&	getContentLength() const;
 		std::string		execute(const std::string &);
 		void			clear();
 		
@@ -47,6 +48,7 @@ class cgi
 		char 				**_env;
 		Socket				_socket;
 		const std::string	_program;
+		size_t				_contentLength;
 		
 };
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   defs.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/25 17:52:25 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 21:15:18 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,7 @@
 # include <string>
 # include <cstring>
 # include <cstdio>
+# include <cstdlib>
 # include <cctype>
 # include <iostream>
 # include <iomanip>

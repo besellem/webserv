@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 18:42:05 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 22:20:33 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -231,16 +231,8 @@ Socket::pair_type	Socket::getStatus(__unused const std::string& path) const
 void		Socket::sendHttpResponse(int socket_fd)
 {
 	std::string		response;
-	pair_type		status = getStatus(header.path_constructed);
-	const ssize_t	content_length = getFileLength(header.path_constructed);
-
-	// Header
-	response =  HTTP_PROTOCOL_VERSION " ";
-	response += std::to_string(status.first) + " ";
-	response += status.second + NEW_LINE;
-
-	response += "Content-Length: " + std::to_string(content_length);
-	response += "\n\n";
+	std::string		content;
+	ssize_t			content_length;
 
 	// Content
 	if (getExtension(header.path) == ".php")
@@ -249,7 +241,8 @@ void		Socket::sendHttpResponse(int socket_fd)
 		{
 			// cgi cgi(*this, "/Users/adbenoit/.brew/bin/php");
 			cgi cgi(*this, "/Users/adbenoit/.brew/bin/php-cgi");
-			response += cgi.execute(header.path);
+			content = cgi.execute(header.path_constructed);
+			content_length = cgi.getContentLength();
 		}
 		catch(const std::exception& e)
 		{
@@ -257,8 +250,22 @@ void		Socket::sendHttpResponse(int socket_fd)
 		}
 	}
 	else
-		response += getFileContent(header.path_constructed);
-
+	{
+		content = "\n";
+		content += getFileContent(header.path_constructed);
+		content_length = content.size() - 1;
+	}
+	
+	// Header
+	pair_type		status = getStatus(header.path_constructed);
+	response =  HTTP_PROTOCOL_VERSION " ";
+	response += std::to_string(status.first) + " ";
+	response += status.second + NEW_LINE;
+	response += "Content-Length: " + std::to_string(content_length);
+	response += "\n";
+	
+	response += content;
+	
 	// -- Send to client --
 	send(socket_fd, response.c_str(), response.length(), 0);
 
