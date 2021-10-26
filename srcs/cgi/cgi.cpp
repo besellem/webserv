@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/26 16:56:59 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 19:19:37 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,42 +44,63 @@ char**	cgi::getEnv() const {
     return this->_env;
 }
 
+std::string vectorToStr(const std::vector<std::string> &vect)
+{
+    if (vect.empty())
+        return std::string("");
+    std::string str = vect[0];
+    for (size_t i = 1; i < vect.size(); i++)
+    {
+        str += " ";
+        str += vect[i];
+    }
+    return str;
+}
+
 std::string	Socket::getRequestData(const std::string &name)
 {
-    this->header.data["Host"].push_back("");
-    this->header.data["Accept"].push_back("");
-    this->header.data["User-Agent"].push_back("");
-    this->header.data["Accept-Language"].push_back("");
-    this->header.data["Referer"].push_back("");
-
-    std::string dataNames[] = {"SERVER_PORT", "REQUEST_METHOD", "PATH_INFO",
-        "SCRIPT_NAME", "REMOTE_HOST", "REMOTE_ADDR", "CONTENT_LENGTH", "HTTP_ACCEPT",
-        "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER"};
-    std::string  values[] = {std::to_string(this->_port), this->header.request_method,
-        this->header.path_constructed, this->header.path_constructed, this->header.data["Host"][0],
-        this->header.data["Host"][0], std::to_string(this->getFileLength(this->header.path_constructed)),
-        this->header.data["Accept"][0], this->header.data["Accept-Language"][0],
-        this->header.data["User-Agent"][0], this->header.data["Referer"][0]};
-
     if (name == "QUERY_STRING")
     {
-        size_t pos = this->header.data["Referer"][0].find("?");
+        size_t pos = vectorToStr(this->header.data["Referer"]).find("?");
         if (pos == std::string::npos)
             return std::string("");
-       return this->header.path.substr(pos, this->header.path.size());
+       return this->header.path.substr(pos);
     }
+    else if (name == "REMOTE_HOST")
+        return ft_strcut(vectorToStr(this->header.data["Host"]), ':');
+    else if (name == "REQUEST_METHOD")
+        return this->header.request_method;
+    else if (name == "PATH_INFO")
+        return this->header.path_constructed;
+    else if (name == "SCRIPT_NAME")
+        return std::string("/Users/adbenoit/.brew/bin/php-cgi");
+    else if (name == "REMOTE_ADDR")
+        return vectorToStr(this->header.data["Host"]);
+    else if (name == "CONTENT_LENGTH")
+        return std::to_string(this->getFileLength(this->header.path_constructed));
+    else if (name == "HTTP_ACCEPT")
+        return vectorToStr(this->header.data["Accept"]);
+    else if (name == "HTTP_ACCEPT_LANGUAGE")
+        return vectorToStr(this->header.data["Accept-Language"]);
+    else if (name == "HTTP_USER_AGENT")
+        return vectorToStr(this->header.data["User-Agent"]);
+    else if (name == "HTTP_REFERER")
+        return vectorToStr(this->header.data["Referer"]);
     else if (name == "SERVER_SOFTWARE")
-        return "HTTP/1.1";
+        return std::string(HTTP_PROTOCOL_VERSION);
     else if (name == "GATEWAY_INTERFACE")
-        return "CGI/1.1";
-    else if (name == "REDIRECT_STATUS")
-        return std::to_string(this->getStatus().first);
+        return std::string("CGI/1.1");
     else if (name == "CONTENT_TYPE")
-        return "PHP";
-    for (size_t i = 0; i < 11; i++)
+        return std::string("");
+    else if (name == "REDIRECT_STATUS")
+        return std::to_string(getStatus(this->header.path_constructed).first);
+    else if (name == "SERVER_PORT")
     {
-        if (name == dataNames[i])
-            return values[i];
+        std::string str = vectorToStr(this->header.data["Host"]);
+        size_t pos = str.find(":");
+        if (pos == std::string::npos)
+            return std::string("");
+       return str.substr(pos + 1);
     }
     std::cout << "!!!!! ERROR !!!!!" << std::endl;
     return std::string();
@@ -93,7 +114,8 @@ void cgi::setEnv()
 {
     std::string dataNames[] = {"SERVER_PORT", "REQUEST_METHOD", "PATH_INFO",
         "SCRIPT_NAME", "REMOTE_HOST", "REMOTE_ADDR", "CONTENT_LENGTH", "HTTP_ACCEPT",
-        "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER"};
+        "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER", "SERVER_SOFTWARE",
+        "GATEWAY_INTERFACE", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS"};
     
     // ["SERVER_NAME"] = "";
     // ["SERVER_PROTOCOL"] = "webserv/0.0";
@@ -102,21 +124,23 @@ void cgi::setEnv()
     // ["REMOTE_IDENT"] = "";
 
     size_t i = 0;
-    size_t size = 11;
-    std::string str;
+    size_t size = 16;
     this->_env = (char **)malloc(sizeof(char *) * (size + 1));
     if (!this->_env)
         throw std::bad_alloc();
     while (i < size)
     {
-        str = dataNames[i] + "=" + this->_socket.getRequestData(dataNames[i]);
+        std::string str = dataNames[i] + "=" + this->_socket.getRequestData(dataNames[i]);
+        // std::string str = dataNames[i] + "=";
         this->_env[i] = strdup(str.c_str());
         if (!this->_env[i])
             throw std::bad_alloc();
-        std::cout << this->_env[i] << std::endl;
         ++i;
     }
     this->_env[i] = 0;
+    i = -1;
+    while(this->_env[++i])
+        std::cout << this->_env[i] << std::endl;
 }
 
 /* Executes the CGI program on a file.

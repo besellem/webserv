@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 16:46:42 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 18:42:05 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,7 @@ void	Socket::checkHttpHeaderLine(const std::string& __line)
 
 	std::string					key = __line;
 	std::string					value = __line;
-	const size_t				pos = __line.find_first_of(": ");
+	const size_t				pos = __line.find(": ");
 	
 	if (pos == std::string::npos) // (?) HTTP_REQUEST_ERROR;
 	{
@@ -137,7 +137,7 @@ void	Socket::checkHttpHeaderLine(const std::string& __line)
 
 
 	key = key.substr(0, pos); // get only the key (eg: "Host" or "User-Agent")
-	value = value.substr(pos);  // get only the value (eg: "localhost:8080")
+	value = value.substr(pos + 2);  // get only the value (eg: "localhost:8080")
 	for (opt_it = opts.begin(); opt_it != opts.end(); ++opt_it)
 	{
 		if (opt_it->first == key)

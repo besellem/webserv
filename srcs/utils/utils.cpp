@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 17:41:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/26 16:40:29 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 17:41:24 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,11 +38,13 @@ std::vector<std::string>	split_string(const std::string& s, const std::string& d
 		while ((pos = tmp.find(delim)) != std::string::npos)
 		{
 			line = tmp.substr(0, pos);
-			v.push_back(line);
+			if (!tmp.empty())
+				v.push_back(line);
 			tmp.erase(0, pos + delim.length());
 		}
 	}
-	v.push_back(tmp);
+	if (!tmp.empty())
+		v.push_back(tmp);
 	return v;
 }
 
