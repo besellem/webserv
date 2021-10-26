@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 16:04:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/26 14:52:07 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 23:08:26 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@ class HttpHeader
 		~HttpHeader();
 		HttpHeader&		operator=(const HttpHeader &x);
 
-		pointer			resetBuffer(void);		
+		pointer			resetBuffer(void);
+		
 	
 	public:
 		class HttpHeaderParsingError : public std::exception

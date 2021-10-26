@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:53:23 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/26 14:38:32 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 22:57:20 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,6 @@ Server::tokens_type    getTokens(std::string line)
 }
 
 /* Fills the servers with line's data */
-
 void	parse_line(ServerGenerator& servers, std::string line)
 {	
 	line = ft_strcut(line, '#');

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 16:32:24 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 23:12:15 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ _BEGIN_NS_WEBSERV
 
 class Socket
 {
-
 	public:
 		typedef std::vector<std::string>                       vector_type;
 		typedef std::pair<int, std::string>                    pair_type;

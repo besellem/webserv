@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/26 14:35:46 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 23:13:33 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,6 @@ class WebServer {
 /** @brief function declare */
 int		socketAccept(int fd, sockaddr *addr, socklen_t *addrLen);
 int		socketAccept(const Socket &);
-bool	ft_isNumeric(const std::string &str);
 
 
 _END_NS_WEBSERV

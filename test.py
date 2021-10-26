@@ -1,4 +1,7 @@
-# This program prints Hello, world!
+import os
+import sys
 
-print('Hello, world!')
-
+for i in range(100):
+	os.system(f"curl localhost:{int(sys.argv[1])} &");
+	# os.system(f"curl localhost:{int(sys.argv[1])}/index.html &");
+	# print(i)

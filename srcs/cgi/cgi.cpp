@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/26 22:23:04 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 23:41:30 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ std::string	Socket::getRequestData(const std::string &name)
        return str.substr(pos + 1);
     case 1: return this->header.request_method;
     case 2: return this->header.path_constructed;
-    case 3: return std::string("/Users/adbenoit/.brew/bin/php-cgi");
+    case 3: return std::string("/usr/local/bin/php-cgi");
     case 4: return ft_strcut(vectorToStr(this->header.data["Host"]), ':');
     case 5: return vectorToStr(this->header.data["Host"]);
     // case 6: return std::to_string(this->getFileLength(this->header.path_constructed));

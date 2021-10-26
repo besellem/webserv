@@ -14,6 +14,7 @@
 
 _BEGIN_NS_WEBSERV
 
+
 Server::Server() : _port(8080), _cliMaxSize(-1) {}
 
 Server::~Server() {
@@ -25,39 +26,26 @@ Server::~Server() {
 Server::Server(const Server &x) { *this = x; }
 
 Server& Server::operator=(const Server &x) {
-    if (this == &x)
-        return *this;
+	if (this == &x)
+		return *this;
 	this->_port = x._port;
-    this->_name = x._name;
-    this->_errorPages = x._errorPages;
+	this->_name = x._name;
+	this->_errorPages = x._errorPages;
 	this->_cliMaxSize = x._cliMaxSize;
-    this->_locations = x._locations;
-    return *this;
+	this->_locations = x._locations;
+	return *this;
 }
+
 
 /*
 **  Getters
 */
-
-const int&	Server::port() const {
-    return this->_port ;
-}
-const std::vector<std::string>&	Server::name() const {
-    return this->_name ;
-}
-const std::map<int, std::string>&	Server::errorPages() const {
-    return this->_errorPages ;
-}
-const int&	Server::cliMaxSize() const {
-    return this->_cliMaxSize ;
-}
-const t_location&	Server::locations(int i) const {
-    return *(this->_locations[i]);
-}
-
-size_t  Server::nLoc() const {
-    return this->_locations.size();
-}
+const int&							Server::port()       const { return this->_port; }
+const std::vector<std::string>&		Server::name()       const { return this->_name; }
+const std::map<int, std::string>&	Server::errorPages() const { return this->_errorPages; }
+const int&							Server::cliMaxSize() const { return this->_cliMaxSize; }
+const t_location&	Server::locations(int i)			 const { return *(this->_locations[i]); }
+size_t  Server::nLoc()									 const { return this->_locations.size(); }
 
 /*
 **  Setters
@@ -73,7 +61,7 @@ void	Server::setPort(const tokens_type &tok) {
     if (!ft_isNumeric(tok[1]))
         throw WebServer::ParsingError();
     std::stringstream(tok[1]) >> this->_port;
-    if (this->_port > 65535)
+    if (this->_port > std::numeric_limits<unsigned short>().max())
         throw WebServer::ParsingError();
 }
 
@@ -151,7 +139,6 @@ void	Server::setMethods(t_location  *loc, const tokens_type &tok)
 */
 
 /* Adds a new location to the server */
-
 void	Server::newLocation(const tokens_type &tok) {
     if (tok.size() != 2 || tok[1].find(';') != std::string::npos)
         throw WebServer::ParsingError();
@@ -162,7 +149,6 @@ void	Server::newLocation(const tokens_type &tok) {
 }
 
 /* Adds the new directive to the location */
-
 void	Server::newLocationDirective(const tokens_type &tok)
 {
     std::string directives[] = {"allow", "rewrite", "root",
@@ -187,7 +173,6 @@ void	Server::newLocationDirective(const tokens_type &tok)
 }
 
 /* Adds the new directive to the server */
-
 void	Server::newDirective(const tokens_type &tokens)
 {
 	if (tokens.empty())
@@ -210,7 +195,6 @@ void	Server::newDirective(const tokens_type &tokens)
 }
 
 /* Display location block like the config file */
-
 std::ostream& operator<<(std::ostream& os, const t_location& loc)
 {
     std::string directives[] = {"rewrite", "root"};
@@ -247,7 +231,6 @@ std::ostream& operator<<(std::ostream& os, const t_location& loc)
 }
 
 /* Display server block like the config file */
-
 std::ostream& operator<<(std::ostream& os, const Server& server)
 {
     os << "server\n" << "{" << std::endl;
@@ -274,5 +257,6 @@ std::ostream& operator<<(std::ostream& os, const Server& server)
     os << "}" << std::endl;
     return os;
 }
+
 
 _END_NS_WEBSERV

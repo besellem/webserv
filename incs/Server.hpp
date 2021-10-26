@@ -6,20 +6,16 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/26 14:40:48 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 23:09:06 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include <iostream>
-# include <cstring>
-# include <exception>
-# include <fstream>
-# include <iomanip>
-# include <map>
-# include <vector>
+# include <defs.hpp>
+# include "Server.hpp"
+
 
 _BEGIN_NS_WEBSERV
 

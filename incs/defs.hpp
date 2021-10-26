@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/26 21:15:18 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 23:07:46 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,10 @@
 /* Most syscalls return -1 */
 # define SYSCALL_ERR (-1)
 
+/* Listen Backlog */
+#ifndef SOMAXCONN
+# define SOMAXCONN 128
+#endif
 
 /*
 ** -- Includes --
@@ -85,6 +89,9 @@
 # include <sys/types.h>
 # include <sys/cdefs.h>
 # include <netinet/in.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <sys/stat.h>
 # include <fcntl.h>
 # include <unistd.h>
 

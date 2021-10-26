@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 22:20:33 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 23:41:54 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,10 @@
 
 
 _BEGIN_NS_WEBSERV
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc++11-compat-deprecated-writable-strings"
+#pragma clang diagnostic pop
 
 Socket::Socket(void) :
 	_port(0),
@@ -149,7 +153,15 @@ void	Socket::checkHttpHeaderLine(const std::string& __line)
 
 std::string	Socket::constructPath(void) const
 {
-	/* default case */
+	// const std::string	path = this->header.path;
+	// std::string			parent_dir = path.substr(0, path.find_last_of("/"));
+	// std::string			real;
+
+	// if (parent_dir == )
+
+	// ROOT_PATH + 
+	
+	// return real;
 	return ROOT_PATH + this->header.path;
 }
 
@@ -183,6 +195,13 @@ void	Socket::resolveHttpRequest(void)
 
 ssize_t		Socket::getFileLength(const std::string& path)
 {
+	// check if the path is a file or directory
+	struct stat		statBuf;
+
+	stat(path.c_str(), &statBuf);
+	if (S_ISDIR(statBuf.st_mode))
+			return 0;
+	
 	std::ifstream	ifs(path, std::ios::binary | std::ios::ate);
 
 	if (ifs.is_open())
@@ -240,7 +259,7 @@ void		Socket::sendHttpResponse(int socket_fd)
 		try
 		{
 			// cgi cgi(*this, "/Users/adbenoit/.brew/bin/php");
-			cgi cgi(*this, "/Users/adbenoit/.brew/bin/php-cgi");
+			cgi cgi(*this, "/usr/local/bin/php-cgi");
 			content = cgi.execute(header.path_constructed);
 			content_length = cgi.getContentLength();
 		}
@@ -251,9 +270,11 @@ void		Socket::sendHttpResponse(int socket_fd)
 	}
 	else
 	{
-		content = "\n";
-		content += getFileContent(header.path_constructed);
-		content_length = content.size() - 1;
+		content = getFileContent(header.path_constructed);
+		if (content.empty())
+			content = generateAutoindexPage();
+		content_length = content.size();
+		content = "\n" + content;
 	}
 	
 	// Header
@@ -295,6 +316,107 @@ void	Socket::listenStep(const int& serverFd)
 {
 	if (SYSCALL_ERR == listen(serverFd, SOMAXCONN))
 		errorExit("listen step");
+}
+
+std::string	Socket::generateAutoindexPage(void) const {
+	DIR				*dir = opendir(ROOT_PATH);
+	struct dirent	*dirInfo;
+	struct stat		statBuf;
+
+	std::string		addPrefix;
+
+	std::string		fileName;
+	std::string		lastModTime;
+	std::string		fileSize;
+
+	std::string		content;
+	
+	/* begin html */
+	content = "<html>\n";
+	content += "<head><title>autoindex</title></head>\n";
+	content += "<body>\n";
+	content += "<h1>Index of /</h1><hr/>\n";
+
+	/* create table */
+	content += "<table width=\"100%\" border=\"0\">\n";
+	content += "<tr>\n";
+	content += "<th align=\"left\">Name</th>\n";
+	content += "<th align=\"left\">Last modified</th>\n";
+	content += "<th align=\"left\">size</th>\n";
+	content += "</tr>\n";
+
+	if (dir == NULL) {
+		std::cout << "open dir error!" << std::endl;
+		return NULL;
+	}
+
+	/* create table content */
+	while ((dirInfo = readdir(dir)) != NULL) {
+		fileName = dirInfo->d_name;
+		if (fileName == ".") {
+			fileName.clear();
+			continue;
+		}
+
+		/* get absolut path */
+		addPrefix = ROOT_PATH;
+		addPrefix += "/";
+		if (fileName != "..")
+			addPrefix += fileName;
+		else
+			addPrefix = fileName;
+
+		/* get file status */
+		stat(addPrefix.c_str(), &statBuf);
+
+		/* get file modify time */
+		lastModTime = ctime(&statBuf.st_mtime);
+		lastModTime.erase(lastModTime.end() - 1);
+
+		/* get file size */
+		fileSize = std::to_string(statBuf.st_size);
+
+		/* begin of content */
+		content += "<tr>\n";
+
+		/* element 1: path access */
+		content += "<td><a href=\"";
+		content += fileName;
+		if (S_ISDIR(statBuf.st_mode))
+			content += "/";
+		content += "\">";
+		content += fileName;
+		if (S_ISDIR(statBuf.st_mode))
+			content += "/";		
+		content += "</a></td>\n";
+
+		/* element 2: modify time */
+		content += "<td>";
+		content += lastModTime;
+		content += "</td>";
+
+		/* element 3: file size */
+		content += "<td>";
+		content += fileSize;
+		content += "</td>";
+
+		/* end of content */
+		content += "</tr>\n";
+
+		addPrefix.clear();
+		fileName.clear();
+		lastModTime.clear();
+		fileSize.clear();
+	}
+
+	closedir(dir);
+
+	/* end of html */
+	content += "</table>\n";
+	content += "</body>\n";
+	content += "</html>\n";
+
+	return content;
 }
 
 _END_NS_WEBSERV
