@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   defs.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/26 14:42:22 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 18:08:06 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,9 @@
 # include <sys/types.h>
 # include <sys/cdefs.h>
 # include <netinet/in.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <sys/stat.h>
 # include <fcntl.h>
 # include <unistd.h>
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 14:41:40 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 19:08:50 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -209,6 +209,13 @@ void	Socket::resolveHttpRequest(void)
 
 ssize_t		Socket::getFileLength(const std::string& path)
 {
+	// check if the path is a file or directory
+	struct stat		statBuf;
+
+	stat(path.c_str(), &statBuf);
+	if (S_ISDIR(statBuf.st_mode))
+			return 0;
+	
 	std::ifstream	ifs(path, std::ios::binary | std::ios::ate);
 
 	if (ifs.is_open())
@@ -265,11 +272,19 @@ void		Socket::sendHttpResponse(int socket_fd)
 	response += std::to_string(status.first) + " ";
 	response += status.second + NEW_LINE;
 
-	response += "Content-Length: " + std::to_string(content_length);
+	// Content + autoindex
+	std::string content = getFileContent(header.path_constructed);
+	
+	if (content_length != 0)
+		response += "Content-Length: " + std::to_string(content_length);
+	else {
+		if (content == "")
+			content = generateAutoindexPage();
+		response += "Content-Length: " + std::to_string(content.length());
+	}
 	response += "\n\n";
 
-	// Content
-	response += getFileContent(header.path_constructed);
+	response += content;
 
 	// -- Send to client --
 	send(socket_fd, response.c_str(), response.length(), 0);
@@ -300,6 +315,107 @@ void	Socket::listenStep(const int& serverFd)
 {
 	if (SYSCALL_ERR == listen(serverFd, SOMAXCONN))
 		errorExit("listen step");
+}
+
+std::string	Socket::generateAutoindexPage(void) const {
+	DIR				*dir = opendir(ROOT_PATH);
+	struct dirent	*dirInfo;
+	struct stat		statBuf;
+
+	std::string		addPrefix;
+
+	std::string		fileName;
+	std::string		lastModTime;
+	std::string		fileSize;
+
+	std::string		content;
+	
+	/* begin html */
+	content = "<html>\n";
+	content += "<head><title>autoindex</title></head>\n";
+	content += "<body>\n";
+	content += "<h1>Index of /</h1><hr/>\n";
+
+	/* create table */
+	content += "<table width=\"100%\" border=\"0\">\n";
+	content += "<tr>\n";
+	content += "<th align=\"left\">Name</th>\n";
+	content += "<th align=\"left\">Last modified</th>\n";
+	content += "<th align=\"left\">size</th>\n";
+	content += "</tr>\n";
+
+	if (dir == NULL) {
+		std::cout << "open dir error!" << std::endl;
+		return NULL;
+	}
+
+	/* create table content */
+	while ((dirInfo = readdir(dir)) != NULL) {
+		fileName = dirInfo->d_name;
+		if (fileName == ".") {
+			fileName.clear();
+			continue;
+		}
+
+		/* get absolut path */
+		addPrefix = ROOT_PATH;
+		addPrefix += "/";
+		if (fileName != "..")
+			addPrefix += fileName;
+		else
+			addPrefix = fileName;
+
+		/* get file status */
+		stat(addPrefix.c_str(), &statBuf);
+
+		/* get file modify time */
+		lastModTime = ctime(&statBuf.st_mtime);
+		lastModTime.erase(lastModTime.end() - 1);
+
+		/* get file size */
+		fileSize = std::to_string(statBuf.st_size);
+
+		/* begin of content */
+		content += "<tr>\n";
+
+		/* element 1: path access */
+		content += "<td><a href=\"";
+		content += fileName;
+		if (S_ISDIR(statBuf.st_mode))
+			content += "/";
+		content += "\">";
+		content += fileName;
+		if (S_ISDIR(statBuf.st_mode))
+			content += "/";		
+		content += "</a></td>\n";
+
+		/* element 2: modify time */
+		content += "<td>";
+		content += lastModTime;
+		content += "</td>";
+
+		/* element 3: file size */
+		content += "<td>";
+		content += fileSize;
+		content += "</td>";
+
+		/* end of content */
+		content += "</tr>\n";
+
+		addPrefix.clear();
+		fileName.clear();
+		lastModTime.clear();
+		fileSize.clear();
+	}
+
+	closedir(dir);
+
+	/* end of html */
+	content += "</table>\n";
+	content += "</body>\n";
+	content += "</html>\n";
+
+	return content;
 }
 
 _END_NS_WEBSERV

@@ -4,8 +4,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <time.h>
+#include <unistd.h>
 
 int main() {
 	DIR				*dir = opendir("./www");
@@ -25,6 +25,7 @@ int main() {
 	content += "<html>\n";
 	content += "<head><title>autoindex</title></head>\n";
 	content += "<body>\n";
+	content += "<h1>autoindex</h1><hr/>\n";
 
 	/* create table */
 	content += "<table width=\"100%\" border=\"0\">\n";
@@ -97,8 +98,6 @@ int main() {
 	content += "</table>\n";
 	content += "</body>\n";
 	content += "</html>\n";
-
-	std::cout << content << std::endl;
 
 	return 0;
 }
