@@ -1,8 +1,8 @@
-- [x] Parser (Adeline)
-- [ ] Server engine
-- [ ] poll / epoll / select / kqueue
-- [ ] HTTP requests
+- [x] Parser
+- [x] Server engine
+- [x] poll / epoll / select / kqueue
+- [x] HTTP requests
 - [ ] HTTP response codes
-- [ ] Autoindex page generator
+- [x] Autoindex page generator
 - [ ] CGI
 - [ ] Tester (to do & to pass)
