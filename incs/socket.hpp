@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 15:33:11 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 16:32:24 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ class Socket
 	/** @brief constructor / destructor */
 
 		explicit Socket(void);
-		explicit Socket(const Server &);
+		explicit Socket(const Server *);
 		// explicit Socket(short const &);
 		Socket(const Socket &);
 		~Socket();

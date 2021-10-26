@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/26 14:37:14 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 16:33:19 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ void			WebServer::createServers(void)
 	for (size_t i = 0; i < server_size; ++i)
 	{
 		// init each socket
-		_socks[i] = Socket(*_servers[i]);
+		_socks[i] = Socket(_servers[i]);
 
 		cur = _socks[i];
 		cur.startSocket();

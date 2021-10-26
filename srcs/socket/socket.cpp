@@ -6,44 +6,15 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 16:22:32 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 16:46:42 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cgi.hpp"
 #include "socket.hpp"
+#include "cgi.hpp"
+
 
 _BEGIN_NS_WEBSERV
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wc++11-compat-deprecated-writable-strings"
-
-struct s_options
-{
-	char	*token;
-	char	*delim;
-};
-
-const char	*g_methods[] = {
-	"GET",
-	"POST",
-	"DELETE",
-	NULL
-};
-
-const struct s_options	g_options[] = {
-	{"Host",            " " },
-	{"Connection",      " " },
-	{"Accept",          "," },
-	{"User-Agent",      ""  },
-	{"Accept-Language", " " },
-	{"Referer",         " " },
-	{"Accept-Encoding", ", "},
-	{NULL, NULL}
-};
-
-#pragma clang diagnostic pop
-
 
 Socket::Socket(void) :
 	_port(0),
@@ -55,9 +26,9 @@ Socket::Socket(void) :
 Socket::~Socket(void)
 {}
 
-Socket::Socket(const Server& serv) :
-	_server_block(&serv),
-	_port(serv.port()),
+Socket::Socket(const Server *serv) :
+	_server_block(serv),
+	_port(serv->port()),
 	_addrLen(sizeof(sockaddr_in)),
 	header()
 {
@@ -75,7 +46,7 @@ Socket::Socket(const Server& serv) :
 		close(_serverFd);
 		errorExit("set opt");
 	}
-	// setNonBlock(_serverFd);
+	setNonBlock(_serverFd);
 }
 
 Socket::Socket(const Socket &x)
@@ -133,51 +104,52 @@ void	Socket::readHttpRequest(int socket_fd)
 }
 
 void	Socket::checkHttpHeaderLine(const std::string& __line)
-{	
-	vector_type					methods;
-	vector_type					opts;
-	vector_type::const_iterator	opt_it;
-	vector_type::const_iterator	method_it;
+{
+	typedef std::map<std::string, std::string>                 map_type;
 	
+
 	std::string					key = __line;
 	std::string					value = __line;
 	const size_t				pos = __line.find_first_of(": ");
-	
 	
 	if (pos == std::string::npos) // (?) HTTP_REQUEST_ERROR;
 	{
 		// throw HttpHeader::HttpHeaderParsingError();
 		return ;
 	}
-	
+
+	vector_type					methods;
+	vector_type::const_iterator	method_it;
+	map_type					opts;
+	map_type::const_iterator	opt_it;
+
+	methods.push_back("GET");
+	methods.push_back("POST");
+	methods.push_back("DELETE");
+
+	opts.insert(std::make_pair("Host",            " " ));
+	opts.insert(std::make_pair("Connection",      " " ));
+	opts.insert(std::make_pair("Accept",          "," ));
+	opts.insert(std::make_pair("User-Agent",      ""  ));
+	opts.insert(std::make_pair("Accept-Language", " " ));
+	opts.insert(std::make_pair("Referer",         " " ));
+	opts.insert(std::make_pair("Accept-Encoding", ", "));
+
+
 	key = key.substr(0, pos); // get only the key (eg: "Host" or "User-Agent")
 	value = value.substr(pos);  // get only the value (eg: "localhost:8080")
-	
-
-	for (size_t i = 0; g_options[i].token; ++i)
+	for (opt_it = opts.begin(); opt_it != opts.end(); ++opt_it)
 	{
-		// for (size_t j = 0; g_methods[j].token; ++j)
-		// {
-			
-		// }
-		if (CMP_STRINGS(key.c_str(), g_options[i].token))
+		if (opt_it->first == key)
 		{
-			header.data[key] = split_string(value, g_options[i].delim);
+			header.data[key] = split_string(value, opt_it->second);
 		}
 	}
 }
 
 std::string	Socket::constructPath(void) const
 {
-	// const std::string	path = this->header.path;
-	// std::string			parent_dir = path.substr(0, path.find_last_of("/"));
-	// std::string			real;
-
-	// if (parent_dir == )
-
-	// ROOT_PATH + 
-	
-	// return real;
+	/* default case */
 	return ROOT_PATH + this->header.path;
 }
 
@@ -197,6 +169,8 @@ void	Socket::resolveHttpRequest(void)
 	header.path = first_line[1];
 	header.path_constructed = constructPath();
 	++line;
+
+	std::cout << "Contructed Path -> [" S_CYAN << header.path_constructed << S_NONE "]\n";
 
 	/* Parse the remaining buffer line by line */
 	for ( ; line != buffer.end(); ++line)
@@ -254,7 +228,6 @@ Socket::pair_type	Socket::getStatus(__unused const std::string& path) const
 	return std::make_pair<int, std::string>(200, "OK");
 }
 
-
 void		Socket::sendHttpResponse(int socket_fd)
 {
 	std::string		response;
@@ -270,7 +243,7 @@ void		Socket::sendHttpResponse(int socket_fd)
 	response += "\n\n";
 
 	// Content
-		if (getExtension(header.path) == ".php")
+	if (getExtension(header.path) == ".php")
 	{
 		try
 		{

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   epoll.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 21:22:10 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/26 16:42:15 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ void	Epoll::readCase(struct kevent & event) {
 	// debug msg
 	std::cout << S_RED "Reading ..." S_NONE << "\n" << std::endl;
 
-	_sock.readHttpRequest(event.ident);			
+	_sock.readHttpRequest(event.ident);
 	try {
 		_sock.resolveHttpRequest();
 	}
