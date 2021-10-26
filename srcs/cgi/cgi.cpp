@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/25 16:56:46 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 13:55:20 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void cgi::setEnv()
     env["SERVER_PROTOCOL"] = "webserv/0.0";
     env["SERVER_PORT"] = std::to_string(this->_socket.getPort());
     env["REQUEST_METHOD"] = "";
-    env["PATH_INFO"] = "test.php";
+    env["PATH_INFO"] = this->_socket.getHeader().path_info;
     env["SCRIPT_NAME"] = "test.php";
     env["QUERY_STRING"] = "";
     env["REMOTE_HOST"] = "127.0.0.1";
@@ -67,12 +67,12 @@ void cgi::setEnv()
     env["AUTH_TYPE"] = "";
     env["REMOTE_USER"] = "";
     env["REMOTE_IDENT"] = "";
-    env["CONTENT_TYPE"] = "";
+    env["CONTENT_TYPE"] = "php";
     env["CONTENT_LENGTH"] = "10";
     
     env["HTTP_ACCEPT"] = "*/*";
     env["HTTP_ACCEPT_LANGUAGE"] = "";
-    env["HTTP_USER_AGENT"] = "";
+    env["HTTP_USER_AGENT"] = this->_socket.getHeader().data["User-Agent"][0];
     env["HTTP_COOKIE"] = "";
     env["HTTP_REFERER"] = "";
     
@@ -110,6 +110,7 @@ std::string cgi::execute(const std::string &fileName)
     char *arg[] = {strdup(this->_program.c_str()),
             strdup(fileName.c_str()), NULL};
     std::cout << "arg: " << arg[0] << ", " << arg[1] << std::endl;
+    errno = 0;
     if ((pid = fork()) == -1)
         throw CgiError();
     else if (pid == 0)
@@ -117,8 +118,9 @@ std::string cgi::execute(const std::string &fileName)
         close(fd[0]);
         if (dup2(fd[1], STDOUT_FILENO) == -1)
         {
+            std::cout << strerror(errno) << std::endl;
             close(fd[1]);
-            throw CgiError();
+            // throw CgiError();
         }
         close(fd[1]);
         if (execve(arg[0], arg, this->_env)== -1)

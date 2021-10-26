@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/25 17:09:37 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/26 13:00:27 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,8 +113,7 @@ void	Socket::readHttpRequest(int socket_fd)
 
 	header.resetBuffer();
 	ret = recv(socket_fd, header.buf, sizeof(header.buf), 0);
-	
-	if (!DEBUG)
+	if (DEBUG)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++" << std::endl;
 		write(STDOUT_FILENO, header.buf, ret); // (?) may be chunked
@@ -162,7 +161,7 @@ void	Socket::checkHttpHeaderLine(const std::string& __line)
 void	Socket::resolveHttpRequest(void)
 {
 	typedef std::vector<std::string>     vector_type;
-	
+
 	vector_type				buffer = split_string(this->header.buf, "\n");
 	vector_type::iterator	line = buffer.begin();
 
@@ -270,6 +269,7 @@ void		Socket::sendHttpResponse(int socket_fd)
 	{
 		try
 		{
+			// cgi cgi(*this, "/Users/adbenoit/.brew/bin/php");
 			cgi cgi(*this, "/Users/adbenoit/.brew/bin/php-cgi");
 			response += cgi.execute(header.path_info);
 		}
