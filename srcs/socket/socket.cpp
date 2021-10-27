@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 14:27:48 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/27 15:45:16 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,6 +261,39 @@ ssize_t		Socket::getFileLength(const std::string& path)
 	return SYSCALL_ERR; // may want to throw an error or something
 }
 
+std::string Socket::getErrorPage(pair_type status)
+{
+	std::map<int, std::string>::const_iterator it = this->_server_block->errorPages().find(status.first);
+	std::cout << ">>>>>>> " << ROOT_PATH + std::string("/") + it->second << std::endl;
+	if (it != this->_server_block->errorPages().end())
+	{
+		status = getStatus(ROOT_PATH + std::string("/") + it->second);
+		if (status.first == 200)
+			return getFileContent(ROOT_PATH + std::string("/") + it->second);
+	}
+	std::string content = "<html>\n";
+	content += "  <head>\n";
+	content += "    <meta charset=\"utf-8\">\n";
+	content += "    <title>";
+	content += std::to_string(status.first);
+	content += " ";
+	content += status.second;
+	content += "</title>\n";
+	content += "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n";
+	content += "  </head>\n";
+	content += "<body>\n";
+	content += "    <h1>";
+	content += std::to_string(status.first);
+	content += " ";
+	content += status.second;
+	content += "</h1>\n";
+	// content += "    <p>Sorry, the page you're looking for doesn't exist.</p>\n";
+	content += "</body>\n";
+	content += "</html>\n";
+	
+	return content;
+}
+
 std::string	Socket::getFileContent(const std::string& path)
 {
 	std::string		content;
@@ -320,7 +353,7 @@ void		Socket::sendHttpResponse(int socket_fd)
 		if (status.first == 200)
 			file_content = getFileContent(header.path_constructed);
 		else
-			;// file_content = getErrorPage();
+			file_content = getErrorPage(status);
 		if (file_content.empty())
 			file_content = generateAutoindexPage();
 		content_length = file_content.size();
