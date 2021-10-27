@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 14:02:06 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/27 14:21:18 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -299,22 +299,14 @@ void		Socket::sendHttpResponse(int socket_fd)
 	size_t			content_length;
 	std::string		file_content = "";
 
-	if (status.first == 200)
-		file_content = getFileContent(header.path_constructed);
-	else
-	{
-		// file_content = getErrorPage();
-	}
 	
-	content_length = file_content.size();
-
 	// Content
-	if (getExtension(header.path) == ".php") // replace with location.cgi[0] + check if cgi exist
+	if (status.first == 200 && getExtension(header.path) == ".php") // replace with location.cgi[0] + check if cgi exist
 	{
 		try
 		{
 			cgi cgi(*this, CGI_PROGRAM); // replace with location.cgi[1]
-			content = cgi.execute(header.path_constructed);
+			file_content = cgi.execute(header.path_constructed);
 			content_length = cgi.getContentLength();
 		}
 		catch(const std::exception& e)
@@ -324,20 +316,22 @@ void		Socket::sendHttpResponse(int socket_fd)
 	}
 	else
 	{
-		content = getFileContent(header.path_constructed);
-		if (content.empty())
-			content = generateAutoindexPage();
-		content_length = content.size();
-		content = "\n" + content;
+		if (status.first == 200)
+			file_content = getFileContent(header.path_constructed);
+		else
+			;// file_content = getErrorPage();
+		if (file_content.empty())
+			file_content = generateAutoindexPage();
+		content_length = file_content.size();
+		file_content = "\n" + file_content;
 	}
 	
 	// Header
-	pair_type		status = getStatus(header.path_constructed);
 	response =  HTTP_PROTOCOL_VERSION " ";
 	response += std::to_string(status.first) + " ";
 	response += status.second + NEW_LINE;
 	response += "Content-Length: " + std::to_string(content_length);
-	response += "\n\n";
+	response += "\n";
 
 	// Content
 	response += file_content;

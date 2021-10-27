@@ -40,13 +40,13 @@ Server& Server::operator=(const Server &x) {
 /*
 **  Getters
 */
-const int&							Server::port()       const { return this->_port; }
-const std::vector<std::string>&		Server::name()       const { return this->_name; }
-const std::map<int, std::string>&	Server::errorPages() const { return this->_errorPages; }
-const int&							Server::cliMaxSize() const { return this->_cliMaxSize; }
-const t_location&	Server::locations(int i)			 const { return *(this->_locations[i]); }
-const t_location&	Server::locations(void)			     const { return *(this->_locations); }
-size_t  Server::nLoc()									 const { return this->_locations.size(); }
+const int&							Server::port()              const { return this->_port; }
+const std::vector<std::string>&		Server::name()              const { return this->_name; }
+const std::map<int, std::string>&	Server::errorPages()        const { return this->_errorPages; }
+const int&							Server::cliMaxSize()        const { return this->_cliMaxSize; }
+const t_location&	                Server::locations(int i)    const { return *(this->_locations[i]); }
+const std::vector<t_location *>&	Server::locations(void)     const { return this->_locations; }
+size_t  Server::nLoc()									        const { return this->_locations.size(); }
 
 /*
 **  Setters

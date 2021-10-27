@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   defs.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/27 14:04:02 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/27 14:20:24 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@
 # define DEFAULT_CONFIG_FILE  CONFIG_DEFAULT_PATH "/default" CONFIG_FILETYPE
 
 # define ROOT_PATH            "./www"
-# define CGI_PROGRAM		  "/usr/local/bin/php-cgi"
+# define CGI_PROGRAM		  "/Users/adbenoit/.brew/bin/php-cgi"
 
 # define GET     (1L << 0)
 # define POST    (1L << 1)
