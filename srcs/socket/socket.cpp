@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 16:27:22 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/27 13:56:45 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,42 +151,56 @@ std::string	Socket::constructPath(void) const
 {
 	typedef std::vector<t_location *>                             location_type;
 
+	// const
 	const std::string		path = this->header.path;
 	const location_type		loc = this->_server_block->locations();
 	
+	// main paths
 	std::string		parent_dir = path.substr(0, path.find_last_of("/"));
-	std::string		ret = ROOT_PATH;
+	std::string		ret;
+	
+	// tmp variables
+	std::string								root_tmp;
+	std::string								index_tmp;
+	location_type::const_iterator			it;  // iterator on locations
+	Server::tokens_type::const_iterator		idx; // iterator on indexes
 
 
 	std::cout << "parent_dir: [" S_GREEN << parent_dir << S_NONE "]" << std::endl;
 	
 	/* find the location based on the path requested */
-	for (location_type::const_iterator it = loc.begin(); it != loc.end(); ++it)
+	for (it = loc.begin(); it != loc.end(); ++it)
 	{
+		ret = ROOT_PATH "/";
 		std::cout << "location path: [" S_GREEN << (*it)->path << S_NONE "]" << std::endl;
 		if (parent_dir == (*it)->path)
 		{
+			root_tmp = (*it)->root;
 
 			/* add root path if it exists */
-			if ((*it)->root.size() != 0)
+			if (root_tmp.size() != 0)
 			{
 				// remove '/' from the root path if it exists
-				if ((*it)->root[ (*it)->root.size() - 1 ] == '/')
-					ret += "/" + (*it)->root.substr(0, (*it)->root.size() - 1);
+				if (root_tmp[root_tmp.size() - 1] == '/')
+					ret += root_tmp.substr(0, root_tmp.size() - 1);
 				else
-					ret += "/" + (*it)->root;
+					ret += root_tmp;
 			}
 			
 			ret += path.substr(path.find_last_of("/"));
 			
 			/* if the requested page is a folder */
-			if (ret[ ret.size() - 1 ] == '/')
+			if (ret[ret.size() - 1] == '/')
 			{
 				/* loop through indexes */
-				for (Server::tokens_type::const_iterator idx = (*it)->index.begin(); idx != (*it)->index.end(); ++idx)
+				for (idx = (*it)->index.begin(); idx != (*it)->index.end(); ++idx)
 				{
-					std::string	tmp = ret + *idx;
-					// std::cout << "index: " << tmp << std::endl;
+					index_tmp = ret + *idx;
+					if (is_valid_path(index_tmp))
+					{
+						ret = index_tmp;
+						break ;
+					}
 				}
 			}
 			std::cout << "location root: [" S_GREEN << (*it)->root << S_NONE "]" << std::endl;
@@ -215,6 +229,7 @@ void	Socket::resolveHttpRequest(void)
 	header.path_constructed = constructPath();
 	++line;
 
+	std::cout << "Path ->            [" S_CYAN << header.path << S_NONE "]\n";
 	std::cout << "Contructed Path -> [" S_CYAN << header.path_constructed << S_NONE "]\n";
 
 	/* Parse the remaining buffer line by line */
@@ -256,28 +271,35 @@ std::string	Socket::getFileContent(const std::string& path)
 			content += "\n";
 		} while (true);
 	}
-	else
-		std::cout << "open file error: for get content" << std::endl;
+	LOG;
 	ifs.close();
 	return content;
 }
 
-Socket::pair_type	Socket::getStatus(void) const
-{
-	return std::make_pair<int, std::string>(200, "OK");
-}
-
 // new one - in process
-Socket::pair_type	Socket::getStatus(__unused const std::string& path) const
+Socket::pair_type	Socket::getStatus(const std::string& path)
 {
-	return std::make_pair<int, std::string>(200, "OK");
+	if (is_valid_path(path))
+		return std::make_pair<int, std::string>(200, "OK");
+	else
+		return std::make_pair<int, std::string>(404, "Not Found");
 }
 
 void		Socket::sendHttpResponse(int socket_fd)
 {
 	std::string		response;
 	pair_type		status = getStatus(header.path_constructed);
-	const ssize_t	content_length = getFileLength(header.path_constructed);
+	size_t			content_length;
+	std::string		file_content = "";
+
+	if (status.first == 200)
+		file_content = getFileContent(header.path_constructed);
+	else
+	{
+		// file_content = getErrorPage();
+	}
+	
+	content_length = file_content.size();
 
 	// Header
 	response =  HTTP_PROTOCOL_VERSION " ";
@@ -288,7 +310,7 @@ void		Socket::sendHttpResponse(int socket_fd)
 	response += "\n\n";
 
 	// Content
-	response += getFileContent(header.path_constructed);
+	response += file_content;
 
 	// -- Send to client --
 	send(socket_fd, response.c_str(), response.length(), 0);

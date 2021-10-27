@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 16:28:18 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/27 13:43:32 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define SOCKET_HPP
 
 # include "defs.hpp"
+# include "utils.hpp"
 # include "Server.hpp"
 # include "HttpHeader.hpp"
 
@@ -50,8 +51,6 @@ class Socket
 		
 		void		readHttpRequest(int);
 		void		resolveHttpRequest(void);
-		pair_type	getStatus(void) const;                // old - to remove
-		pair_type	getStatus(const std::string &) const; // (?) may be static
 		void		sendHttpResponse(int);
 
 		void		setNonBlock(int & fd);
@@ -62,6 +61,7 @@ class Socket
 	public:
 		static ssize_t		getFileLength(const std::string &);
 		static std::string	getFileContent(const std::string &);
+		static pair_type	getStatus(const std::string &);
 
 
 	private:

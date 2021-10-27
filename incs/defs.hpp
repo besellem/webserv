@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/26 15:59:25 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/27 13:18:49 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,15 +16,15 @@
 # define DEBUG     true // print some logs
 
 /** @brief Anscii code */
-# define S_NONE    "\033[0m"
-# define S_BLACK   "\033[1;30m"
-# define S_RED     "\033[1;31m"
-# define S_GREEN   "\033[1;32m"
-# define S_YELLOW  "\033[1;33m"
-# define S_BLUE    "\033[1;34m"
-# define S_PURPLE  "\033[1;35m"
-# define S_CYAN    "\033[1;36m"
-# define S_CLRLINE "\033[K\r"
+# define S_NONE    "\e[0m"
+# define S_BLACK   "\e[1;30m"
+# define S_RED     "\e[1;31m"
+# define S_GREEN   "\e[1;32m"
+# define S_YELLOW  "\e[1;33m"
+# define S_BLUE    "\e[1;34m"
+# define S_PURPLE  "\e[1;35m"
+# define S_CYAN    "\e[1;36m"
+# define S_CLRLINE "\e[K\r"
 
 /** @brief namespace define */
 # define _INLINE_NAMESPACE  webserv
@@ -87,6 +87,7 @@
 # include <netinet/in.h>
 # include <fcntl.h>
 # include <unistd.h>
+# include <sys/stat.h>
 
 # include <string>
 # include <cstring>
