@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 15:45:16 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/27 16:38:17 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -269,7 +269,21 @@ std::string Socket::getErrorPage(pair_type status)
 	{
 		status = getStatus(ROOT_PATH + std::string("/") + it->second);
 		if (status.first == 200)
+		{
+			if (getExtension(ROOT_PATH + std::string("/") + it->second) == ".php") // replace with location.cgi[0] + check if cgi exist
+			{
+				try
+				{
+					cgi cgi(*this, CGI_PROGRAM); // replace with location.cgi[1]
+					return cgi.execute(ROOT_PATH + std::string("/") + it->second);
+				}
+				catch(const std::exception& e)
+				{
+					EXCEPT_WARNING;
+				}
+			}
 			return getFileContent(ROOT_PATH + std::string("/") + it->second);
+		}
 	}
 	std::string content = "<html>\n";
 	content += "  <head>\n";
@@ -350,10 +364,10 @@ void		Socket::sendHttpResponse(int socket_fd)
 	}
 	else
 	{
-		if (status.first == 200)
-			file_content = getFileContent(header.path_constructed);
-		else
+		if (status.first != 200)
 			file_content = getErrorPage(status);
+		else
+			file_content = getFileContent(header.path_constructed);
 		if (file_content.empty())
 			file_content = generateAutoindexPage();
 		content_length = file_content.size();

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/27 00:11:52 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/27 16:15:32 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ const char*	cgi::CgiError::what() const throw() {
 }
 
 cgi::cgi(const Socket &socket, const std::string &program) :
-    _socket(socket), _program(program) {
+    _socket(socket), _program(program), _contentLength(0) {
     this->setEnv();
 }
 
