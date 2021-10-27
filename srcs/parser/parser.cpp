@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:53:23 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/26 22:57:20 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/27 12:57:57 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,12 @@ _BEGIN_NS_WEBSERV
 /* Breaks a string into a sequence of zero or
 more nonempty tokens delimiter by tabulation or space
 Returns the vector of tokens. */
-
 Server::tokens_type    getTokens(std::string line)
 {
 	Server::tokens_type tokens;
 
 	size_t pos = line.find(' ');
-	pos = (line.find('\t', pos) != std::string::npos) ? line.find('\t', pos) : pos;
+	pos = (line.find('\t') < pos) ? line.find('\t') : pos;
 	while (pos != std::string::npos)
 	{
 		std::string str = line.substr(0, pos);
@@ -31,7 +30,7 @@ Server::tokens_type    getTokens(std::string line)
 			tokens.push_back(str);
 		line.erase(0, pos + 1);
 		pos = line.find(' ');
-		pos = (line.find('\t', pos) != std::string::npos) ? line.find('\t', pos) : pos;
+		pos = (line.find('\t') < pos) ? line.find('\t') : pos;
 	}
 	if (line[0])
 		tokens.push_back(line);
@@ -64,10 +63,9 @@ void	parse_line(ServerGenerator& servers, std::string line)
 }
 
 /* Reads the config file and parse it line by line */
-
 void	WebServer::parse(const std::string &config_file)
 {
-	std::cout << "=== Parsing ===\n";
+	;
 	if (getExtension(config_file) != ".conf")
 		throw ParsingError();
 	std::fstream os;
@@ -78,7 +76,12 @@ void	WebServer::parse(const std::string &config_file)
 	if (this->_servers.state() != START)
 		throw ParsingError();
 	os.close();
-	std::cout << "\n## ServerGenerator :\n\n" << this->_servers;
+	if (DEBUG)
+	{
+		std::cout << "============== Parsing ===============" << std::endl;
+		std::cout << this->_servers;
+        std::cout << "======================================" << std::endl;
+	}
 }
 
 _END_NS_WEBSERV
