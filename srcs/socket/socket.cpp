@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 15:42:42 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/27 16:03:39 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -320,8 +320,9 @@ void		Socket::sendHttpResponse(int socket_fd)
 			file_content = getFileContent(header.path_constructed);
 		else
 			;// file_content = getErrorPage();
-		if (file_content.empty())
+		if (file_content.empty()) {
 			file_content = generateAutoindexPage(header.path_constructed);
+		}
 		content_length = file_content.size();
 		file_content = "\n" + file_content;
 	}
@@ -396,7 +397,7 @@ std::string	Socket::generateAutoindexPage(std::string const & path) const {
 
 	if (dir == NULL) {
 		std::cout << "open dir error!" << std::endl;
-		return NULL;
+		return ""; // if return NULL, get a seg ...
 	}
 
 	/* create table content */
