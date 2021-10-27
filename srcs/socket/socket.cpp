@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 00:10:33 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/27 14:00:03 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -253,6 +253,9 @@ void		Socket::sendHttpResponse(int socket_fd)
 	std::string		response;
 	std::string		content;
 	ssize_t			content_length;
+	pair_type		status = getStatus(header.path_constructed);
+
+	if (status.first != 200)
 
 	// Content
 	if (getExtension(header.path) == ".php") // replace with location.cgi[0] + check if cgi exist
@@ -278,7 +281,6 @@ void		Socket::sendHttpResponse(int socket_fd)
 	}
 	
 	// Header
-	pair_type		status = getStatus(header.path_constructed);
 	response =  HTTP_PROTOCOL_VERSION " ";
 	response += std::to_string(status.first) + " ";
 	response += status.second + NEW_LINE;
@@ -319,7 +321,7 @@ void	Socket::listenStep(const int& serverFd)
 }
 
 std::string	Socket::generateAutoindexPage(void) const {
-	DIR				*dir = opendir(ROOT_PATH);
+	DIR				*dir = opendir(header.path_constructed.c_str());
 	struct dirent	*dirInfo;
 	struct stat		statBuf;
 
