@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 17:40:42 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/27 18:37:39 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,13 +149,14 @@ void	Socket::checkHttpHeaderLine(const std::string& __line)
 
 t_location*	Socket::getLocation(const std::string &path)
 {
-	typedef std::vector<t_location *>                             location_type;
+	typedef std::vector<t_location *>	location_type;
 
-	const std::string				new_path = path.substr(1);
-	const std::string				parent_dir = path.substr(0, new_path.find_first_of("/"));
+	const std::string				parent_dir = path.substr(0, path.find('/', 1));
 	const location_type				loc = this->_server_block->locations();
 	location_type::const_iterator	it;  // iterator on locations
-
+	
+	std::cout << "ooooooooooo " << path << std::endl;
+	std::cout << "ooooooooooo " << parent_dir << std::endl;
 	for (it = loc.begin(); it != loc.end(); ++it)
 	{
 		if (parent_dir == (*it)->path)
@@ -343,19 +344,27 @@ Socket::pair_type	Socket::getStatus(const std::string& path)
 
 void		Socket::sendHttpResponse(int socket_fd)
 {
-	std::string		response;
-	std::string		content;
-	ssize_t			content_length;
-	pair_type		status = getStatus(header.path_constructed);
-	std::string		file_content;
+	std::string			response;
+	std::string			content;
+	ssize_t				content_length;
+	pair_type			status = getStatus(header.path_constructed);
+	std::string			file_content;
+	const t_location	*loc = getLocation(this->header.path);
 
 	
 	// Content
-	if (status.first == 200 && getExtension(header.path) == ".php") // replace with location.cgi[0] + check if cgi exist
+	if (status.first == 200 && loc && !loc->cgi.empty()
+	&& getExtension(header.path) == loc->cgi[0])
 	{
 		try
 		{
-			cgi cgi(*this, CGI_PROGRAM); // replace with location.cgi[1]
+			if (!DEBUG)
+			{
+				std::cout << "::::::: CGI COMMAND ::::::" << std::endl;
+				std::cout << loc->cgi[0] << " " << loc->cgi[1] << std::endl;
+				std::cout << "::::::::::::::::::::::::::" << std::endl;
+			}
+			cgi cgi(*this, loc->cgi[1]);
 			file_content = cgi.execute(header.path_constructed);
 			content_length = cgi.getContentLength();
 		}
@@ -370,7 +379,7 @@ void		Socket::sendHttpResponse(int socket_fd)
 			file_content = getErrorPage(status);
 		else
 			file_content = getFileContent(header.path_constructed);
-		if (file_content.empty())
+		if (file_content.empty() && loc && loc->autoindex == ON)
 			file_content = generateAutoindexPage(header.path_constructed);
 		content_length = file_content.size();
 		file_content = "\n" + file_content;
@@ -544,7 +553,7 @@ std::string	Socket::getCgiEnv(const std::string &varName)
        return str.substr(pos + 1);
     case 1: return this->header.request_method;
     case 2: return this->header.path_constructed;
-    case 3: return std::string(CGI_PROGRAM);
+    case 3: return getLocation(this->header.path)->cgi[1];
     case 4: return ft_strcut(vectorJoin(this->header.data["Host"]), ':');
     case 5: return vectorJoin(this->header.data["Host"]);
     case 6: return std::to_string(this->getFileLength(this->header.path_constructed));

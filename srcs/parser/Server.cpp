@@ -129,7 +129,12 @@ void	Server::setMethods(t_location  *loc, const tokens_type &tok)
         {
             if (*it == methods[i])
             {
-                loc->methods.push_back(methods[i]);
+                bool exist = 0;
+                for(tokens_type::const_iterator it1 = loc->methods.begin(); it1 != loc->methods.end(); it1++)
+                    if (*it1 == methods[i])
+                        exist = 1;
+                if (!exist)
+                    loc->methods.push_back(methods[i]);
                 break ;
             }
         }
@@ -148,10 +153,8 @@ void	Server::newLocation(const tokens_type &tok) {
 		throw WebServer::ParsingError();
 	t_location* loc = new t_location;
 	loc->path = tok[1];
-	// loc->methods = std::vector<std::string>();
-	// loc->redirection = "";
-	// loc->root = std::string;
-	// loc->index = std::vector<std::string>();
+    loc->root = tok[1];
+	loc->methods.push_back("GET");
 	loc->autoindex = OFF;
 	this->_locations.push_back(loc);
 }
