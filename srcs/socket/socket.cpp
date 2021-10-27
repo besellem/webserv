@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 16:03:39 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/27 17:40:42 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,67 +147,70 @@ void	Socket::checkHttpHeaderLine(const std::string& __line)
 	}
 }
 
-std::string	Socket::constructPath(void) const
+t_location*	Socket::getLocation(const std::string &path)
 {
 	typedef std::vector<t_location *>                             location_type;
 
-	// const
-	const std::string		path = this->header.path;
-	const location_type		loc = this->_server_block->locations();
-	
+	const std::string				new_path = path.substr(1);
+	const std::string				parent_dir = path.substr(0, new_path.find_first_of("/"));
+	const location_type				loc = this->_server_block->locations();
+	location_type::const_iterator	it;  // iterator on locations
+
+	for (it = loc.begin(); it != loc.end(); ++it)
+	{
+		if (parent_dir == (*it)->path)
+			return *it;
+	}
+	return NULL;
+}
+
+/* Find the location based on the path requested */
+std::string	Socket::constructPath(void)
+{
 	// main paths
-	std::string		parent_dir = path.substr(0, path.find_last_of("/"));
-	std::string		ret;
+	std::string			ret;
+	const t_location	*loc = getLocation(this->header.path);
 	
 	// tmp variables
 	std::string								root_tmp;
 	std::string								index_tmp;
-	location_type::const_iterator			it;  // iterator on locations
 	Server::tokens_type::const_iterator		idx; // iterator on indexes
-
-
-	std::cout << "parent_dir: [" S_GREEN << parent_dir << S_NONE "]" << std::endl;
 	
-	/* find the location based on the path requested */
-	for (it = loc.begin(); it != loc.end(); ++it)
+	if (loc)
 	{
 		ret = ROOT_PATH "/";
-		std::cout << "location path: [" S_GREEN << (*it)->path << S_NONE "]" << std::endl;
-		if (parent_dir == (*it)->path)
-		{
-			root_tmp = (*it)->root;
+		root_tmp = loc->root;
 
-			/* add root path if it exists */
-			if (root_tmp.size() != 0)
+		/* add root path if it exists */
+		if (root_tmp.size() != 0)
+		{
+			// remove '/' from the root path if it exists
+			if (root_tmp[root_tmp.size() - 1] == '/')
+				ret += root_tmp.substr(0, root_tmp.size() - 1);
+			else
+				ret += root_tmp;
+		}
+		
+		ret += this->header.path.substr(this->header.path.find_last_of("/"));
+		
+		/* if the requested page is a folder */
+		if (ret[ret.size() - 1] == '/')
+		{
+			/* loop through indexes */
+			for (idx = loc->index.begin(); idx != loc->index.end(); ++idx)
 			{
-				// remove '/' from the root path if it exists
-				if (root_tmp[root_tmp.size() - 1] == '/')
-					ret += root_tmp.substr(0, root_tmp.size() - 1);
-				else
-					ret += root_tmp;
-			}
-			
-			ret += path.substr(path.find_last_of("/"));
-			
-			/* if the requested page is a folder */
-			if (ret[ret.size() - 1] == '/')
-			{
-				/* loop through indexes */
-				for (idx = (*it)->index.begin(); idx != (*it)->index.end(); ++idx)
+				index_tmp = ret + *idx;
+				if (is_valid_path(index_tmp))
 				{
-					index_tmp = ret + *idx;
-					if (is_valid_path(index_tmp))
-					{
-						ret = index_tmp;
-						break ;
-					}
+					ret = index_tmp;
+					break ;
 				}
 			}
-			std::cout << "location root: [" S_GREEN << (*it)->root << S_NONE "]" << std::endl;
-			return ret;
 		}
+		std::cout << "location root: [" S_GREEN << loc->root << S_NONE "]" << std::endl;
+		return ret;
 	}
-
+	
 	/* default case */
 	return ROOT_PATH + this->header.path;
 }
@@ -261,6 +264,53 @@ ssize_t		Socket::getFileLength(const std::string& path)
 	return SYSCALL_ERR; // may want to throw an error or something
 }
 
+std::string Socket::getErrorPage(pair_type status)
+{
+	std::map<int, std::string>::const_iterator it = this->_server_block->errorPages().find(status.first);
+	std::cout << ">>>>>>> " << ROOT_PATH + std::string("/") + it->second << std::endl;
+	if (it != this->_server_block->errorPages().end())
+	{
+		status = getStatus(ROOT_PATH + std::string("/") + it->second);
+		if (status.first == 200)
+		{
+			if (getExtension(ROOT_PATH + std::string("/") + it->second) == ".php") // replace with location.cgi[0] + check if cgi exist
+			{
+				try
+				{
+					cgi cgi(*this, CGI_PROGRAM); // replace with location.cgi[1]
+					return cgi.execute(ROOT_PATH + std::string("/") + it->second);
+				}
+				catch(const std::exception& e)
+				{
+					EXCEPT_WARNING;
+				}
+			}
+			return getFileContent(ROOT_PATH + std::string("/") + it->second);
+		}
+	}
+	std::string content = "<html>\n";
+	content += "  <head>\n";
+	content += "    <meta charset=\"utf-8\">\n";
+	content += "    <title>";
+	content += std::to_string(status.first);
+	content += " ";
+	content += status.second;
+	content += "</title>\n";
+	content += "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n";
+	content += "  </head>\n";
+	content += "<body>\n";
+	content += "    <h1>";
+	content += std::to_string(status.first);
+	content += " ";
+	content += status.second;
+	content += "</h1>\n";
+	// content += "    <p>Sorry, the page you're looking for doesn't exist.</p>\n";
+	content += "</body>\n";
+	content += "</html>\n";
+	
+	return content;
+}
+
 std::string	Socket::getFileContent(const std::string& path)
 {
 	std::string		content;
@@ -278,7 +328,6 @@ std::string	Socket::getFileContent(const std::string& path)
 			content += "\n";
 		} while (true);
 	}
-	LOG;
 	ifs.close();
 	return content;
 }
@@ -295,9 +344,10 @@ Socket::pair_type	Socket::getStatus(const std::string& path)
 void		Socket::sendHttpResponse(int socket_fd)
 {
 	std::string		response;
+	std::string		content;
+	ssize_t			content_length;
 	pair_type		status = getStatus(header.path_constructed);
-	size_t			content_length;
-	std::string		file_content = "";
+	std::string		file_content;
 
 	
 	// Content
@@ -316,13 +366,12 @@ void		Socket::sendHttpResponse(int socket_fd)
 	}
 	else
 	{
-		if (status.first == 200)
-			file_content = getFileContent(header.path_constructed);
+		if (status.first != 200)
+			file_content = getErrorPage(status);
 		else
-			;// file_content = getErrorPage();
-		if (file_content.empty()) {
+			file_content = getFileContent(header.path_constructed);
+		if (file_content.empty())
 			file_content = generateAutoindexPage(header.path_constructed);
-		}
 		content_length = file_content.size();
 		file_content = "\n" + file_content;
 	}
@@ -397,7 +446,8 @@ std::string	Socket::generateAutoindexPage(std::string const & path) const {
 
 	if (dir == NULL) {
 		std::cout << "open dir error!" << std::endl;
-		return ""; // if return NULL, get a seg ...
+		// return ""; // if return NULL, get a seg ...
+		return NULL;
 	}
 
 	/* create table content */
@@ -504,7 +554,7 @@ std::string	Socket::getCgiEnv(const std::string &varName)
     case 10: return vectorJoin(this->header.data["Referer"]);
     case 11: return std::string(HTTP_PROTOCOL_VERSION);
     case 12: return std::string("CGI/1.1");
-    case 13: return std::string("");
+    case 13: return std::string("application/x-www-form-urlencoded");
     case 14:
         pos = vectorJoin(this->header.data["Referer"]).find("?");
         if (pos == std::string::npos)

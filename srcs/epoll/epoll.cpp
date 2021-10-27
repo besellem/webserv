@@ -6,13 +6,13 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 23:07:24 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/27 17:12:56 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "epoll.hpp"
 
-# define NB false // set kqueue in non-block mode
+# define NB true // set kqueue in non-block mode
 
 _BEGIN_NS_WEBSERV
 

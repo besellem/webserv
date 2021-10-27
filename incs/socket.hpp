@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 15:41:39 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/27 17:33:01 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ class Socket
 		int			getServerFd(void) const;
 		sockaddr_in	getAddr(void) const;
 		size_t		getAddrLen(void) const;
+		t_location*	getLocation(const std::string &);
 
 
 		/** @brief init socket */
@@ -62,6 +63,7 @@ class Socket
 		static ssize_t		getFileLength(const std::string &);
 		static std::string	getFileContent(const std::string &);
 		static pair_type	getStatus(const std::string &);
+		std::string			getErrorPage(pair_type);
 
 
 	private:
@@ -70,7 +72,7 @@ class Socket
 		void		listenStep(const int &);
 		
 		void		checkHttpHeaderLine(const std::string &);
-		std::string	constructPath(void) const;
+		std::string	constructPath(void);
 		std::string	generateAutoindexPage(std::string const &) const;
 
 	private:
