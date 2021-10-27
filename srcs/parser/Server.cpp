@@ -45,6 +45,7 @@ const std::vector<std::string>&		Server::name()       const { return this->_name
 const std::map<int, std::string>&	Server::errorPages() const { return this->_errorPages; }
 const int&							Server::cliMaxSize() const { return this->_cliMaxSize; }
 const t_location&	Server::locations(int i)			 const { return *(this->_locations[i]); }
+const t_location&	Server::locations(void)			     const { return *(this->_locations); }
 size_t  Server::nLoc()									 const { return this->_locations.size(); }
 
 /*
@@ -140,12 +141,16 @@ void	Server::setMethods(t_location  *loc, const tokens_type &tok)
 
 /* Adds a new location to the server */
 void	Server::newLocation(const tokens_type &tok) {
-    if (tok.size() != 2 || tok[1].find(';') != std::string::npos)
-        throw WebServer::ParsingError();
-    t_location* loc = new t_location;
-    loc->path = tok[1];
-    loc->autoindex = OFF;
-    this->_locations.push_back(loc);
+	if (tok.size() != 2 || tok[1].find(';') != std::string::npos)
+		throw WebServer::ParsingError();
+	t_location* loc = new t_location;
+	loc->path = tok[1];
+	// loc->methods = std::vector<std::string>();
+	// loc->redirection = "";
+	// loc->root = std::string;
+	// loc->index = std::vector<std::string>();
+	loc->autoindex = OFF;
+	this->_locations.push_back(loc);
 }
 
 /* Adds the new directive to the location */

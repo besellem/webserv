@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 00:08:01 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/27 14:03:10 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define SOCKET_HPP
 
 # include "defs.hpp"
+# include "utils.hpp"
 # include "Server.hpp"
 # include "HttpHeader.hpp"
 
@@ -31,7 +32,6 @@ class Socket
 
 		explicit Socket(void);
 		explicit Socket(const Server *);
-		// explicit Socket(short const &);
 		Socket(const Socket &);
 		~Socket();
 
@@ -50,8 +50,6 @@ class Socket
 		
 		void		readHttpRequest(int);
 		void		resolveHttpRequest(void);
-		pair_type	getStatus(void) const;                // old - to remove
-		pair_type	getStatus(const std::string &) const; // (?) may be static
 		std::string	getCgiEnv(const std::string &);
 		void		sendHttpResponse(int);
 
@@ -63,6 +61,7 @@ class Socket
 	public:
 		static ssize_t		getFileLength(const std::string &);
 		static std::string	getFileContent(const std::string &);
+		static pair_type	getStatus(const std::string &);
 
 
 	private:
@@ -75,12 +74,12 @@ class Socket
 		std::string	generateAutoindexPage(void) const;
 
 	private:
-		const Server*	_server_block; // which was parsed
-		short			_port;
-		int				_serverFd;
-		sockaddr_in		_addr;
-		size_t			_addrLen;
-		HttpHeader		header;
+		const Server	*_server_block; // which was parsed
+		short		_port;
+		int			_serverFd;
+		sockaddr_in	_addr;
+		size_t		_addrLen;
+		HttpHeader	header;
 	
 }; /* class Socket */
 
