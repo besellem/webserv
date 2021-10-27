@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 14:21:18 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/27 15:42:42 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -321,7 +321,7 @@ void		Socket::sendHttpResponse(int socket_fd)
 		else
 			;// file_content = getErrorPage();
 		if (file_content.empty())
-			file_content = generateAutoindexPage();
+			file_content = generateAutoindexPage(header.path_constructed);
 		content_length = file_content.size();
 		file_content = "\n" + file_content;
 	}
@@ -367,8 +367,8 @@ void	Socket::listenStep(const int& serverFd)
 		errorExit("listen step");
 }
 
-std::string	Socket::generateAutoindexPage(void) const {
-	DIR				*dir = opendir(ROOT_PATH);
+std::string	Socket::generateAutoindexPage(std::string const & path) const {
+	DIR				*dir = opendir(path.c_str());
 	struct dirent	*dirInfo;
 	struct stat		statBuf;
 
@@ -408,7 +408,7 @@ std::string	Socket::generateAutoindexPage(void) const {
 		}
 
 		/* get absolut path */
-		addPrefix = ROOT_PATH;
+		addPrefix = path;
 		addPrefix += "/";
 		if (fileName != "..")
 			addPrefix += fileName;

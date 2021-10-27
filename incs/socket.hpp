@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 14:03:10 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/27 15:41:39 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ class Socket
 		
 		void		checkHttpHeaderLine(const std::string &);
 		std::string	constructPath(void) const;
-		std::string	generateAutoindexPage(void) const;
+		std::string	generateAutoindexPage(std::string const &) const;
 
 	private:
 		const Server	*_server_block; // which was parsed
