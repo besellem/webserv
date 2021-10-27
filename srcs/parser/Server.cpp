@@ -100,7 +100,10 @@ void	Server::setIndex(t_location  *loc, const tokens_type &tok) {
 void	Server::setAutoIndex(t_location  *loc, const tokens_type &tok) {
     if (tok.size() != 2)
         throw WebServer::ParsingError();
-    loc->autoindex = (tok[1] == "on") ? ON : throw WebServer::ParsingError();
+    if (tok[1] == "on")
+        loc->autoindex = ON;
+    else if (tok[1] != "off")
+        throw WebServer::ParsingError();
 }
 
 void	Server::setRedirection(t_location  *loc, const tokens_type &tok) {
