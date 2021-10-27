@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 17:41:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/26 23:59:21 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/27 14:26:20 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,5 +107,14 @@ std::string vectorJoin(const std::vector<std::string> &vect)
     return str;
 }
 
+
+/* Most optimized way of checking if a file exist */
+bool	is_valid_path(const std::string& path)
+{
+	struct stat	buf;
+	int			_s = stat(path.c_str(), &buf);
+	// std::cout << "is_valid_path(" << path << ") : " << _s << std::endl;
+	return (0 == _s);
+}
 
 _END_NS_WEBSERV

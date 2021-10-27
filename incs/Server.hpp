@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/26 23:09:06 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/27 14:26:06 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ class Server
 		const std::map<int, std::string>&	errorPages() const;
 		const int&							cliMaxSize() const;
 		const t_location&					locations(int) const;
+		const std::vector<t_location *>&	locations(void) const;
 		size_t								nLoc() const;
 
 		/*
