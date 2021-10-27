@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 18:37:39 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/27 19:55:56 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,26 +103,28 @@ void	Socket::readHttpRequest(int socket_fd)
 	}
 }
 
-void	Socket::checkHttpHeaderLine(const std::string& __line)
+void	Socket::checkHttpHeaderLine(const std::string& line_)
 {
 	typedef std::map<std::string, std::string>                 map_type;
 	
 
-	std::string					key = __line;
-	std::string					value = __line;
-	const size_t				pos = __line.find(": ");
+	vector_type							methods;
+	map_type							opts;
+	map_type::const_iterator			opt_it;
+	std::pair<std::string, std::string>	mapped;
+	const size_t						pos = line_.find(": ");
 	
+	// if we don't find a ": " in a line of the header
 	if (pos == std::string::npos) // (?) HTTP_REQUEST_ERROR;
 	{
 		// throw HttpHeader::HttpHeaderParsingError();
 		return ;
 	}
+	
+	// set the key (eg: "Host") and its value (eg: "localhost:8080")
+	mapped = std::make_pair(line_.substr(0, pos), line_.substr(pos + 2));
 
-	vector_type					methods;
-	vector_type::const_iterator	method_it;
-	map_type					opts;
-	map_type::const_iterator	opt_it;
-
+	// fill methods and options to parse
 	methods.push_back("GET");
 	methods.push_back("POST");
 	methods.push_back("DELETE");
@@ -135,14 +137,11 @@ void	Socket::checkHttpHeaderLine(const std::string& __line)
 	opts.insert(std::make_pair("Referer",         " " ));
 	opts.insert(std::make_pair("Accept-Encoding", ", "));
 
-
-	key = key.substr(0, pos); // get only the key (eg: "Host" or "User-Agent")
-	value = value.substr(pos + 2);  // get only the value (eg: "localhost:8080")
 	for (opt_it = opts.begin(); opt_it != opts.end(); ++opt_it)
 	{
-		if (opt_it->first == key)
+		if (opt_it->first == mapped.first)
 		{
-			header.data[key] = split_string(value, opt_it->second);
+			header.data[mapped.first] = split_string(mapped.second, opt_it->second);
 		}
 	}
 }
@@ -153,7 +152,7 @@ t_location*	Socket::getLocation(const std::string &path)
 
 	const std::string				parent_dir = path.substr(0, path.find('/', 1));
 	const location_type				loc = this->_server_block->locations();
-	location_type::const_iterator	it;  // iterator on locations
+	location_type::const_iterator	it;
 	
 	std::cout << "ooooooooooo " << path << std::endl;
 	std::cout << "ooooooooooo " << parent_dir << std::endl;
@@ -173,9 +172,9 @@ std::string	Socket::constructPath(void)
 	const t_location	*loc = getLocation(this->header.path);
 	
 	// tmp variables
-	std::string								root_tmp;
-	std::string								index_tmp;
-	Server::tokens_type::const_iterator		idx; // iterator on indexes
+	std::string							root_tmp;
+	std::string							index_tmp;
+	Server::tokens_type::const_iterator	idx; // iterator on indexes
 	
 	if (loc)
 	{
@@ -228,6 +227,7 @@ void	Socket::resolveHttpRequest(void)
 	vector_type				first_line = split_string(*line, " ");
 	if (first_line.size() != 3)
 		throw HttpHeader::HttpBadRequestError();	
+	
 	header.request_method = first_line[0];
 	header.path = first_line[1];
 	header.path_constructed = constructPath();

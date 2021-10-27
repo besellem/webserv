@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 16:09:26 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/25 16:40:22 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/27 20:00:04 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ HttpHeader::HttpHeader(const HttpHeader &x)
 { *this = x; }
 
 HttpHeader::~HttpHeader()
-{}
+{ this->resetBuffer(); }
 
 HttpHeader&			HttpHeader::operator=(const HttpHeader &x)
 {
