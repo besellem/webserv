@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/28 19:02:48 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/28 19:33:54 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,8 +65,6 @@ void	Epoll::clientConnect(int & fd, int const & serverFd) {
 	if (fd < 0)
 		errorExit("accept failed");
 
-	std::cout << "accept fd: " << fd << std::endl;
-
 	_sock.setNonBlock(fd);
 
 	std::cout << "Client Connected form: [" S_GREEN << inet_ntoa(clientAddr.sin_addr)
@@ -98,21 +96,16 @@ void	Epoll::serverLoop(void) {
 			// debug msg
 			std::cout << "---\nStar: Num of request: [" S_GREEN << kevt << S_NONE "]" << "\n---\n" << std::endl;
 
-		Socket tmp;
-
 		for (int i = 0; i < kevt; i++) {
 			struct kevent currentEvt = _evlist[i];
 			int currentSocket = -1;
 			int currentFd = currentEvt.ident;
 
-			std::cout << "currFd: " << currentFd << std::endl;
-
 			for (int j = 0; j < _nListenEvent; j++) {
 				if (currentFd == _multiSock[j].getServerFd()) {
 					clientConnect(currentSocket, _multiSock[j].getServerFd());
-					tmp = _multiSock[j];
 
-					readCase(currentSocket, tmp);
+					readCase(currentSocket, _multiSock[j]);
 
 					// debug msg
 					std::cout << S_RED "closing ..." S_NONE << "\n" << std::endl;
