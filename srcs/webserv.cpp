@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/28 13:22:21 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/28 16:50:50 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ void			WebServer::createServers(void)
 	const size_t	server_size = _servers.size();
 	Socket			cur;
 
-	// std::vector<Socket> multiServ;
+	std::vector<Socket> multiServ;
 
 	// create a socket for each server declared in the config file
 	_socks = new Socket[server_size];
@@ -74,18 +74,18 @@ void			WebServer::createServers(void)
 		cur = _socks[i];
 		cur.startSocket();
 
-		// multiServ.push_back(cur);
+		multiServ.push_back(cur);
 
-		Epoll	_epoll(cur);
-		_epoll.startEpoll();
-		_epoll.serverLoop();
+		// Epoll	_epoll(cur);
+		// _epoll.startEpoll();
+		// _epoll.serverLoop();
 	} // for each server
 
 	// exit(EXIT_SUCCESS);
 
-	// Epoll	_epoll(cur);
-	// _epoll.startEpoll();
-	// _epoll.serverLoop();
+	Epoll	_epoll(multiServ);
+	_epoll.startEpoll();
+	_epoll.serverLoop();
 }
 
 WebServer::ParsingError::ParsingError() {}
