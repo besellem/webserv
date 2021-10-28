@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 18:37:39 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/28 13:00:35 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ void	Socket::readHttpRequest(int socket_fd)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++" << std::endl;
 		write(STDOUT_FILENO, header.buf, ret); // (?) may be chunked
-		std::cout << "++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
+		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
 	}
 }
 
@@ -155,8 +155,6 @@ t_location*	Socket::getLocation(const std::string &path)
 	const location_type				loc = this->_server_block->locations();
 	location_type::const_iterator	it;  // iterator on locations
 	
-	std::cout << "ooooooooooo " << path << std::endl;
-	std::cout << "ooooooooooo " << parent_dir << std::endl;
 	for (it = loc.begin(); it != loc.end(); ++it)
 	{
 		if (parent_dir == (*it)->path)
@@ -268,7 +266,6 @@ ssize_t		Socket::getFileLength(const std::string& path)
 std::string Socket::getErrorPage(pair_type status)
 {
 	std::map<int, std::string>::const_iterator it = this->_server_block->errorPages().find(status.first);
-	std::cout << ">>>>>>> " << ROOT_PATH + std::string("/") + it->second << std::endl;
 	if (it != this->_server_block->errorPages().end())
 	{
 		status = getStatus(ROOT_PATH + std::string("/") + it->second);
@@ -305,7 +302,6 @@ std::string Socket::getErrorPage(pair_type status)
 	content += " ";
 	content += status.second;
 	content += "</h1>\n";
-	// content += "    <p>Sorry, the page you're looking for doesn't exist.</p>\n";
 	content += "</body>\n";
 	content += "</html>\n";
 	
