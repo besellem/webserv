@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 17:41:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/27 14:26:20 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/28 18:36:48 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,17 +91,17 @@ std::vector<std::string>	ft_vectorcut(const std::vector<std::string>& vect, char
 	return newVect;
 }
 
-/* Joins all the strings of a vector separate by a space.
+/* Joins all the strings of vect separate by sep.
 Returns the new string */
 
-std::string vectorJoin(const std::vector<std::string> &vect)
+std::string vectorJoin(const std::vector<std::string> &vect, char sep)
 {
     if (vect.empty())
         return std::string("");
     std::string str = vect[0];
     for (size_t i = 1; i < vect.size(); i++)
     {
-        str += " ";
+        str += sep;
         str += vect[i];
     }
     return str;
@@ -115,6 +115,17 @@ bool	is_valid_path(const std::string& path)
 	int			_s = stat(path.c_str(), &buf);
 	// std::cout << "is_valid_path(" << path << ") : " << _s << std::endl;
 	return (0 == _s);
+}
+
+/* Check if a path is a directory */
+bool	ft_isDirectory(const std::string& path)
+{
+	struct stat	statBuf;
+	
+	stat(path.c_str(), &statBuf);
+	if (S_ISDIR(statBuf.st_mode))
+		return 1;
+	return 0;
 }
 
 _END_NS_WEBSERV

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/28 18:08:44 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/28 19:19:26 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,8 @@ void	Socket::readHttpRequest(int socket_fd)
 
 	header.resetBuffer();
 	ret = recv(socket_fd, header.buf, sizeof(header.buf), 0);
-	
+	if (ret == sizeof(header.buf) || ret == -1)
+		LOG;
 	if (DEBUG)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++" << std::endl;
@@ -129,13 +130,16 @@ void	Socket::checkHttpHeaderLine(const std::string& line_)
 	methods.push_back("POST");
 	methods.push_back("DELETE");
 
-	opts.insert(std::make_pair("Host",            " " ));
-	opts.insert(std::make_pair("Connection",      " " ));
-	opts.insert(std::make_pair("Accept",          "," ));
-	opts.insert(std::make_pair("User-Agent",      ""  ));
-	opts.insert(std::make_pair("Accept-Language", " " ));
-	opts.insert(std::make_pair("Referer",         " " ));
-	opts.insert(std::make_pair("Accept-Encoding", ", "));
+	opts.insert(std::make_pair("Host",						" " ));
+	opts.insert(std::make_pair("Origin",					""));
+	opts.insert(std::make_pair("Content-Type",				""));
+	opts.insert(std::make_pair("Accept-Encoding",			", "));
+	opts.insert(std::make_pair("Connection",				" " ));
+	opts.insert(std::make_pair("Upgrade-Insecure-Requests",	""));
+	opts.insert(std::make_pair("Accept",					"," ));
+	opts.insert(std::make_pair("User-Agent",				""  ));
+	opts.insert(std::make_pair("Referer",					" " ));
+	opts.insert(std::make_pair("Accept-Language",			" " ));
 
 	for (opt_it = opts.begin(); opt_it != opts.end(); ++opt_it)
 	{
@@ -149,13 +153,18 @@ void	Socket::checkHttpHeaderLine(const std::string& line_)
 t_location*	Socket::getLocation(const std::string &path)
 {
 	typedef std::vector<t_location *>	location_type;
-
-	const std::string				parent_dir = path.substr(0, path.find('/', 1));
-	const location_type				loc = this->_server_block->locations();
-	location_type::const_iterator	it;
+	std::string							parent_dir;
+	size_t								pos = path.find('/', 1);
+	location_type::const_iterator		it;
+	const location_type					loc = this->_server_block->locations();
 	
-	std::cout << "ooooooooooo " << path << std::endl;
-	std::cout << "ooooooooooo " << parent_dir << std::endl;
+	if (ft_isDirectory(ROOT_PATH + path))
+		parent_dir = path;
+	else if (pos == std::string::npos)
+		parent_dir = "/";
+	else
+		parent_dir = path.substr(0, pos);
+	parent_dir = ft_strcut(parent_dir, '?');
 	for (it = loc.begin(); it != loc.end(); ++it)
 	{
 		if (parent_dir == (*it)->path)
@@ -176,25 +185,15 @@ std::string	Socket::constructPath(void)
 	std::string							index_tmp;
 	Server::tokens_type::const_iterator	idx; // iterator on indexes
 	
+	ret = ROOT_PATH;
 	if (loc)
 	{
-		ret = ROOT_PATH "/";
-		root_tmp = loc->root;
-
-		/* add root path if it exists */
-		if (root_tmp.size() != 0)
-		{
-			// remove '/' from the root path if it exists
-			if (root_tmp[root_tmp.size() - 1] == '/')
-				ret += root_tmp.substr(0, root_tmp.size() - 1);
-			else
-				ret += root_tmp;
-		}
-		
-		ret += this->header.path.substr(this->header.path.find_last_of("/"));
-		
-		/* if the requested page is a folder */
-		if (ret[ret.size() - 1] == '/')
+		std::cout << "location root: [" S_GREEN << loc->root << S_NONE "]" << std::endl;
+		ret += loc->root;
+		if (ret[ret.size() - 1] != '/')
+			ret += "/";
+		ret += this->header.path.substr(loc->path.size(), this->header.path.size());
+		if (ft_isDirectory(ret))
 		{
 			/* loop through indexes */
 			for (idx = loc->index.begin(); idx != loc->index.end(); ++idx)
@@ -207,12 +206,11 @@ std::string	Socket::constructPath(void)
 				}
 			}
 		}
-		std::cout << "location root: [" S_GREEN << loc->root << S_NONE "]" << std::endl;
-		return ret;
 	}
+	else
+		ret += this->header.path;
 	
-	/* default case */
-	return ROOT_PATH + this->header.path;
+	return ft_strcut(ret, '?');
 }
 
 void	Socket::resolveHttpRequest(void)
@@ -268,7 +266,6 @@ ssize_t		Socket::getFileLength(const std::string& path)
 std::string Socket::getErrorPage(pair_type status)
 {
 	std::map<int, std::string>::const_iterator it = this->_server_block->errorPages().find(status.first);
-	std::cout << ">>>>>>> " << ROOT_PATH + std::string("/") + it->second << std::endl;
 	if (it != this->_server_block->errorPages().end())
 	{
 		status = getStatus(ROOT_PATH + std::string("/") + it->second);
@@ -305,7 +302,6 @@ std::string Socket::getErrorPage(pair_type status)
 	content += " ";
 	content += status.second;
 	content += "</h1>\n";
-	// content += "    <p>Sorry, the page you're looking for doesn't exist.</p>\n";
 	content += "</body>\n";
 	content += "</html>\n";
 	
@@ -352,18 +348,23 @@ void		Socket::sendHttpResponse(int socket_fd)
 	const t_location	*loc = getLocation(this->header.path);
 
 	
+	if (DEBUG)
+	{
+		std::cout << "_______ LOCATION ______" << std::endl;
+		if (!loc)
+			std::cout << "Location " << this->header.path << " not found" << std::endl;
+		else if (loc->cgi.empty())
+			std::cout << "CGI not found" << std::endl;
+		else
+			std::cout << "cgi command: " << loc->cgi[0] << " " << loc->cgi[1] << std::endl;
+		std::cout << "__________________________" << std::endl;
+	}
 	// Content
 	if (status.first == 200 && loc && !loc->cgi.empty()
-	&& getExtension(header.path) == loc->cgi[0])
+	&& getExtension(header.path_constructed) == loc->cgi[0])
 	{
 		try
 		{
-			if (!DEBUG)
-			{
-				std::cout << "::::::: CGI COMMAND ::::::" << std::endl;
-				std::cout << loc->cgi[0] << " " << loc->cgi[1] << std::endl;
-				std::cout << "::::::::::::::::::::::::::" << std::endl;
-			}
 			cgi cgi(*this, loc->cgi[1]);
 			file_content = cgi.execute(header.path_constructed);
 			content_length = cgi.getContentLength();
@@ -535,18 +536,19 @@ std::string	Socket::getCgiEnv(const std::string &varName)
     std::string envVar[] = {"SERVER_PORT", "REQUEST_METHOD", "PATH_INFO",
         "SCRIPT_NAME", "REMOTE_HOST", "REMOTE_ADDR", "CONTENT_LENGTH", "HTTP_ACCEPT",
         "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER", "SERVER_SOFTWARE",
-        "GATEWAY_INTERFACE", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS"};
+        "GATEWAY_INTERFACE", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS",
+		"HTTP_ACCEPT_ENCODING", "HTTP_CONNECTION"};
     std::string str;
     size_t      pos;
     int         i = 0;
     
-    for (;i < 16; i++)
+    for (;i < 18; i++)
         if (varName == envVar[i])
             break ;
     switch (i)
     {
     case 0:
-        str = vectorJoin(this->header.data["Host"]);
+        str = vectorJoin(this->header.data["Host"], ' ');
         pos = str.find(":");
         if (pos == std::string::npos)
             return std::string("");
@@ -554,22 +556,24 @@ std::string	Socket::getCgiEnv(const std::string &varName)
     case 1: return this->header.request_method;
     case 2: return this->header.path_constructed;
     case 3: return getLocation(this->header.path)->cgi[1];
-    case 4: return ft_strcut(vectorJoin(this->header.data["Host"]), ':');
-    case 5: return vectorJoin(this->header.data["Host"]);
+    case 4: return ft_strcut(vectorJoin(this->header.data["Host"], ' '), ':');
+    case 5: return vectorJoin(this->header.data["Host"], ' ');
     case 6: return std::to_string(this->getFileLength(this->header.path_constructed));
-    case 7: return vectorJoin(this->header.data["Accept"]);
-    case 8: return vectorJoin(this->header.data["Accept-Language"]);
-    case 9: return vectorJoin(this->header.data["User-Agent"]);
-    case 10: return vectorJoin(this->header.data["Referer"]);
+    case 7: return vectorJoin(this->header.data["Accept"], ',');
+    case 8: return vectorJoin(this->header.data["Accept-Language"], ' ');
+    case 9: return vectorJoin(this->header.data["User-Agent"], ' ');
+    case 10: return vectorJoin(this->header.data["Referer"], ' ');
     case 11: return std::string(HTTP_PROTOCOL_VERSION);
     case 12: return std::string("CGI/1.1");
-    case 13: return std::string("application/x-www-form-urlencoded");
+    case 13: return vectorJoin(this->header.data["Content-Type"], ' ');
     case 14:
-        pos = vectorJoin(this->header.data["Referer"]).find("?");
+        pos = this->header.path.find("?");
         if (pos == std::string::npos)
             return std::string("");
-       return this->header.path.substr(pos);
+       return this->header.path.substr(pos + 1);
     case 15: return std::string("CGI");
+    case 16: return vectorJoin(this->header.data["Accept-Encoding"], ' ');
+    case 17: return vectorJoin(this->header.data["Connection"], ' ');
     default: return std::string();
     }
 }
