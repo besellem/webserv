@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/27 17:15:04 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/28 13:22:21 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,8 +61,11 @@ void			WebServer::createServers(void)
 	const size_t	server_size = _servers.size();
 	Socket			cur;
 
+	// std::vector<Socket> multiServ;
+
 	// create a socket for each server declared in the config file
 	_socks = new Socket[server_size];
+
 	for (size_t i = 0; i < server_size; ++i)
 	{
 		// init each socket
@@ -70,11 +73,19 @@ void			WebServer::createServers(void)
 
 		cur = _socks[i];
 		cur.startSocket();
-		
+
+		// multiServ.push_back(cur);
+
 		Epoll	_epoll(cur);
 		_epoll.startEpoll();
 		_epoll.serverLoop();
 	} // for each server
+
+	// exit(EXIT_SUCCESS);
+
+	// Epoll	_epoll(cur);
+	// _epoll.startEpoll();
+	// _epoll.serverLoop();
 }
 
 WebServer::ParsingError::ParsingError() {}

@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   epoll.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 17:12:56 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/28 15:27:42 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "epoll.hpp"
 
-# define NB true // set kqueue in non-block mode
+# define NB false // set kqueue in non-block mode
 
 _BEGIN_NS_WEBSERV
 
@@ -24,6 +24,10 @@ Epoll::~Epoll(void) {}
 Epoll::Epoll(Socket const & sock) :
 	_sock(sock),
 	_epollFd(-1) {}
+
+Epoll::Epoll(std::vector<Socket> const & multiSock) :
+_multiSock(multiSock),
+_epollFd(-1) {}
 
 void	Epoll::startEpoll(void) {
 	_epollFd = kqueue();
@@ -39,6 +43,8 @@ void	Epoll::startEpoll(void) {
 	int kevt = kevent(_epollFd, _chlist, 1, NULL, 0, (NB == true) ? &timeout : NULL);
 	if (kevt < 0)
 		errorExit("epoll start failed!");
+
+	std::cout << "Epoll begin: " << kevt << std::endl;
 }
 
 void	Epoll::addEvents(int const & sockFd) {
@@ -51,12 +57,15 @@ void	Epoll::deleteEvents(int const & sockFd) {
 
 void	Epoll::clientConnect(int & fd) {
 	int sockFd = _sock.getServerFd();
+
 	sockaddr_in clientAddr;
 	socklen_t clientAddrLen = sizeof(clientAddr);
 	fd = accept(sockFd, (sockaddr *)&clientAddr, &clientAddrLen);
 
 	if (fd < 0)
 		errorExit("accept failed");
+
+	std::cout << "accept fd: " << fd << std::endl;
 
 	_sock.setNonBlock(fd);
 	addEvents(fd);
@@ -119,6 +128,7 @@ void	Epoll::serverLoop(void) {
 		if (kevt < 0)
 			errorExit("kevent failed in loop");
 
+		std::cout << "ready: " << _evlist[0].ident << std::endl;
 		if (kevt > 0)		
 			// debug msg
 			std::cout << "---\nStar: Num of request: [" S_GREEN << kevt << S_NONE "]" << "\n---\n" << std::endl;
@@ -132,12 +142,12 @@ void	Epoll::serverLoop(void) {
 				clientConnect(currentSocket);
 			}
 			else {
-				if (currentEvt.flags & EVFILT_READ)
+				if (currentEvt.flags & EVFILT_READ) {
 					readCase(currentEvt);
+					std::cout << "read fd: " << currentEvt.ident << std::endl;
+				}
 				if (currentEvt.flags & EV_EOF)
 					eofCase(currentEvt);
-				// else
-				// 	continue ;
 			}
 		}
 	}

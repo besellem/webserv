@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   epoll.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 14:27:23 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/26 23:07:51 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/28 13:20:45 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,12 @@ _BEGIN_NS_WEBSERV
 
 class Epoll {
 	public:
-		explicit Epoll(Socket const & sock);
+		explicit Epoll(Socket const &);
+		explicit Epoll(std::vector<Socket> const &);
 		~Epoll(void);
 
 		void	startEpoll(void);
+		int   	checkSocketFd(void);
 
 		void	addEvents(int const &);
 		void	deleteEvents(int const &);
@@ -42,7 +44,8 @@ class Epoll {
 		void	errorExit(const std::string &) const;
 
 	private:
-		Socket				_sock;
+		Socket					_sock;
+		std::vector<Socket>		_multiSock;
 		int					_epollFd;
 
 		static const int	maxEvent = 32; // why 32? IDK
