@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/28 18:08:44 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/29 19:07:57 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,9 @@ void	Socket::readHttpRequest(int socket_fd)
 
 	header.resetBuffer();
 	ret = recv(socket_fd, header.buf, sizeof(header.buf), 0);
+
+	if (ret < 0)
+		std::cout << "recv failed!!!!!!!!" << std::endl;
 	
 	if (DEBUG)
 	{

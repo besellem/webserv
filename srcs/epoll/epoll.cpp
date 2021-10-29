@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/28 19:33:54 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/29 19:23:59 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,18 +16,18 @@ _BEGIN_NS_WEBSERV
 
 /** @brief public function */
 
-Epoll::Epoll(void) : _sock() {}
+Epoll::Epoll(void) {}
 Epoll::~Epoll(void) {
 	delete [] _chlist;
 	delete [] _evlist;
 }
 
-Epoll::Epoll(std::vector<Socket> const & multiSock) :
+Epoll::Epoll(std::map<const int, Socket> const & multiSock, int const & serverSize) :
 _multiSock(multiSock),
 _epollFd(-1) {
-	_nListenEvent = multiSock.size();
-	_chlist = new struct kevent[_nListenEvent];
-	_evlist = new struct kevent[_nListenEvent];
+	_serverSize = serverSize;
+	_chlist = new struct kevent[serverSize];
+	_evlist = new struct kevent[serverSize];
 }
 
 void	Epoll::startEpoll(void) {
@@ -36,83 +36,100 @@ void	Epoll::startEpoll(void) {
 		errorExit("epoll create");
 	
 	int i = 0;
-	for (std::vector<Socket>::iterator it = _multiSock.begin(); it != _multiSock.end(); it++, i++) {
-		int sockFd = it->getServerFd();
-
+	for (std::map<const int, Socket>::iterator it = _multiSock.begin(); it != _multiSock.end(); it++, i++) {
+		int sockFd = it->second.getServerFd();
+		std::cout << "Add sock: [" << sockFd << "]" << std::endl;
 		EV_SET(&_chlist[i], sockFd, EVFILT_READ, EV_ADD, 0, 0, 0);
 	}
 
-	int kevt = kevent(_epollFd, _chlist, _nListenEvent, NULL, 0, NULL);
+	int kevt = kevent(_epollFd, _chlist, _serverSize, NULL, 0, NULL);
 	if (kevt < 0)
 		errorExit("epoll start failed!");
 }
 
-void	Epoll::addEvents(int const & sockFd) {
-	EV_SET(_chlist, sockFd, EVFILT_READ, EV_ADD, 0, 0, 0);
-}
-
-void	Epoll::deleteEvents(int const & sockFd) {
-	EV_SET(_chlist, sockFd, EVFILT_READ, EV_DELETE, 0, 0, 0);
-}
-
-void	Epoll::clientConnect(int & fd, int const & serverFd) {
+int	Epoll::clientConnect(int const & serverFd) {
 	int sockFd = serverFd;
 
 	sockaddr_in clientAddr;
 	socklen_t clientAddrLen = sizeof(clientAddr);
-	fd = accept(sockFd, (sockaddr *)&clientAddr, &clientAddrLen);
+	int newSock = accept(sockFd, (sockaddr *)&clientAddr, &clientAddrLen);
 
-	if (fd < 0)
-		errorExit("accept failed");
+	if (newSock < 0)
+		return SYSCALL_ERR;
 
-	_sock.setNonBlock(fd);
+	if (newSock == 0)
+		std::cout << "Invalid socket" << std::endl;
+
+	if (SYSCALL_ERR == fcntl(newSock, F_SETFL, O_NONBLOCK))
+		errorExit("Non-blocking failed");
 
 	std::cout << "Client Connected form: [" S_GREEN << inet_ntoa(clientAddr.sin_addr)
-		<< S_NONE "]:[" S_GREEN << ntohs(clientAddr.sin_port) << S_NONE "]" << "\n" << std::endl;
+		<< S_NONE "]:[" S_GREEN << ntohs(clientAddr.sin_port) << S_NONE "] with socket: [" << sockFd << "]\n" << std::endl;
+
+	return newSock;
 }
 
 void	Epoll::readCase(int & fd, Socket & sock) {
 	// debug msg
-	std::cout << S_RED "Reading ..." S_NONE << "\n" << std::endl;
+	std::cout << "Reading: [" S_RED << fd << S_NONE "] ..."<< "\n" << std::endl;
 
 	sock.readHttpRequest(fd);			
 	try {
 		sock.resolveHttpRequest();
+		sock.sendHttpResponse(fd);
 	}
 	catch (std::exception &e) {
 		EXCEPT_WARNING;
-		return ;
 	}
-	sock.sendHttpResponse(fd);
+}
+
+void	*Epoll::handleRequest(void * args) {
+	Epoll *epollInfo = static_cast<Epoll *>(args);
+
+	epollInfo->readCase(epollInfo->_currConn, epollInfo->_multiSock[epollInfo->_currSockFd]);
+
+	std::cout << "Closing: [" S_RED << epollInfo->_currConn << S_NONE "] ..." << "\n" << std::endl;
+
+	close(epollInfo->_currConn);
+	pthread_exit(NULL);
+	return NULL;
 }
 
 void	Epoll::serverLoop(void) {
 	for(;;) {
-		int kevt = kevent(_epollFd, NULL, 0, _evlist, _nListenEvent, NULL);
-		if (kevt < 0)
+		int readyEvts = kevent(_epollFd, NULL, 0, _evlist, _serverSize, NULL);
+		if (readyEvts < 0)
 			errorExit("kevent failed in loop");
+		else if (readyEvts == 0)
+			continue ;
 
-		if (kevt > 0)
+		if (readyEvts > 0)
 			// debug msg
-			std::cout << "---\nStar: Num of request: [" S_GREEN << kevt << S_NONE "]" << "\n---\n" << std::endl;
+			std::cout << "---\nStar: Num of request: [" S_GREEN << readyEvts << S_NONE "]" << "\n---\n" << std::endl;
 
-		for (int i = 0; i < kevt; i++) {
+		for (int i = 0; i < readyEvts; i++) {
 			struct kevent currentEvt = _evlist[i];
-			int currentSocket = -1;
-			int currentFd = currentEvt.ident;
-
-			for (int j = 0; j < _nListenEvent; j++) {
-				if (currentFd == _multiSock[j].getServerFd()) {
-					clientConnect(currentSocket, _multiSock[j].getServerFd());
-
-					readCase(currentSocket, _multiSock[j]);
-
-					// debug msg
-					std::cout << S_RED "closing ..." S_NONE << "\n" << std::endl;
-					
-					close(currentSocket);
-				}
+			_currConn = clientConnect(currentEvt.ident);
+			_currSockFd = currentEvt.ident;
+			if (_currConn == SYSCALL_ERR) {
+				std::cout << "Id: [" << currentEvt.ident << "]: connection failed!" << std::endl;
+				continue ;
 			}
+
+			std::cout << "sock to communicate with client: [" << _currConn << "]" << std::endl;
+
+			sleep(1); // accept get a delay
+
+			readCase(_currConn, _multiSock[_currSockFd]);
+
+			std::cout << S_RED "Closing ..." S_NONE << "\n" << std::endl;
+
+			close(_currConn);
+
+			// if (pthread_create(&_e_tid, NULL, Epoll::handleRequest, (void *)this) != 0) {
+			// 	close(_currConn);
+			// 	errorExit("create handle thread failed!");
+			// }
 		}
 	}
 }

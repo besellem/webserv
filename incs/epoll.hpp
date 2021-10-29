@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 14:27:23 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/28 19:00:47 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/29 19:10:43 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,35 +20,33 @@ _BEGIN_NS_WEBSERV
 
 class Epoll {
 	public:
-		explicit Epoll(std::vector<Socket> const &);
+		explicit Epoll(std::map<const int, Socket> const &, int const &);
 		~Epoll(void);
 
 		void	startEpoll(void);
-		int   	checkSocketFd(void);
-
-		void	addEvents(int const &);
-		void	deleteEvents(int const &);
-
-		void	clientConnect(int &, int const &);
-
-		void	readCase(int &, Socket &);
-
 		void	serverLoop(void);
 
 	private:
 		Epoll(void);
 
 		void	errorExit(const std::string &) const;
+		
+		int			clientConnect(int const &);
+		void		readCase(int &, Socket &);
+		static void	*handleRequest(void * args);
 
 	private:
-		Socket					_sock;
-		std::vector<Socket>		_multiSock;
-		int						_epollFd;
+		std::map<const int, Socket>	_multiSock;
+		int							_epollFd;
+		int							_serverSize;
 
-		struct kevent		*_chlist; // listen event
-		struct kevent		*_evlist; // tigger event
+		struct kevent				*_chlist; // listen event
+		struct kevent				*_evlist; // tigger event
 
-		int	_nListenEvent;
+		__unused pthread_t					_e_tid;
+
+		int							_currSockFd;
+		int							_currConn;
 };
 
 _END_NS_WEBSERV
