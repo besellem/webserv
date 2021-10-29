@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/28 19:07:59 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/29 18:54:28 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,24 +62,24 @@ CGI Environment variables contain data about the transaction
 between the client and the server. */
 void cgi::setEnv()
 {
-    std::string envVar[] = {"SERVER_PORT", "CONTENT_LENGTH", "PATH_INFO",
-        "SCRIPT_NAME", "REMOTE_HOST", "REMOTE_ADDR", "HTTP_ACCEPT", "HTTP_ACCEPT_LANGUAGE",
+    std::string envVar[] = {"SERVER_PORT", "PATH_INFO", "REQUEST_METHOD", "PATH_TRANSLATED",
+        "SCRIPT_NAME", "REMOTE_ADDR", "HTTP_ACCEPT", "HTTP_ACCEPT_LANGUAGE",
         "HTTP_USER_AGENT", "HTTP_REFERER", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS",
-        "HTTP_ACCEPT_ENCODING", "HTTP_CONNECTION"};
-    // , "REQUEST_METHOD", "SERVER_SOFTWARE", "GATEWAY_INTERFACE"
+        "HTTP_ACCEPT_ENCODING", "HTTP_CONNECTION", "SERVER_PROTOCOL", "GATEWAY_INTERFACE", ""};
     size_t i = 0;
-    size_t size = 15; // stop to request metod : status: 404 not found ?
+    size_t size = 0;
     
+    while (!envVar[size].empty())
+        ++size;
     this->_env = (char **)malloc(sizeof(char *) * (size + 1));
     if (!this->_env)
         throw std::bad_alloc();
-    while (i < size)
+    for (; i < size; i++)
     {
         std::string str = envVar[i] + "=" + this->_socket.getCgiEnv(envVar[i]);
         this->_env[i] = strdup(str.c_str());
         if (!this->_env[i])
             throw std::bad_alloc();
-        ++i;
     }
     this->_env[i] = 0;
 }
@@ -94,14 +94,14 @@ std::string cgi::execute(const std::string &fileName)
     int                 fd[2];
     char                buffer[4098];
     std::string		    content;
+    std::string         method = this->_socket.getCgiEnv("REQUEST_METHOD");
 
     if (pipe(fd) == -1)
         throw CgiError();
-    char *argGet[] = {strdup(this->_program.c_str()),
-            strdup(fileName.c_str()), NULL};
-    char *argPost[] = {strdup(this->_program.c_str()),
-            strdup(fileName.c_str()), NULL}; // add variables
-    errno = 0;
+     char               *arg[4] = {strdup(this->_program.c_str()),
+                            strdup(fileName.c_str()), NULL, NULL};
+    if (method == "POST")
+        arg[2] = strdup(this->_socket.getVar().c_str());
     if ((pid = fork()) == -1)
         throw CgiError();
     else if (pid == 0)
@@ -110,16 +110,8 @@ std::string cgi::execute(const std::string &fileName)
         if (dup2(fd[1], STDOUT_FILENO) == -1)
             throw CgiError();
         close(fd[1]);
-        if (this->_socket.getCgiEnv("REQUEST_METHOD") == "GET")
-        {
-            if (execve(argGet[0], argGet, this->_env)== -1)
-                throw CgiError();
-        }
-        else if (this->_socket.getCgiEnv("REQUEST_METHOD") == "POST")
-        {
-            if (execve(argPost[0], argPost, this->_env)== -1)
-                throw CgiError();
-        }
+        if (execve(arg[0], arg, this->_env)== -1)
+            throw CgiError();
         exit(EXIT_FAILURE);
     }
     waitpid(-1, &status, 0);
@@ -133,10 +125,6 @@ std::string cgi::execute(const std::string &fileName)
         content += buffer;
     }
     close(fd[0]);
-    free(argGet[0]);
-    free(argGet[1]);
-    free(argPost[0]);
-    free(argPost[1]);
     this->_contentLength = content.size();
     size_t pos = content.find("\n\r\n");
     if (pos != std::string::npos)
@@ -145,6 +133,10 @@ std::string cgi::execute(const std::string &fileName)
     // ##################################################################
     if (DEBUG)
     {
+        std::cout << "Command : " << arg[0] << " " << arg[1];
+        if (method == "POST")
+            std::cout << " " << arg[2] << "|";
+        std::cout << std::endl;
         std::cout << "............ CGI ENVIRON ............." <<std::endl;
         int i = -1;
         while(this->_env[++i])
@@ -154,6 +146,9 @@ std::string cgi::execute(const std::string &fileName)
         std::cout << content << std::endl;
         std::cout << "######################################" << std::endl;
     }
+    // ##################################################################
+    
+    free(arg[0]); free(arg[1]); free(arg[2]);
     
     return content;
 }

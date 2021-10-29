@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpHeader.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 16:09:26 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/27 20:00:04 by besellem         ###   ########.fr       */
+/*   Updated: 2021/10/29 18:58:30 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ HttpHeader&			HttpHeader::operator=(const HttpHeader &x)
 	request_method = x.request_method;
 	path = x.path;
 	path_constructed = x.path_constructed;
+	variables = x.variables;
 	memcpy(buf, x.buf, sizeof(buf));
 	return *this;
 }

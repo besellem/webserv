@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/28 18:42:38 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/29 18:59:26 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,8 @@ short		Socket::getPort(void)     const { return _port; }
 int			Socket::getServerFd(void) const { return _serverFd; }
 sockaddr_in	Socket::getAddr(void)     const { return _addr; }
 size_t		Socket::getAddrLen(void)  const { return _addrLen; }
+
+const std::string	Socket::getVar(void)  const { return this->header.variables; }
 
 void	Socket::startSocket(void)
 {
@@ -235,7 +237,8 @@ void	Socket::resolveHttpRequest(void)
 	std::cout << "Contructed Path -> [" S_CYAN << header.path_constructed << S_NONE "]\n";
 
 	/* Parse the remaining buffer line by line */
-	for ( ; line != buffer.end(); ++line)
+	header.variables = buffer[buffer.size() - 1];
+	for ( ; line != buffer.end() - 1; ++line)
 	{
 		this->checkHttpHeaderLine(*line);
 	}
@@ -356,7 +359,7 @@ void		Socket::sendHttpResponse(int socket_fd)
 		else if (loc->cgi.empty())
 			std::cout << "CGI not found" << std::endl;
 		else
-			std::cout << "cgi command: " << loc->cgi[0] << " " << loc->cgi[1] << std::endl;
+			std::cout << "cgi command: " << loc->cgi[0] << " " << loc->cgi[1] << " " << header.path_constructed << std::endl;
 		std::cout << "__________________________" << std::endl;
 	}
 	// Content
@@ -534,15 +537,15 @@ std::string	Socket::generateAutoindexPage(std::string const & path) const {
 std::string	Socket::getCgiEnv(const std::string &varName)
 {
     std::string envVar[] = {"SERVER_PORT", "REQUEST_METHOD", "PATH_INFO",
-        "SCRIPT_NAME", "REMOTE_HOST", "REMOTE_ADDR", "CONTENT_LENGTH", "HTTP_ACCEPT",
-        "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER", "SERVER_SOFTWARE",
+        "SCRIPT_NAME", "REMOTE_ADDR", "REMOTE_IDENT", "HTTP_ACCEPT",
+        "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER", "SERVER_PROTOCOL",
         "GATEWAY_INTERFACE", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS",
-		"HTTP_ACCEPT_ENCODING", "HTTP_CONNECTION"};
+		"HTTP_ACCEPT_ENCODING", "HTTP_CONNECTION", "PATH_TRANSLATED", "REMOTE_USER", ""};
     std::string str;
     size_t      pos;
     int         i = 0;
     
-    for (;i < 18; i++)
+    for (; !envVar[i].empty(); i++)
         if (varName == envVar[i])
             break ;
     switch (i)
@@ -554,26 +557,27 @@ std::string	Socket::getCgiEnv(const std::string &varName)
             return std::string("");
        return str.substr(pos + 1);
     case 1: return this->header.request_method;
-    case 2: return this->header.path_constructed;
-    case 3: return getLocation(this->header.path)->cgi[1];
-    case 4: return ft_strcut(vectorJoin(this->header.data["Host"], ' '), ':');
-    case 5: return vectorJoin(this->header.data["Host"], ' ');
-    case 6: return std::to_string(this->getFileLength(this->header.path_constructed));
-    case 7: return vectorJoin(this->header.data["Accept"], ',');
-    case 8: return vectorJoin(this->header.data["Accept-Language"], ' ');
-    case 9: return vectorJoin(this->header.data["User-Agent"], ' ');
-    case 10: return vectorJoin(this->header.data["Referer"], ' ');
-    case 11: return std::string(HTTP_PROTOCOL_VERSION);
-    case 12: return std::string("CGI/1.1");
-    case 13: return vectorJoin(this->header.data["Content-Type"], ' ');
-    case 14:
+    case 2: return header.path_constructed.substr(sizeof(ROOT_PATH) - 1);
+    case 3: return header.path_constructed;
+    case 4: return std::string("127.0.0.1");
+    case 5: return std::string("");
+    case 6: return vectorJoin(this->header.data["Accept"], ',');
+    case 7: return vectorJoin(this->header.data["Accept-Language"], ' ');
+    case 8: return vectorJoin(this->header.data["User-Agent"], ' ');
+    case 9: return vectorJoin(this->header.data["Referer"], ' ');
+    case 10: return std::string(HTTP_PROTOCOL_VERSION);
+    case 11: return std::string("CGI/1.1");
+    case 12: return vectorJoin(this->header.data["Content-Type"], ' ');
+    case 13:
         pos = this->header.path.find("?");
         if (pos == std::string::npos)
             return std::string("");
        return this->header.path.substr(pos + 1);
-    case 15: return std::string("CGI");
-    case 16: return vectorJoin(this->header.data["Accept-Encoding"], ' ');
-    case 17: return vectorJoin(this->header.data["Connection"], ' ');
+    case 14: return std::string("200");
+    case 15: return vectorJoin(this->header.data["Accept-Encoding"], ' ');
+    case 16: return vectorJoin(this->header.data["Connection"], ' ');
+    case 17: return header.path_constructed;;
+    case 18: return std::string("");
     default: return std::string();
     }
 }

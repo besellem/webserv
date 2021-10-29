@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 17:33:01 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/29 14:13:06 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ class Socket
 		static std::string	getFileContent(const std::string &);
 		static pair_type	getStatus(const std::string &);
 		std::string			getErrorPage(pair_type);
-
+		const std::string	getVar(void)  const;
 
 	private:
 		void		errorExit(const std::string &) const;
