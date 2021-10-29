@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/29 19:23:59 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/29 19:32:37 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,11 +54,8 @@ int	Epoll::clientConnect(int const & serverFd) {
 	socklen_t clientAddrLen = sizeof(clientAddr);
 	int newSock = accept(sockFd, (sockaddr *)&clientAddr, &clientAddrLen);
 
-	if (newSock < 0)
+	if (newSock == SYSCALL_ERR)
 		return SYSCALL_ERR;
-
-	if (newSock == 0)
-		std::cout << "Invalid socket" << std::endl;
 
 	if (SYSCALL_ERR == fcntl(newSock, F_SETFL, O_NONBLOCK))
 		errorExit("Non-blocking failed");
@@ -97,7 +94,7 @@ void	*Epoll::handleRequest(void * args) {
 
 void	Epoll::serverLoop(void) {
 	for(;;) {
-		int readyEvts = kevent(_epollFd, NULL, 0, _evlist, _serverSize, NULL);
+		int readyEvts = kevent(_epollFd, _chlist, 0, _evlist, _serverSize, NULL);
 		if (readyEvts < 0)
 			errorExit("kevent failed in loop");
 		else if (readyEvts == 0)
@@ -116,9 +113,9 @@ void	Epoll::serverLoop(void) {
 				continue ;
 			}
 
-			std::cout << "sock to communicate with client: [" << _currConn << "]" << std::endl;
+			std::cout << "sock to communicate with client: [" << _currConn << "]\n" << std::endl;
 
-			sleep(1); // accept get a delay
+			// sleep(1); // accept get a delay
 
 			readCase(_currConn, _multiSock[_currSockFd]);
 
