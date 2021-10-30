@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/29 18:57:53 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 00:44:08 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,17 +89,17 @@ void	Epoll::clientDisconnect(int const & fd) {
 void	Epoll::readCase(struct kevent & event) {
 	// debug msg
 	std::cout << S_RED "Reading ..." S_NONE << "\n" << std::endl;
-
-	_sock.readHttpRequest(event.ident);			
+	Request	request(_sock.getServer());
+	_sock.readHttpRequest(&request, event.ident);			
 	try {
-		_sock.resolveHttpRequest();
+		_sock.resolveHttpRequest(&request);
 	}
 	catch (std::exception &e) {
 		EXCEPT_WARNING;
 		event.flags |= EV_EOF;
 		return ;
 	}
-	_sock.sendHttpResponse(event.ident);
+	_sock.sendHttpResponse(&request, event.ident);
 	event.flags |= EV_EOF;
 }
 

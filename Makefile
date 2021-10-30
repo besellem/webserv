@@ -6,7 +6,7 @@
 #    By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/26 22:47:59 by adbenoit         ###   ########.fr        #
+#    Updated: 2021/10/31 01:33:15 by adbenoit         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -47,13 +47,15 @@ SUB_SRC			:= parser.cpp \
 SRC				+= $(addprefix parser/, $(SUB_SRC))
 SUB_SRC			:= accept.cpp \
 				   socket.cpp \
-				   HttpHeader.cpp
+				   HttpHeader.cpp \
+				   Request.cpp \
+				   Response.cpp
 SRC				+= $(addprefix socket/, $(SUB_SRC))
 SUB_SRC			:= utils.cpp
 SRC				+= $(addprefix utils/, $(SUB_SRC))
 SUB_SRC			:= epoll.cpp
 SRC				+= $(addprefix epoll/, $(SUB_SRC))
-SUB_SRC			:= cgi.cpp 
+SUB_SRC			:= Cgi.cpp 
 SRC				+= $(addprefix cgi/, $(SUB_SRC))
 
 OBJ				:= $(SRC:%.cpp=$(OBJ_DIR)/%.o)

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 16:04:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/29 14:07:56 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/30 23:07:48 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ class HttpHeader
 		};
 
 
-	private:
+	public:
 		value_type		data;
 		std::string		request_method;
 		std::string		path;

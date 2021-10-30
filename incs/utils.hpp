@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 17:49:10 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/28 18:20:21 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 00:05:40 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ std::vector<std::string>	ft_vectorcut(const std::vector<std::string>& vect, char
 std::string                 vectorJoin(const std::vector<std::string> &vect, char sep);
 bool						is_valid_path(const std::string& path);
 bool	                    ft_isDirectory(const std::string& path);
+std::string	                getFileContent(const std::string& file);
+ssize_t		                getFileLength(const std::string& file);
 
 
 _END_NS_WEBSERV
