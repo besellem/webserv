@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/31 01:27:11 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 01:50:34 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,7 @@ void	Socket::resolveHttpRequest(Request *request)
 	++line;
 
 	std::cout << "Path ->            [" S_CYAN << request->getHeader().path << S_NONE "]\n";
-	std::cout << "Contructed Path -> [" S_CYAN << request->getHeader().path_constructed << S_NONE "]\n";
+	std::cout << "Contructed Path -> [" S_CYAN << request->getConstructPath() << S_NONE "]\n";
 
 	/* Parse the remaining buffer line by line */
 	request->getHeader().variables = buffer[buffer.size() - 1];

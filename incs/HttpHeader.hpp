@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 16:04:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/30 23:07:48 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 01:50:52 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ class HttpHeader
 		value_type		data;
 		std::string		request_method;
 		std::string		path;
-		std::string		path_constructed;
 		std::string		variables;
 		char			buf[BUFSIZ];
 
