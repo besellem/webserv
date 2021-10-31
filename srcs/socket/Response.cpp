@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 18:18:39 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 20:04:58 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ Response::Response(Request *req) : _request(req) {
         _cgi = new Cgi(req);
     else
         _cgi = NULL;
+	setStatus(200);
 }
 
 Response::~Response() {
@@ -43,11 +44,12 @@ void    Response::setStatus(const status_type& status) {
 }
 
 void    Response::setStatus(int code) {
-	int 		codeTab[] = {200, 404, 500};
-	std::string actionTab[] = {"OK", "Not Found", "Internal Server Error"};
+	int 		codeTab[] = {200, 204, 404, 405, 500};
+	std::string actionTab[] = {"OK", "No content", "Not Found", "Method Not Allowed",
+			"Internal Server Error"};
 	int			i = 0;
 
-	while (i < 3 && codeTab[i] != code)
+	while (i < 4 && codeTab[i] != code)
 		++i;
 	this->_status = std::make_pair<int, std::string>(codeTab[i], actionTab[i]);
 }
@@ -60,11 +62,29 @@ void    Response::setHeader(void)
 	this->_header += "Content-Length: " + std::to_string(this->_contentLenght);
 }
 
-void    Response::setContent(const std::string &file_content)
+bool	Response::isMethodAllowed(const std::string &method)
 {
-	
 	const t_location	*loc = this->_request->getLocation();
 
+	if (method == "GET")
+		return 1;
+
+	if (loc)
+	{
+		for (size_t i = 0; i < loc->methods.size(); i++)
+			if (method == loc->methods[i])
+				return 1;
+	}
+	this->setStatus(405);
+	return 0;
+}
+
+void    Response::setContent(const std::string &file_content)
+{
+	this->isMethodAllowed(this->_request->getHeader().request_method);
+	
+	const t_location	*loc = this->_request->getLocation();
+	
 	// cgi case
 	if (this->_status.first == 200 && this->_cgi
 	&& getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension())
@@ -82,19 +102,22 @@ void    Response::setContent(const std::string &file_content)
 		}
 	}
 	
+	// OK case
+	if (this->_status.first == 200)
+	{
+		this->_content = file_content;
+		if (this->_content.empty() && loc && loc->autoindex == ON)
+			this->_content = generateAutoindexPage(this->_request->getConstructPath());
+		this->_contentLenght = this->_content.size();
+		this->_content = "\n" + this->_content;
+	}
+	
+	if (this->_contentLenght == 0)
+		this->setStatus(204);
+		
 	// Error case
 	if (this->_status.first != 200)
-	{
 		this->setErrorContent();
-		return ;
-	}
-
-	// Default case
-	this->_content = file_content;
-	if (this->_content.empty() && loc && loc->autoindex == ON)
-		this->_content = generateAutoindexPage(this->_request->getConstructPath());
-	this->_contentLenght = this->_content.size();
-	this->_content = "\n" + this->_content;
 }
 
 void Response::setErrorContent(void)
@@ -116,6 +139,7 @@ void Response::setErrorContent(void)
 			}
 			catch(const std::exception& e)
 			{
+				this->setStatus(500);
 				EXCEPT_WARNING;
 			}
 		}

@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   defs.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/28 14:23:44 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/31 19:30:18 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef DEFS_HPP
 # define DEFS_HPP
 
-# define DEBUG     true // print some logs
+# define DEBUG     false // print some logs
 
 /** @brief Anscii code */
 # define S_NONE    "\e[0m"

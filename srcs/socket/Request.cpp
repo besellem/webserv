@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 18:40:15 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 18:59:47 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ void	Request::setConstructPath(void)
 	ret = ROOT_PATH;
 	if (loc)
 	{
-		std::cout << "location root: [" S_GREEN << loc->root << S_NONE "]" << std::endl;
+		std::cout << "location root   : [" S_GREEN << loc->root << S_NONE "]" << std::endl;
 		ret += loc->root;
 		ret += this->_header.path.substr(loc->path.size(), this->_header.path.size());
 
@@ -98,7 +98,10 @@ void	Request::setConstructPath(void)
 		}
 	}
 	else
+	{
+		std::cout << "location root   : [" S_RED << "unknow" << S_NONE "]" << std::endl;
 		ret += this->_header.path;
+	}
 	
 	this->_constructPath = ft_strcut(ret, '?');
 }
