@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 18:18:27 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 21:39:21 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ between the client and the server. */
 void Cgi::setEnv()
 {
 	std::string envVar[] = {"PATH_INFO", "REQUEST_METHOD", "PATH_TRANSLATED",
-			"REDIRECT_STATUS", "QUERY_STRING", ""};
+			"REDIRECT_STATUS", "QUERY_STRING", "SERVER_PROTOCOL", ""};
 	size_t i = 0;
 	size_t size = 0;
 	
@@ -80,7 +80,7 @@ void Cgi::setEnv()
 		this->_env[i] = strdup(str.c_str());
 		if (!this->_env[i])
 			throw std::bad_alloc();
-	}
+	}  
 	this->_env[i] = 0;
 }
 
@@ -114,33 +114,33 @@ void	Cgi::setContentLenght(const std::string &output) {
 Returns the output in a string */
 std::string Cgi::execute(const std::string &fileName)
 {
-	pid_t               pid;
-	int                 status;
-	int                 fdIn[2];
-	int                 fdOut[2];
-	std::string		    content;
-	std::string         method = this->_request->getEnv("REQUEST_METHOD");
+	pid_t		pid;
+	int			status = 0;
+	int			fdIn[2];
+	int			fdOut[2];
+	std::string	content;
+	std::string	method = this->_request->getEnv("REQUEST_METHOD");
 
 	if (pipe(fdIn) == -1 || pipe(fdOut) == -1)
 		throw CgiError();
 
 	 char   *arg[3] = {strdup(this->_program.c_str()), strdup(fileName.c_str()), NULL};
 							
-	if ((pid = fork()) == -1)
+	if (!arg[0] || !arg[1] || (pid = fork()) == -1)
 		throw CgiError();
 	else if (pid == 0)
 	{
 		// Modify standard input and output
-		if (dup2(fdIn[0], STDIN_FILENO) == -1)
-			throw CgiError();
-		close(fdIn[0]); close(fdIn[1]);
 		if (dup2(fdOut[1], STDOUT_FILENO) == -1)
-			throw CgiError();
+			exit(EXIT_FAILURE);
 		close(fdOut[0]); close(fdOut[1]);
+		if (dup2(fdIn[0], STDIN_FILENO) == -1)
+			exit(EXIT_FAILURE);
+		close(fdIn[0]); close(fdIn[1]);
 		
 		// Execute the cgi program on the file
-		if (execve(arg[0], arg, this->_env)== -1)
-			throw CgiError();
+		if (execve(arg[0], arg, this->_env) == -1)
+			exit(EXIT_FAILURE);
 		exit(EXIT_FAILURE);
 	}
 	
@@ -151,7 +151,7 @@ std::string Cgi::execute(const std::string &fileName)
 		write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size());
 		
 	close(fdIn[1]); close(fdIn[0]);
-	waitpid(-1, &status, 0);
+	waitpid(pid, &status, 0);
 	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
 		throw CgiError();
 
