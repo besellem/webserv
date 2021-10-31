@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/29 19:32:37 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/31 16:54:08 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ _multiSock(multiSock),
 _epollFd(-1) {
 	_serverSize = serverSize;
 	_chlist = new struct kevent[serverSize];
-	_evlist = new struct kevent[serverSize];
+	_evlist = new struct kevent[32];
 }
 
 void	Epoll::startEpoll(void) {
@@ -92,13 +92,27 @@ void	*Epoll::handleRequest(void * args) {
 	return NULL;
 }
 
+Socket	Epoll::checkServ(int const & currConn, std::map<const int, Socket> & sockConn) const {
+	Socket sock;
+
+	for (std::map<const int, Socket>::iterator it = sockConn.begin(); it != sockConn.end(); it++) {
+		if (currConn == it->first)
+			return it->second;
+	}
+	return sock;
+}
+
 void	Epoll::serverLoop(void) {
+
+	std::map<const int, Socket> sockConn;
+
 	for(;;) {
-		int readyEvts = kevent(_epollFd, _chlist, 0, _evlist, _serverSize, NULL);
+		int readyEvts = kevent(_epollFd, NULL, 0, _evlist, 32, NULL);
 		if (readyEvts < 0)
 			errorExit("kevent failed in loop");
-		else if (readyEvts == 0)
-			continue ;
+		// else if (readyEvts == 0) { // time out
+		// 	continue ;
+		// }
 
 		if (readyEvts > 0)
 			// debug msg
@@ -106,22 +120,48 @@ void	Epoll::serverLoop(void) {
 
 		for (int i = 0; i < readyEvts; i++) {
 			struct kevent currentEvt = _evlist[i];
-			_currConn = clientConnect(currentEvt.ident);
-			_currSockFd = currentEvt.ident;
-			if (_currConn == SYSCALL_ERR) {
-				std::cout << "Id: [" << currentEvt.ident << "]: connection failed!" << std::endl;
-				continue ;
+
+			bool isClient = false;
+			for (std::map<const int, Socket>::iterator it = _multiSock.begin(); it != _multiSock.end(); it++) {
+				if (static_cast<int>(currentEvt.ident) == it->first) {
+					_currConn = clientConnect(currentEvt.ident);
+					sockConn[_currConn] = it->second;
+					isClient = true;
+					break;
+				}
 			}
 
-			std::cout << "sock to communicate with client: [" << _currConn << "]\n" << std::endl;
+			if (isClient == true) {
+				EV_SET(&_chlist[0], _currConn, EVFILT_READ, EV_ADD, 0, 0, 0);
+				int addEvts = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
+				if (addEvts < 0)
+					errorExit("kevent failed in loop");
 
-			// sleep(1); // accept get a delay
+				continue ;
+			}
+			else {
+				Socket tmp = checkServ(currentEvt.ident, sockConn);
+				if (tmp.getServerFd() == SYSCALL_ERR) {
+					std::cout << "No found conn!" << std::endl;
+					close(currentEvt.ident);
+					break ;
+				}
 
-			readCase(_currConn, _multiSock[_currSockFd]);
+				tmp.readHttpRequest(currentEvt.ident);
+				try {
+					tmp.resolveHttpRequest();
+					tmp.sendHttpResponse(currentEvt.ident);
+				}
+				catch (std::exception &e) {
+					EXCEPT_WARNING;
+				}
 
-			std::cout << S_RED "Closing ..." S_NONE << "\n" << std::endl;
-
-			close(_currConn);
+				EV_SET(&_chlist[0], currentEvt.ident, EVFILT_READ, EV_DELETE, 0, 0, 0);
+				int addEvts = kevent(_epollFd, _chlist, 1, NULL, 0, NULL);
+				if (addEvts < 0)
+					errorExit("kevent failed in loop");
+				close(currentEvt.ident);
+			}
 
 			// if (pthread_create(&_e_tid, NULL, Epoll::handleRequest, (void *)this) != 0) {
 			// 	close(_currConn);

@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 14:27:23 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/29 19:10:43 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/31 16:49:21 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,9 @@ class Epoll {
 	private:
 		Epoll(void);
 
-		void	errorExit(const std::string &) const;
+		void		errorExit(const std::string &) const;
 		
+		Socket		checkServ(int const &, std::map<const int, Socket> &) const;
 		int			clientConnect(int const &);
 		void		readCase(int &, Socket &);
 		static void	*handleRequest(void * args);
