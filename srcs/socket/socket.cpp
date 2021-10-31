@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/31 18:25:08 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 19:52:21 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,8 +119,8 @@ void	Socket::resolveHttpRequest(Request *request)
 	request->setConstructPath();
 	++line;
 
-	std::cout << "Path ->            [" S_CYAN << request->getHeader().path << S_NONE "]\n";
-	std::cout << "Contructed Path -> [" S_CYAN << request->getConstructPath() << S_NONE "]\n";
+	std::cout << "Path            : [" S_CYAN << request->getHeader().path << S_NONE "]\n";
+	std::cout << "Contructed Path : [" S_CYAN << request->getConstructPath() << S_NONE "]\n";
 
 	request->setContent(buffer[buffer.size() - 1]);
 
@@ -141,9 +141,7 @@ void		Socket::sendHttpResponse(Request* request, int socket_fd)
 	Response		response(request);
 	std::string		toSend;
 	
-	if (is_valid_path(request->getConstructPath()))
-		response.setStatus(200);
-	else
+	if (!is_valid_path(request->getConstructPath()))
 		response.setStatus(404);
 	response.setContent(getFileContent(request->getConstructPath()));
 	response.setHeader();
