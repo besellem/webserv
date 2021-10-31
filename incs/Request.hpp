@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 15:40:54 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 18:05:47 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 # include "defs.hpp"
 # include "HttpHeader.hpp"
 # include "Server.hpp"
-# include "Cgi.hpp"
+# include "cgi.hpp"
 
 _BEGIN_NS_WEBSERV
 

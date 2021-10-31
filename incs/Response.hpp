@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 12:01:45 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 18:05:13 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # define RESPONSE_HPP
 
 # include "defs.hpp"
-# include "Cgi.hpp"
+# include "cgi.hpp"
 # include "Request.hpp"
 
 _BEGIN_NS_WEBSERV

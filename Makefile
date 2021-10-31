@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+         #
+#    By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/10/31 01:33:15 by adbenoit         ###   ########.fr        #
+#    Updated: 2021/10/31 18:06:41 by kaye             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -55,7 +55,7 @@ SUB_SRC			:= utils.cpp
 SRC				+= $(addprefix utils/, $(SUB_SRC))
 SUB_SRC			:= epoll.cpp
 SRC				+= $(addprefix epoll/, $(SUB_SRC))
-SUB_SRC			:= Cgi.cpp 
+SUB_SRC			:= cgi.cpp 
 SRC				+= $(addprefix cgi/, $(SUB_SRC))
 
 OBJ				:= $(SRC:%.cpp=$(OBJ_DIR)/%.o)
