@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 11:24:37 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 12:12:02 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ std::string Cgi::execute(const std::string &fileName)
         exit(EXIT_FAILURE);
     }
     if (method == "POST")
-        write(fd[0], this->_request->getContent().c_str(), this->_contentLength);
+        write(fd[1], this->_request->getContent().c_str(), this->_contentLength);
     waitpid(-1, &status, 0);
     if (status != 0)
         throw CgiError();
