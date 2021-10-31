@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 18:36:12 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 18:40:15 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,6 @@ void	Request::setConstructPath(void)
 	const t_location	*loc = this->getLocation();
 	
 	// tmp variables
-	std::string							root_tmp;
 	std::string							index_tmp;
 	Server::tokens_type::const_iterator	idx; // iterator on indexes
 	
@@ -80,6 +79,8 @@ void	Request::setConstructPath(void)
 		std::cout << "location root: [" S_GREEN << loc->root << S_NONE "]" << std::endl;
 		ret += loc->root;
 		ret += this->_header.path.substr(loc->path.size(), this->_header.path.size());
+
+		// use default index
 		if (ft_isDirectory(ret))
 		{
 			if (ret[ret.size() - 1] != '/')
