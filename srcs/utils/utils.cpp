@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 17:41:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/28 18:36:48 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 00:05:27 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,6 +126,45 @@ bool	ft_isDirectory(const std::string& path)
 	if (S_ISDIR(statBuf.st_mode))
 		return 1;
 	return 0;
+}
+
+/* Returns the content of a file */
+std::string	getFileContent(const std::string& file)
+{
+	std::string		content;
+	std::ifstream	ifs(file, std::ios::in);
+
+	std::string		gline;
+	if (ifs.is_open())
+	{
+		do
+		{
+			std::getline(ifs, gline);
+			content += gline;
+			if (ifs.eof())
+				break ;
+			content += "\n";
+		} while (true);
+	}
+	ifs.close();
+	return content;
+}
+
+/* Returns the size of a file */
+ssize_t		getFileLength(const std::string& file)
+{
+	if (ft_isDirectory(file))
+		return 0;
+	
+	std::ifstream	ifs(file, std::ios::binary | std::ios::ate);
+
+	if (ifs.is_open())
+	{
+		ssize_t	size = ifs.tellg();
+		ifs.close();
+		return size;
+	}
+	return SYSCALL_ERR; // may want to throw an error or something
 }
 
 _END_NS_WEBSERV

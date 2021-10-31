@@ -1,0 +1,17 @@
+AUTH_TYPE=Basic
+CONTENT_TYPE=
+GATEWAY_INTERFACE=CGI/1.1
+PATH_INFO=/php-example.php
+PATH_TRANSLATED=/sgoinfre/goinfre/Perso/adbenoit/Cursus/webserver/www/francebook/php-example.php
+QUERY_STRING=say=Hi&to=Mom
+REDIRECT_STATUS=200
+REMOTE_ADDR=127.0.0.1
+REMOTE_IDENT=
+REMOTE_USER=
+REQUEST_METHOD=GET
+REQUEST_URI=/php-example.php
+SCRIPT_NAME=/sgoinfre/goinfre/Perso/adbenoit/Cursus/webserver/www/francebook/php-example.php
+SERVER_NAME=francebook.com
+SERVER_PORT=8080
+SERVER_PROTOCOL=HTTP/1.1
+SERVER_SOFTWARE=webserv/0.1.0

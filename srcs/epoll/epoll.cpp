@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   epoll.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/28 19:02:48 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/31 12:19:12 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,16 +76,16 @@ void	Epoll::clientConnect(int & fd, int const & serverFd) {
 void	Epoll::readCase(int & fd, Socket & sock) {
 	// debug msg
 	std::cout << S_RED "Reading ..." S_NONE << "\n" << std::endl;
-
-	sock.readHttpRequest(fd);			
+	Request	request(sock.getServer());
+	sock.readHttpRequest(&request, fd);			
 	try {
-		sock.resolveHttpRequest();
+		sock.resolveHttpRequest(&request);
 	}
 	catch (std::exception &e) {
 		EXCEPT_WARNING;
 		return ;
 	}
-	sock.sendHttpResponse(fd);
+	sock.sendHttpResponse(&request, fd);
 }
 
 void	Epoll::serverLoop(void) {

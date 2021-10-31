@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/27 17:33:01 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 01:32:28 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 # include "utils.hpp"
 # include "Server.hpp"
 # include "HttpHeader.hpp"
+# include "Response.hpp"
+# include "Request.hpp"
 
 
 _BEGIN_NS_WEBSERV
@@ -38,21 +40,20 @@ class Socket
 		Socket&		operator=(const Socket &);
 
 
-		short		getPort(void) const;
-		int			getServerFd(void) const;
-		sockaddr_in	getAddr(void) const;
-		size_t		getAddrLen(void) const;
-		t_location*	getLocation(const std::string &);
+		short			getPort(void) const;
+		int				getServerFd(void) const;
+		const Server*	getServer(void) const;
+		sockaddr_in		getAddr(void) const;
+		size_t			getAddrLen(void) const;
 
 
 		/** @brief init socket */
-		void		startSocket(void);
+		void			startSocket(void);
 
 		
-		void		readHttpRequest(int);
-		void		resolveHttpRequest(void);
-		std::string	getCgiEnv(const std::string &);
-		void		sendHttpResponse(int);
+		void		readHttpRequest(Request *, int);
+		void		resolveHttpRequest(Request *);
+		void		sendHttpResponse(Request *, int);
 
 		void		setNonBlock(int & fd);
 		int			socketAccept(void);
@@ -60,28 +61,22 @@ class Socket
 
 	/* Static public functions */
 	public:
-		static ssize_t		getFileLength(const std::string &);
-		static std::string	getFileContent(const std::string &);
 		static pair_type	getStatus(const std::string &);
-		std::string			getErrorPage(pair_type);
-
 
 	private:
 		void		errorExit(const std::string &) const;
 		void		bindStep(const int &, const sockaddr_in &);
 		void		listenStep(const int &);
 		
-		void		checkHttpHeaderLine(const std::string &);
+		void		setHeaderData(const std::string &);
 		std::string	constructPath(void);
-		std::string	generateAutoindexPage(std::string const &) const;
 
 	private:
 		const Server	*_server_block; // which was parsed
-		short		_port;
-		int			_serverFd;
-		sockaddr_in	_addr;
-		size_t		_addrLen;
-		HttpHeader	header;
+		short			_port;
+		int				_serverFd;
+		sockaddr_in		_addr;
+		size_t			_addrLen;
 	
 }; /* class Socket */
 
