@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 11:24:36 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 15:40:54 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,34 +24,34 @@ class Cgi;
 
 class Request
 {
-    public:
-        Request(const Server *);
-        ~Request();
+	public:
+		Request(const Server *);
+		~Request();
 
-    private:
-        Request();
-        Request(const Request &);
-        Request& operator=(const Request &);
+	private:
+		Request();
+		Request(const Request &);
+		Request& operator=(const Request &);
 
-    public:
-        HttpHeader&         getHeader(void);
-        const std::string&  getContent(void) const;
-        const std::string&  getConstructPath(void) const;
-        const size_t&       getContentLenght(void) const;
-        const Server*       getServer(void) const;
-        const t_location*   getLocation(void) const;
-        
-        const std::string   getEnv(const std::string &);
-        
-        void                setConstructPath(void);
-        void	            setHeaderData(const std::string &);
-    
-    private:
-        HttpHeader          _header;
-        std::string         _constructPath;
-        std::string         _content;
-        size_t              _contentLenght;
-        const Server	    *_server;
+	public:
+		HttpHeader&			getHeader(void);
+		const std::string&	getContent(void) const;
+		const std::string&	getConstructPath(void) const;
+		size_t				getContentLenght(void) const;
+		const Server*		getServer(void) const;
+		const t_location*	getLocation(void) const;
+		
+		const std::string	getEnv(const std::string &);
+		
+		void				setConstructPath(void);
+		void				setContent(const std::string &);
+		void				setHeaderData(const std::string &);
+
+	private:
+		HttpHeader			_header;
+		std::string			_constructPath;
+		std::string			_content;
+		const Server		*_server;
 };
 
 

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/31 12:16:48 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 17:17:18 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,6 @@ const Server*	Socket::getServer(void)   const { return _server_block; }
 sockaddr_in		Socket::getAddr(void)     const { return _addr; }
 size_t			Socket::getAddrLen(void)  const { return _addrLen; }
 
-// void				Socket::setVar(void)  const { return this->header.variables; }
-
 void	Socket::startSocket(void)
 {
 	bindStep(_serverFd, _addr);
@@ -124,14 +122,13 @@ void	Socket::resolveHttpRequest(Request *request)
 	std::cout << "Path ->            [" S_CYAN << request->getHeader().path << S_NONE "]\n";
 	std::cout << "Contructed Path -> [" S_CYAN << request->getConstructPath() << S_NONE "]\n";
 
-	/* Parse the remaining buffer line by line */
-	request->getHeader().variables = buffer[buffer.size() - 1];
-	if (request->getHeader().variables.empty())
-	{
-		size_t pos = request->getHeader().path.find("?");
-		if (pos != std::string::npos)
-			request->getHeader().variables = request->getHeader().path.substr(pos + 1);
-	}
+	request->setContent(buffer[buffer.size() - 1]);
+
+	// set query string
+	size_t pos = request->getHeader().path.find("?");
+	if (pos != std::string::npos)
+		request->getHeader().queryString = request->getHeader().path.substr(pos + 1);
+
 	for ( ; line != buffer.end() - 1; ++line)
 		request->setHeaderData(*line);
 	
