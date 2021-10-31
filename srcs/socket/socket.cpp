@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/31 01:50:34 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 11:13:07 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,6 @@ void	Socket::readHttpRequest(Request *request, int socket_fd)
 {
 	int	ret;
 
-	request->getHeader().resetBuffer();
 	ret = recv(socket_fd, request->getHeader().buf, sizeof(request->getHeader().buf), 0);
 	if (ret == sizeof(request->getHeader().buf) || ret == -1)
 		LOG;
@@ -146,6 +145,8 @@ void		Socket::sendHttpResponse(Request* request, int socket_fd)
 	std::string		toSend;
 	
 	response.setStatus(request->getConstructPath());
+	response.setContent(getFileContent(request->getConstructPath()));
+	response.setHeader();
 	
 	toSend =  response.getHeader();
 	toSend += "\n";
