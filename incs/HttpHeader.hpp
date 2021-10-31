@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 16:04:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/31 01:50:52 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 17:11:51 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ class HttpHeader
 		value_type		data;
 		std::string		request_method;
 		std::string		path;
-		std::string		variables;
+		std::string		queryString;
 		char			buf[BUFSIZ];
 
 	friend class Socket;

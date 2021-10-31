@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 12:12:02 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 16:41:18 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,10 +64,8 @@ CGI Environment variables contain data about the transaction
 between the client and the server. */
 void Cgi::setEnv()
 {
-    std::string envVar[] = {"SERVER_PORT", "PATH_INFO", "REQUEST_METHOD", "PATH_TRANSLATED",
-        "SCRIPT_NAME", "REMOTE_ADDR", "HTTP_ACCEPT", "HTTP_ACCEPT_LANGUAGE",
-        "HTTP_USER_AGENT", "HTTP_REFERER", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS",
-        "HTTP_ACCEPT_ENCODING", "HTTP_CONNECTION", "SERVER_PROTOCOL", "GATEWAY_INTERFACE", ""};
+    std::string envVar[] = {"PATH_INFO", "REQUEST_METHOD", "PATH_TRANSLATED",
+            "REDIRECT_STATUS", "QUERY_STRING", ""};
     size_t i = 0;
     size_t size = 0;
     
@@ -93,52 +91,65 @@ std::string Cgi::execute(const std::string &fileName)
 {
     pid_t               pid;
     int                 status;
-    int                 fd[2];
+    int                 fdIn[2];
+    int                 fdOut[2];
     char                buffer[4098];
     std::string		    content;
     std::string         method = this->_request->getEnv("REQUEST_METHOD");
 
-    if (pipe(fd) == -1)
+    if (pipe(fdIn) == -1 || pipe(fdOut) == -1)
         throw CgiError();
 
-     char               *arg[3] = {strdup(this->_program.c_str()),
-                            strdup(fileName.c_str()), NULL};
+     char   *arg[3] = {strdup(this->_program.c_str()), strdup(fileName.c_str()), NULL};
                             
     if ((pid = fork()) == -1)
         throw CgiError();
     else if (pid == 0)
     {
-        if (dup2(fd[0], STDIN_FILENO) == -1)
+        // Modify standard input and output
+        if (dup2(fdIn[0], STDIN_FILENO) == -1)
             throw CgiError();
-        if (dup2(fd[1], STDOUT_FILENO) == -1)
+        close(fdIn[0]); close(fdIn[1]);
+        if (dup2(fdOut[1], STDOUT_FILENO) == -1)
             throw CgiError();
-        close(fd[1]);
+        close(fdOut[0]); close(fdOut[1]);
+        
+        // Execute the cgi program on the file
         if (execve(arg[0], arg, this->_env)== -1)
             throw CgiError();
         exit(EXIT_FAILURE);
     }
+    close(fdOut[1]);
+    
+    // Send variables to the standard input of the program
     if (method == "POST")
-        write(fd[1], this->_request->getContent().c_str(), this->_contentLength);
+        write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size());
+        
+    close(fdIn[1]); close(fdIn[0]);
     waitpid(-1, &status, 0);
-    if (status != 0)
+    if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
         throw CgiError();
-    close(fd[1]);
+
+    // Read the standard output of the program
     int n;
-    while ((n = read(fd[0], buffer, sizeof(buffer))) > 0)
+    while ((n = read(fdOut[0], buffer, sizeof(buffer))) > 0)
     {
         buffer[n] = 0;
         content += buffer;
     }
-    close(fd[0]);
+    
+    close(fdOut[0]);
+    
     this->_contentLength = content.size();
-    size_t pos = content.find("\n\r\n");
+    size_t pos = content.find("\r\n\r\n");
     if (pos != std::string::npos)
-        this->_contentLength -= pos + 3;
+        this->_contentLength -= pos + 4;
 
     // ##################################################################
     if (DEBUG)
     {
         std::cout << "Command : " << arg[0] << " " << arg[1] << std::endl;
+        std::cout << "request content : " << this->_request->getContent() << std::endl;
         std::cout << "............ CGI ENVIRON ............." <<std::endl;
         int i = -1;
         while(this->_env[++i])

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 11:24:14 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 17:10:54 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,9 @@ Request::~Request() {}
 */
 
 HttpHeader&         Request::getHeader(void) { return this->_header ; }
-const std::string&  Request::getContent(void) const { return this->_content ; }
-const size_t&       Request::getContentLenght(void) const { return this->_contentLenght ; }
+const std::string&  Request::getContent(void) const { return this->_content; }
 const std::string&  Request::getConstructPath(void) const { return this->_constructPath; }
+size_t       		Request::getContentLenght(void) const { return this->_content.size(); }
 const Server*       Request::getServer(void) const { return this->_server ; }
 
 /* Find the location of the request */
@@ -34,17 +34,18 @@ const t_location*   Request::getLocation(void) const
 {
 	typedef std::vector<t_location *>	location_type;
 	std::string							parent_dir;
-	size_t								pos = this->_header.path.find('/', 1);
 	location_type::const_iterator		it;
 	const location_type					loc = this->_server->locations();
 	
-	if (ft_isDirectory(ROOT_PATH + this->_header.path))
-		parent_dir = this->_header.path;
-	else if (pos == std::string::npos)
-		parent_dir = "/";
-	else
-		parent_dir = this->_header.path.substr(0, pos);
-	parent_dir = ft_strcut(parent_dir, '?');
+	parent_dir = ft_strcut(this->_header.path, '?');
+	if (!ft_isDirectory(ROOT_PATH + parent_dir))
+	{
+		size_t	pos = parent_dir.find_last_of('/');
+		if (pos == std::string::npos)
+			parent_dir = "/";
+		else
+			parent_dir = parent_dir.substr(0, pos);
+	}
 	for (it = loc.begin(); it != loc.end(); ++it)
 	{
 		if (parent_dir == (*it)->path)
@@ -56,6 +57,11 @@ const t_location*   Request::getLocation(void) const
 /*
 ** Setters
 */
+
+void	Request::setContent(const std::string &content) {
+	this->_content = content;
+}
+
 
 void	Request::setConstructPath(void)
 {
@@ -148,7 +154,7 @@ const std::string	Request::getEnv(const std::string &varName)
         "SCRIPT_NAME", "REMOTE_ADDR", "REMOTE_IDENT", "HTTP_ACCEPT",
         "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER", "SERVER_PROTOCOL",
         "GATEWAY_INTERFACE", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS",
-		"HTTP_ACCEPT_ENCODING", "HTTP_CONNECTION", "PATH_TRANSLATED", "REMOTE_USER", ""};
+		"HTTP_ACCEPT_ENCODING", "HTTP_CONNECTION", "PATH_TRANSLATED", "REMOTE_USER", "CONTENT_LENGHT", ""};
     std::string str;
     size_t      pos;
     int         i = 0;
@@ -176,12 +182,13 @@ const std::string	Request::getEnv(const std::string &varName)
     case 10: return std::string(HTTP_PROTOCOL_VERSION);
     case 11: return std::string("CGI/1.1");
     case 12: return vectorJoin(this->_header.data["Content-Type"], ' ');
-    case 13: return this->_header.variables;
+    case 13: return this->_header.queryString;
     case 14: return std::string("200");
     case 15: return vectorJoin(this->_header.data["Accept-Encoding"], ' ');
     case 16: return vectorJoin(this->_header.data["Connection"], ' ');
     case 17: return this->_constructPath;;
     case 18: return std::string("");
+    case 19: return std::to_string(this->getContentLenght());
     default: return std::string();
     }
 }
