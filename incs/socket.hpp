@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/31 01:32:28 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 17:53:48 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,11 +57,6 @@ class Socket
 
 		void		setNonBlock(int & fd);
 		int			socketAccept(void);
-
-
-	/* Static public functions */
-	public:
-		static pair_type	getStatus(const std::string &);
 
 	private:
 		void		errorExit(const std::string &) const;

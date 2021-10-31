@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/31 17:13:49 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 17:59:05 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,10 @@ void		Socket::sendHttpResponse(Request* request, int socket_fd)
 	Response		response(request);
 	std::string		toSend;
 	
-	response.setStatus(request->getConstructPath());
+	if (is_valid_path(request->getConstructPath()))
+		response.setStatus(200);
+	else
+		response.setStatus(404);
 	response.setContent(getFileContent(request->getConstructPath()));
 	response.setHeader();
 	

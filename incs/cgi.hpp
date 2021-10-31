@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 00:36:05 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 11:17:44 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 17:39:30 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,8 @@ class Cgi
 		Cgi();
 		Cgi(const Cgi &);
 		Cgi& 			operator=(const Cgi &);
+		std::string		getOuput(int);
+		void			setContentLenght(const std::string &);
 		void			setEnv();
 		
 	public:
