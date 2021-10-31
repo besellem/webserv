@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/31 18:02:02 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/31 18:25:39 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,11 +56,6 @@ class Socket
 
 		void		setNonBlock(int & fd);
 		int			socketAccept(void);
-
-
-	/* Static public functions */
-	public:
-		static pair_type	getStatus(const std::string &);
 
 	private:
 		void		errorExit(const std::string &) const;

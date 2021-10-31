@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 16:16:17 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 18:18:39 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,18 +29,10 @@ Response::~Response() {
 ** Getters
 */
 
-const std::string&  Response::getHeader(void) const { return this->_header; }
-const std::string&  Response::getContent(void) const { return this->_content; }
-const size_t&       Response::getContentLenght(void) const { return this->_contentLenght; }
-
+const std::string&  			Response::getHeader(void) const { return this->_header; }
+const std::string&  			Response::getContent(void) const { return this->_content; }
+const size_t&       			Response::getContentLenght(void) const { return this->_contentLenght; }
 const Response::status_type&	Response::getStatus(void) const {return this->_status; }
-
-Response::status_type			Response::getStatus(const std::string& path) const {
-	if (is_valid_path(path))
-		return std::make_pair<int, std::string>(200, "OK");
-	else
-		return std::make_pair<int, std::string>(404, "Not Found");
-}
 
 /*
 ** Setters
@@ -50,8 +42,14 @@ void    Response::setStatus(const status_type& status) {
 	this->_status = status;
 }
 
-void    Response::setStatus(const std::string& path) {
-	this->_status = getStatus(path);
+void    Response::setStatus(int code) {
+	int 		codeTab[] = {200, 404, 500};
+	std::string actionTab[] = {"OK", "Not Found", "Internal Server Error"};
+	int			i = 0;
+
+	while (i < 3 && codeTab[i] != code)
+		++i;
+	this->_status = std::make_pair<int, std::string>(codeTab[i], actionTab[i]);
 }
 
 void    Response::setHeader(void)
@@ -79,6 +77,7 @@ void    Response::setContent(const std::string &file_content)
 		}
 		catch(const std::exception& e)
 		{
+			this->setStatus(500);
 			EXCEPT_WARNING;
 		}
 	}

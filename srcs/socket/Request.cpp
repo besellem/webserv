@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 17:10:54 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 18:32:02 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,15 +75,16 @@ void	Request::setConstructPath(void)
 	Server::tokens_type::const_iterator	idx; // iterator on indexes
 	
 	ret = ROOT_PATH;
+	std::cout << ">>>>> dwtf ?\n";
 	if (loc)
 	{
 		std::cout << "location root: [" S_GREEN << loc->root << S_NONE "]" << std::endl;
 		ret += loc->root;
-		if (ret[ret.size() - 1] != '/')
-			ret += "/";
 		ret += this->_header.path.substr(loc->path.size(), this->_header.path.size());
 		if (ft_isDirectory(ret))
 		{
+			if (ret[ret.size() - 1] != '/')
+				ret += "/";
 			/* loop through indexes */
 			for (idx = loc->index.begin(); idx != loc->index.end(); ++idx)
 			{
