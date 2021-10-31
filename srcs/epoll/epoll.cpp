@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/31 20:05:03 by kaye             ###   ########.fr       */
+/*   Updated: 2021/10/31 20:07:26 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,6 +152,9 @@ bool	Epoll::clientConnect(int const & toConnect, std::map<const int, Socket> & s
 }
 
 void	Epoll::clientDisconnect(int const & toClose, std::map<const int, Socket> & sockConn) {
+	// debug msg
+	std::cout << "closing: [" S_RED << toClose << S_NONE "] ..."<< "\n" << std::endl;
+
 	int servI = servIndex(toClose, sockConn);
 
 	EV_SET(&_chlist[servI], toClose, EVFILT_READ, EV_DELETE, 0, 0, 0);
