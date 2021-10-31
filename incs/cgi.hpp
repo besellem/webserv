@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 00:36:05 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 01:29:32 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 11:17:44 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ class Cgi
 		char**				getEnv() const;
 		const size_t&		getContentLength() const;
 		const std::string&	getExtension() const;
+		const std::string&	getProgram() const;
+		
 		std::string			execute(const std::string &);
 		void				clear();
 		

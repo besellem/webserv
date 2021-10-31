@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 01:51:36 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 11:24:14 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ const size_t&       Request::getContentLenght(void) const { return this->_conten
 const std::string&  Request::getConstructPath(void) const { return this->_constructPath; }
 const Server*       Request::getServer(void) const { return this->_server ; }
 
-/* Find the location based on the path requested */
+/* Find the location of the request */
 const t_location*   Request::getLocation(void) const
 {
 	typedef std::vector<t_location *>	location_type;
@@ -141,8 +141,8 @@ void	Request::setHeaderData(const std::string& line_)
 	}
 }
 
-/* Returns the value of a cgi environment variables */
-const std::string	Request::getCgiEnv(const std::string &varName)
+/* Returns the value of a environment variables of the request */
+const std::string	Request::getEnv(const std::string &varName)
 {
     std::string envVar[] = {"SERVER_PORT", "REQUEST_METHOD", "PATH_INFO",
         "SCRIPT_NAME", "REMOTE_ADDR", "REMOTE_IDENT", "HTTP_ACCEPT",

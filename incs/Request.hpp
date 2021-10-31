@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 01:27:34 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 11:24:36 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ class Request
         const Server*       getServer(void) const;
         const t_location*   getLocation(void) const;
         
-        const std::string   getCgiEnv(const std::string &);
+        const std::string   getEnv(const std::string &);
         
         void                setConstructPath(void);
         void	            setHeaderData(const std::string &);

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/31 11:13:07 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 11:20:55 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,7 @@ void	Socket::readHttpRequest(Request *request, int socket_fd)
 	}
 }
 
+/* Parse the http request */
 void	Socket::resolveHttpRequest(Request *request)
 {
 	vector_type				buffer = split_string(request->getHeader().buf, "\n");
@@ -132,13 +133,12 @@ void	Socket::resolveHttpRequest(Request *request)
 			request->getHeader().variables = request->getHeader().path.substr(pos + 1);
 	}
 	for ( ; line != buffer.end() - 1; ++line)
-	{
 		request->setHeaderData(*line);
-	}
 	
 	// std::cout << S_RED "path_constructed: " S_NONE << header.path_constructed << std::endl;
 }
 
+/* Construct the htttp response and send it to the server */
 void		Socket::sendHttpResponse(Request* request, int socket_fd)
 {
 	Response		response(request);
@@ -152,7 +152,7 @@ void		Socket::sendHttpResponse(Request* request, int socket_fd)
 	toSend += "\n";
 	toSend += response.getContent();
 
-	// -- Send to client --
+	// -- Send to server --
 	send(socket_fd, toSend.c_str(), toSend.length(), 0);
 
 	if (DEBUG)

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 01:34:39 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 11:24:37 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ Cgi::~Cgi() {
 
 const size_t&	    Cgi::getContentLength() const { return this->_contentLength; }
 const std::string&	Cgi::getExtension() const { return this->_extension; }
+const std::string&	Cgi::getProgram() const { return this->_program; }
 char**	            Cgi::getEnv() const { return this->_env; }
 
 /*
@@ -77,7 +78,7 @@ void Cgi::setEnv()
         throw std::bad_alloc();
     for (; i < size; i++)
     {
-        std::string str = envVar[i] + "=" + this->_request->getCgiEnv(envVar[i]);
+        std::string str = envVar[i] + "=" + this->_request->getEnv(envVar[i]);
         this->_env[i] = strdup(str.c_str());
         if (!this->_env[i])
             throw std::bad_alloc();
@@ -95,14 +96,14 @@ std::string Cgi::execute(const std::string &fileName)
     int                 fd[2];
     char                buffer[4098];
     std::string		    content;
-    std::string         method = this->_request->getCgiEnv("REQUEST_METHOD");
+    std::string         method = this->_request->getEnv("REQUEST_METHOD");
 
     if (pipe(fd) == -1)
         throw CgiError();
+
      char               *arg[3] = {strdup(this->_program.c_str()),
                             strdup(fileName.c_str()), NULL};
-    if (method == "POST")
-        arg[2] = strdup(this->_request->getHeader().variables.c_str());
+                            
     if ((pid = fork()) == -1)
         throw CgiError();
     else if (pid == 0)
@@ -137,16 +138,12 @@ std::string Cgi::execute(const std::string &fileName)
     // ##################################################################
     if (DEBUG)
     {
-        std::cout << "Command : " << arg[0] << " " << arg[1];
-        std::cout << std::endl;
+        std::cout << "Command : " << arg[0] << " " << arg[1] << std::endl;
         std::cout << "............ CGI ENVIRON ............." <<std::endl;
         int i = -1;
         while(this->_env[++i])
             std::cout << this->_env[i] << std::endl;
         std::cout << "......................................" <<std::endl;
-        std::cout << "############ CGI OUTPUT ##############" << std::endl;
-        std::cout << content << std::endl;
-        std::cout << "######################################" << std::endl;
     }
     // ##################################################################
     

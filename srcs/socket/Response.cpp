@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 01:41:47 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 12:08:38 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,15 @@ const std::string&  Response::getHeader(void) const { return this->_header; }
 const std::string&  Response::getContent(void) const { return this->_content; }
 const size_t&       Response::getContentLenght(void) const { return this->_contentLenght; }
 
+const Response::status_type&	Response::getStatus(void) const {return this->_status; }
+
+Response::status_type			Response::getStatus(const std::string& path) const {
+	if (is_valid_path(path))
+		return std::make_pair<int, std::string>(200, "OK");
+	else
+		return std::make_pair<int, std::string>(404, "Not Found");
+}
+
 /*
 ** Setters
 */
@@ -41,12 +50,8 @@ void    Response::setStatus(const status_type& status) {
 	this->_status = status;
 }
 
-void    Response::setStatus(const std::string& path)
-{
-	if (is_valid_path(path))
-		this->_status = std::make_pair<int, std::string>(200, "OK");
-	else
-		this->_status = std::make_pair<int, std::string>(404, "Not Found");
+void    Response::setStatus(const std::string& path) {
+	this->_status = getStatus(path);
 }
 
 void    Response::setHeader(void)
@@ -62,7 +67,7 @@ void    Response::setContent(const std::string &file_content)
 	
 	const t_location	*loc = this->_request->getLocation();
 
-	// Content
+	// cgi case
 	if (this->_status.first == 200 && this->_cgi
 	&& getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension())
 	{
@@ -70,51 +75,58 @@ void    Response::setContent(const std::string &file_content)
 		{
 			this->_content = this->_cgi->execute(this->_request->getConstructPath());
 			this->_contentLenght = this->_cgi->getContentLength();
+			return ;
 		}
 		catch(const std::exception& e)
 		{
-			this->_content = "\n" + file_content; //get file_cont _this->_request->getHe->getConstructPath()
-			this->_contentLenght = file_content.size();
 			EXCEPT_WARNING;
 		}
 	}
-	else
+	
+	// Error case
+	if (this->_status.first != 200)
 	{
-		if (this->_status.first != 200)
-			this->_content = getErrorPage();
-		else
-			this->_content = file_content;
-		if (this->_content.empty() && loc && loc->autoindex == ON)
-			this->_content = generateAutoindexPage(this->_request->getConstructPath());
-		this->_contentLenght = this->_content.size();
-		this->_content = "\n" + this->_content;
+		this->setErrorContent();
+		return ;
 	}
+
+	// Default case
+	this->_content = file_content;
+	if (this->_content.empty() && loc && loc->autoindex == ON)
+		this->_content = generateAutoindexPage(this->_request->getConstructPath());
+	this->_contentLenght = this->_content.size();
+	this->_content = "\n" + this->_content;
 }
 
-const std::string Response::getErrorPage(void)
+void Response::setErrorContent(void)
 {
-	std::map<int, std::string>::const_iterator it;
+	std::map<int, std::string>::const_iterator	it;
 	it = this->_request->getServer()->errorPages().find(this->_status.first);
-	
-	if (it != this->_request->getServer()->errorPages().end())
+
+	// Default error page setup case
+	if (it != this->_request->getServer()->errorPages().end() && is_valid_path(it->second))
 	{
-		this->setStatus(ROOT_PATH + std::string("/") + it->second);
-		if (this->_status.first == 200)
+		// cgi
+		if (this->_cgi && getExtension(it->second) == this->_cgi->getExtension())
 		{
-			if (getExtension(ROOT_PATH + std::string("/") + it->second) == this->_cgi->getExtension()) // replace with location.cgi[0] + check if cgi exist
+			try
 			{
-				try
-				{
-					return this->_cgi->execute(ROOT_PATH + std::string("/") + it->second);
-				}
-				catch(const std::exception& e)
-				{
-					EXCEPT_WARNING;
-				}
+				this->_content = this->_cgi->execute(ROOT_PATH + std::string("/") + it->second);
+				this->_contentLenght = this->_cgi->getContentLength();
+				return ;
 			}
-			return getFileContent(ROOT_PATH + std::string("/") + it->second);
+			catch(const std::exception& e)
+			{
+				EXCEPT_WARNING;
+			}
 		}
+
+		this->_content = "\n" + getFileContent(it->second);
+		this->_contentLenght = this->_content.size() - 1;
+		return ;
 	}
+	
+	// Default case
 	std::string content = "<html>\n";
 	content += "  <head>\n";
 	content += "    <meta charset=\"utf-8\">\n";
@@ -134,7 +146,8 @@ const std::string Response::getErrorPage(void)
 	content += "</body>\n";
 	content += "</html>\n";
 	
-	return content;
+	this->_content = "\n" + content;
+	this->_contentLenght = content.size();
 }
 
 const std::string	Response::generateAutoindexPage(std::string const &path) const

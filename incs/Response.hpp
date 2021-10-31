@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 01:36:11 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/10/31 12:01:45 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ class Response
         const std::string&  getContent(void) const;
         const size_t&       getContentLenght(void) const;
         const status_type&  getStatus(void) const;
-        const std::string   getErrorPage(void);
+        status_type         getStatus(const std::string& path) const;
         
         const std::string   generateAutoindexPage(std::string const &) const;
     
@@ -46,6 +46,7 @@ class Response
         void		        setHeader(void);
         void                setStatus(const std::string &);
         void		        setStatus(const status_type &);
+        void                setErrorContent(void);
         
     private:
         std::string         _header;
