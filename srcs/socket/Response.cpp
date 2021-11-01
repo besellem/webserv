@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 20:04:58 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 11:48:31 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ void    Response::setStatus(const status_type& status) {
 }
 
 void    Response::setStatus(int code) {
-	int 		codeTab[] = {200, 204, 404, 405, 500};
-	std::string actionTab[] = {"OK", "No content", "Not Found", "Method Not Allowed",
+	int 		codeTab[] = {200, 403, 404, 405, 500};
+	std::string actionTab[] = {"OK", "Forbidden", "Not Found", "Method Not Allowed",
 			"Internal Server Error"};
 	int			i = 0;
 
@@ -102,22 +102,22 @@ void    Response::setContent(const std::string &file_content)
 		}
 	}
 	
-	// OK case
-	if (this->_status.first == 200)
-	{
+	// Autoindex
+	if (file_content.empty() && loc && loc->autoindex == ON)
+		this->_content  = generateAutoindexPage(this->_request->getConstructPath());
+	else if (file_content.empty() && ft_isDirectory(this->_request->getConstructPath()))
+		this->setStatus(403);
+	else
 		this->_content = file_content;
-		if (this->_content.empty() && loc && loc->autoindex == ON)
-			this->_content = generateAutoindexPage(this->_request->getConstructPath());
-		this->_contentLenght = this->_content.size();
-		this->_content = "\n" + this->_content;
-	}
-	
-	if (this->_contentLenght == 0)
-		this->setStatus(204);
-		
+	this->_contentLenght = this->_content.size();
+	this->_content = "\n" + this->_content;
+
 	// Error case
 	if (this->_status.first != 200)
+	{
 		this->setErrorContent();
+		return ;
+	}
 }
 
 void Response::setErrorContent(void)
