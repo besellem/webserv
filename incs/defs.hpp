@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/01 16:54:31 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/01 17:07:19 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,11 +38,7 @@
 # define DEFAULT_CONFIG_FILE  CONFIG_DEFAULT_PATH "/default" CONFIG_FILETYPE
 
 # define ROOT_PATH            "./www"
-<<<<<<< HEAD
-# define CGI_PROGRAM		  "/Users/yek/42/42_Projects/webserv/www/bin/php-cgi"
-=======
 # define CGI_PROGRAM          "/Users/adbenoit/.brew/bin/php-cgi"
->>>>>>> master
 
 # ifndef BUFSIZ
 #  define BUFSIZ  1024
