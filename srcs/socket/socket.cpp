@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/01 16:37:15 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:49:36 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,7 +134,7 @@ void	Socket::resolveHttpRequest(Request *request)
 
 	// std::cout << "buf: [" << buffer[buffer.size() - 1] << "]\n";
 
-	request->setContent(buffer[buffer.size() - 1]);
+	request->setContent();
 
 	// set query string
 	size_t pos = request->getHeader().path.find("?");
@@ -159,7 +159,7 @@ void		Socket::sendHttpResponse(Request* request, int socket_fd)
 	response.setHeader();
 	
 	toSend =  response.getHeader();
-	toSend += "\n";
+	toSend += NEW_LINE;
 	toSend += response.getContent();
 
 	// -- Send to server --

@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 00:36:05 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 16:39:05 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:45:32 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,13 @@ class Cgi
 		Cgi(Request *);
 		~Cgi();
 		
-		char**				getEnv() const;
 		const size_t&		getContentLength() const;
 		const std::string&	getExtension() const;
 		const std::string&	getProgram() const;
+		char**				getEnv() const;
+		const std::string	getEnv(const std::string &);
 		
-		std::string			execute(const std::string &);
+		std::string			execute(void);
 		void				clear();
 		
 	private:

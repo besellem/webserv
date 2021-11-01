@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 16:04:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/01 16:36:11 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:50:38 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ class HttpHeader
 	friend class Socket;
 	friend class Request;
 	friend class Response;
+	friend class Cgi;
 
 }; /* class HttpHeader */
 

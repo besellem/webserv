@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 16:39:05 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:49:30 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ void    Response::setStatus(const status_type& status) {
 }
 
 void    Response::setStatus(int code) {
-	int 		codeTab[] = {200, 204, 404, 405, 500};
-	std::string actionTab[] = {"OK", "No content", "Not Found", "Method Not Allowed",
+	int 		codeTab[] = {200, 403, 404, 405, 500};
+	std::string actionTab[] = {"OK", "Forbidden", "Not Found", "Method Not Allowed",
 			"Internal Server Error"};
 	int			i = 0;
 
@@ -59,7 +59,10 @@ void    Response::setHeader(void)
     this->_header = HTTP_PROTOCOL_VERSION " ";
 	this->_header += std::to_string(this->_status.first) + " ";
 	this->_header += this->_status.second + NEW_LINE;
-	this->_header += "Content-Length: " + std::to_string(this->_contentLength);
+	this->_header += "Content-Length: " + std::to_string(this->_contentLength) + NEW_LINE;
+	this->_header += "Content-Location: ";
+	this->_header += this->_request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);// + NEW_LINE;
+	// this->_header += "Content-Type: text/plain";
 }
 
 bool	Response::isMethodAllowed(const std::string &method)
@@ -91,7 +94,7 @@ void    Response::setContent(const std::string &file_content)
 	{
 		try
 		{
-			this->_content = this->_cgi->execute(this->_request->getConstructPath());
+			this->_content = this->_cgi->execute();
 			this->_contentLength = this->_cgi->getContentLength();
 			return ;
 		}
@@ -102,22 +105,22 @@ void    Response::setContent(const std::string &file_content)
 		}
 	}
 	
-	// OK case
-	if (this->_status.first == 200)
-	{
+	// Autoindex
+	if (file_content.empty() && loc && loc->autoindex == ON)
+		this->_content  = generateAutoindexPage(this->_request->getConstructPath());
+	else if (file_content.empty() && ft_isDirectory(this->_request->getConstructPath()))
+		this->setStatus(403);
+	else
 		this->_content = file_content;
-		if (this->_content.empty() && loc && loc->autoindex == ON)
-			this->_content = generateAutoindexPage(this->_request->getConstructPath());
-		this->_contentLength = this->_content.size();
-		this->_content = "\n" + this->_content;
-	}
-	
-	if (this->_contentLength == 0)
-		this->setStatus(204);
-		
+	this->_contentLength = this->_content.size();
+	this->_content = NEW_LINE + this->_content;
+
 	// Error case
 	if (this->_status.first != 200)
+	{
 		this->setErrorContent();
+		return ;
+	}
 }
 
 void Response::setErrorContent(void)
@@ -128,23 +131,7 @@ void Response::setErrorContent(void)
 	// Default error page setup case
 	if (it != this->_request->getServer()->errorPages().end() && is_valid_path(it->second))
 	{
-		// cgi
-		if (this->_cgi && getExtension(it->second) == this->_cgi->getExtension())
-		{
-			try
-			{
-				this->_content = this->_cgi->execute(ROOT_PATH + std::string("/") + it->second);
-				this->_contentLength = this->_cgi->getContentLength();
-				return ;
-			}
-			catch(const std::exception& e)
-			{
-				this->setStatus(500);
-				EXCEPT_WARNING;
-			}
-		}
-
-		this->_content = "\n" + getFileContent(it->second);
+		this->_content = NEW_LINE + getFileContent(it->second);
 		this->_contentLength = this->_content.size() - 1;
 		return ;
 	}
@@ -169,7 +156,7 @@ void Response::setErrorContent(void)
 	content += "</body>\n";
 	content += "</html>\n";
 	
-	this->_content = "\n" + content;
+	this->_content = NEW_LINE + content;
 	this->_contentLength = content.size();
 }
 

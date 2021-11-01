@@ -6,14 +6,14 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/01 16:11:06 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:45:26 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef DEFS_HPP
 # define DEFS_HPP
 
-# define DEBUG     false // print some logs
+# define DEBUG     true // print some logs
 
 /** @brief Anscii code */
 # define S_NONE    "\e[0m"
