@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:53:23 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 16:20:21 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:46:31 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,8 @@ void	WebServer::parse(const std::string &config_file)
 	std::fstream os;
 	std::string line;
 	os.open(config_file);
+	if (!os)
+		throw ParsingError();
 	while (std::getline(os, line))
 		parse_line(this->_servers, line);
 	if (this->_servers.state() != START)
