@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 01:13:07 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 14:28:03 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,52 +155,6 @@ void	Request::setHeaderData(const std::string& line_)
 			this->_header.data[mapped.first] = split_string(mapped.second, opt_it->second);
 		}
 	}
-}
-
-/* Returns the value of a environment variables of the request */
-const std::string	Request::getEnv(const std::string &varName)
-{
-    std::string envVar[] = {"SERVER_PORT", "REQUEST_METHOD", "PATH_INFO",
-        "SCRIPT_NAME", "REMOTE_ADDR", "REMOTE_IDENT", "HTTP_ACCEPT",
-        "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER", "SERVER_PROTOCOL",
-        "GATEWAY_INTERFACE", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS",
-		"HTTP_ACCEPT_ENCODING", "HTTP_CONNECTION", "PATH_TRANSLATED", "REMOTE_USER", "CONTENT_LENGHT", ""};
-    std::string str;
-    size_t      pos;
-    int         i = 0;
-    
-    for (; !envVar[i].empty(); i++)
-        if (varName == envVar[i])
-            break ;
-    switch (i)
-    {
-    case 0:
-        str = vectorJoin(this->_header.data["Host"], ' ');
-        pos = str.find(":");
-        if (pos == std::string::npos)
-            return std::string("");
-       return str.substr(pos + 1);
-    case 1: return this->_header.request_method;
-    case 2: return this->_constructPath.substr(sizeof(ROOT_PATH) - 1);
-    case 3: return this->_constructPath;
-    case 4: return std::string("127.0.0.1");
-    case 5: return std::string("");
-    case 6: return vectorJoin(this->_header.data["Accept"], ',');
-    case 7: return vectorJoin(this->_header.data["Accept-Language"], ' ');
-    case 8: return vectorJoin(this->_header.data["User-Agent"], ' ');
-    case 9: return vectorJoin(this->_header.data["Referer"], ' ');
-    case 10: return std::string(HTTP_PROTOCOL_VERSION);
-    case 11: return std::string("CGI/1.1");
-    case 12: return vectorJoin(this->_header.data["Content-Type"], ' ');
-    case 13: return this->_header.queryString;
-    case 14: return std::string("200");
-    case 15: return vectorJoin(this->_header.data["Accept-Encoding"], ' ');
-    case 16: return vectorJoin(this->_header.data["Connection"], ' ');
-    case 17: return this->_constructPath;;
-    case 18: return std::string("");
-    case 19: return std::to_string(this->getContentLenght());
-    default: return std::string();
-    }
 }
 
 _END_NS_WEBSERV

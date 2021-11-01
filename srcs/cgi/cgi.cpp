@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 01:20:21 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:13:57 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,57 @@ const std::string&	Cgi::getExtension() const { return this->_extension; }
 const std::string&	Cgi::getProgram() const { return this->_program; }
 char**	            Cgi::getEnv() const { return this->_env; }
 
+/* Returns the value of a environment variables of the request */
+const std::string	Cgi::getEnv(const std::string &varName)
+{
+    std::string envVar[] = {"SERVER_PORT", "REQUEST_METHOD", "PATH_INFO",
+        "SCRIPT_NAME", "REMOTE_ADDR", "REMOTE_IDENT", "HTTP_ACCEPT",
+        "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER", "SERVER_PROTOCOL",
+        "GATEWAY_INTERFACE", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS",
+		"HTTP_ACCEPT_ENCODING", "HTTP_CONNECTION", "PATH_TRANSLATED", "REMOTE_USER",
+		"CONTENT_LENGHT", "SCRIPT_FILENAME", "SERVER_SOFTWARE", "SERVER_NAME", "REQUEST_URI", ""};
+    std::string str;
+    size_t      pos;
+    int         i = 0;
+    
+    for (; !envVar[i].empty(); i++)
+        if (varName == envVar[i])
+            break ;
+    switch (i)
+    {
+    case 0:
+        str = vectorJoin(_request->getHeader().data["Host"], ' ');
+        pos = str.find(":");
+        if (pos == std::string::npos)
+            return std::string("");
+       return str.substr(pos + 1);
+    case 1: return _request->getHeader().request_method;
+    case 2: return _request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);
+    case 3: return _request->getConstructPath();
+    case 4: return std::string("127.0.0.1");
+    case 5: return std::string("");
+    case 6: return vectorJoin(_request->getHeader().data["Accept"], ',');
+    case 7: return vectorJoin(_request->getHeader().data["Accept-Language"], ' ');
+    case 8: return vectorJoin(_request->getHeader().data["User-Agent"], ' ');
+    case 9: return vectorJoin(_request->getHeader().data["Referer"], ' ');
+    case 10: return std::string(HTTP_PROTOCOL_VERSION);
+    case 11: return std::string("CGI/1.1");
+    case 12: return vectorJoin(_request->getHeader().data["Content-Type"], ' ');
+    case 13: return _request->getHeader().queryString;
+    case 14: return std::string("200");
+    case 15: return vectorJoin(_request->getHeader().data["Accept-Encoding"], ' ');
+    case 16: return vectorJoin(_request->getHeader().data["Connection"], ' ');
+    case 17: return _request->getConstructPath();
+    case 18: return std::string("");
+    case 19: return std::to_string(_request->getContent().size());
+    case 20: return _request->getConstructPath();
+    case 21: return "Webserv/1.0";
+    case 22: return vectorJoin(_request->getServer()->name(), ' '); //tous ou juste 1 ?
+    case 23: return _request->getHeader().path;
+    default: return std::string("");
+    }
+}
+
 /*
 ** Modifiers
 */
@@ -65,7 +116,10 @@ between the client and the server. */
 void Cgi::setEnv()
 {
 	std::string envVar[] = {"PATH_INFO", "REQUEST_METHOD", "PATH_TRANSLATED",
-			"REDIRECT_STATUS", "QUERY_STRING", "SERVER_PROTOCOL", ""};
+			"REDIRECT_STATUS", "QUERY_STRING", "SERVER_PROTOCOL", "SCRIPT_NAME",
+			"SCRIPT_FILENAME", "CONTENT_TYPE", "SERVER_PORT", "CONTENT_LENGHT",
+			"REMOTE_ADDR", "REMOTE_IDENT", "REMOTE_USER", "GATEWAY_INTERFACE",
+			"SERVER_SOFTWARE", "SERVER_NAME", "REQUEST_URI", ""};
 	size_t i = 0;
 	size_t size = 0;
 	
@@ -76,7 +130,7 @@ void Cgi::setEnv()
 		throw std::bad_alloc();
 	for (; i < size; i++)
 	{
-		std::string str = envVar[i] + "=" + this->_request->getEnv(envVar[i]);
+		std::string str = envVar[i] + "=" + this->getEnv(envVar[i]);
 		this->_env[i] = strdup(str.c_str());
 		if (!this->_env[i])
 			throw std::bad_alloc();
@@ -92,12 +146,12 @@ std::string	Cgi::getOuput(int fd)
 	std::string	output;
 	
 	ret = 1;
-	int i = 0;
-	while ((ret = read(fd, buffer, sizeof(buffer))) > 0 && ++i < 15)
+	while (ret > 0)
 	{
-		read(fd, buffer, sizeof(buffer));
+		ret = read(fd, buffer, sizeof(buffer) - 1);
 		buffer[ret] = 0;
 		output += buffer;
+		std::cout << buffer << std::endl;
 	}
 	return output;
 }
@@ -113,24 +167,28 @@ void	Cgi::setContentLenght(const std::string &output) {
 
 /* Executes the CGI program on a file.
 Returns the output in a string */
-std::string Cgi::execute(const std::string &fileName)
+std::string Cgi::execute(void)
 {
 	pid_t		pid;
 	int			status = 0;
 	int			fdIn[2];
 	int			fdOut[2];
 	std::string	content;
-	std::string	method = this->_request->getEnv("REQUEST_METHOD");
+	std::string	method = this->getEnv("REQUEST_METHOD");
 
 	if (pipe(fdIn) == -1 || pipe(fdOut) == -1)
 		throw CgiError();
+		
+	// Send variables to the standard input of the program
+	if (write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size()) < 0)
+		throw CgiError();
 
-	 char   *arg[3] = {strdup(this->_program.c_str()), strdup(fileName.c_str()), NULL};
-							
-	if (!arg[0] || !arg[1] || (pid = fork()) == -1)
+	if ((pid = fork()) == -1)
 		throw CgiError();
 	else if (pid == 0)
 	{
+		char * const * nll = NULL;
+
 		// Modify standard input and output
 		if (dup2(fdIn[0], STDIN_FILENO) == -1)
 			exit(EXIT_FAILURE);
@@ -142,18 +200,16 @@ std::string Cgi::execute(const std::string &fileName)
 		close(fdOut[1]);
 		
 		// Execute the cgi program on the file
-		if (execve(arg[0], arg, this->_env) == -1)
+		if (execve(this->_program.c_str(), nll, this->_env) == -1)
 			exit(EXIT_FAILURE);
 		exit(EXIT_FAILURE);
 	}
+	
 	close(fdOut[1]);
 	
-	// Send variables to the standard input of the program
-	if (method == "POST")
-		write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size());
 	close(fdIn[0]);
 	close(fdIn[1]);
-	
+
 	waitpid(-1, &status, 0);
 	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
 		throw CgiError();
@@ -162,8 +218,6 @@ std::string Cgi::execute(const std::string &fileName)
 	close(fdOut[0]);
 	this->setContentLenght(content);
 
-	free(arg[0]); free(arg[1]);
-	
 	// ##################################################################
 	if (DEBUG)
 	{

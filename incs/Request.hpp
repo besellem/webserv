@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 01:02:42 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 14:30:38 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,6 @@ class Request
 		size_t				getContentLenght(void) const;
 		const Server*		getServer(void) const;
 		const t_location*	getLocation(void) const;
-		
-		const std::string	getEnv(const std::string &);
 		
 		void				setConstructPath(void);
 		void				setContent(void);

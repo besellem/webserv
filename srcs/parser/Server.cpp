@@ -15,7 +15,7 @@
 _BEGIN_NS_WEBSERV
 
 
-Server::Server() : _port(8080), _cliMaxSize(-1) {}
+Server::Server() : _port(8000), _cliMaxSize(-1) {}
 
 Server::~Server() {
     for (size_t i = 0; i < this->_locations.size(); i++)

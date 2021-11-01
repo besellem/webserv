@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/01 00:59:02 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 13:01:09 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,7 +147,7 @@ void		Socket::sendHttpResponse(Request* request, int socket_fd)
 	response.setHeader();
 	
 	toSend =  response.getHeader();
-	toSend += "\n";
+	toSend += NEW_LINE;
 	toSend += response.getContent();
 
 	// -- Send to server --
