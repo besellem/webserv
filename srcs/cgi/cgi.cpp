@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 20:26:13 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 20:43:24 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,8 +197,7 @@ std::string Cgi::execute(void)
 		close(fdOut[1]);
 		
 		// Execute the cgi program on the file
-		if (execve(this->_program.c_str(), nll, this->_env) == SYSCALL_ERR)
-			exit(EXIT_FAILURE);
+		execve(this->_program.c_str(), nll, this->_env);
 		exit(EXIT_FAILURE);
 	}
 	

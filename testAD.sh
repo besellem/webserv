@@ -59,6 +59,4 @@ export CONTENT_LENGTH
 export GATEWAY_INTERFACE
 export SERVER_SOFTWARE
 
-export
-
 echo "name=Test&email=GOOD" | www/bin/php-cgi
