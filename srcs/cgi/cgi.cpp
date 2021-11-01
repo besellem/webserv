@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 20:43:24 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 21:21:49 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,7 +175,8 @@ std::string Cgi::execute(void)
 
 	if (pipe(fdIn) == SYSCALL_ERR || pipe(fdOut) == SYSCALL_ERR)
 		throw CgiError();
-		
+
+
 	// Send variables to the standard input of the program
 	if (write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size()) < 0)
 		throw CgiError();
@@ -184,8 +185,6 @@ std::string Cgi::execute(void)
 		throw CgiError();
 	else if (pid == 0)
 	{
-		char * const * nll = NULL;
-
 		// Modify standard input and output
 		if (dup2(fdIn[0], STDIN_FILENO) == SYSCALL_ERR)
 			exit(EXIT_FAILURE);
@@ -197,7 +196,7 @@ std::string Cgi::execute(void)
 		close(fdOut[1]);
 		
 		// Execute the cgi program on the file
-		execve(this->_program.c_str(), nll, this->_env);
+		execve(this->_program.c_str(), NULL, this->_env);
 		exit(EXIT_FAILURE);
 	}
 	
@@ -217,7 +216,7 @@ std::string Cgi::execute(void)
 	// ##################################################################
 	if (DEBUG)
 	{
-		std::cout << "request content : " << this->_request->getContent() << std::endl;
+		std::cout << "request content :\n" << this->_request->getContent() << std::endl;
 		std::cout << "............ CGI ENVIRON ............." <<std::endl;
 		int i = -1;
 		while(this->_env[++i])
@@ -225,7 +224,6 @@ std::string Cgi::execute(void)
 		std::cout << "......................................" <<std::endl;
 	}
 	// ##################################################################
-	
 	return content;
 }
 

@@ -1,1 +1,1 @@
-name=s&email=s
+name=Test&email=GOOD
