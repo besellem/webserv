@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 17:03:14 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 20:17:14 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ const std::string	Cgi::getEnv(const std::string &varName)
         "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER", "SERVER_PROTOCOL",
         "GATEWAY_INTERFACE", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS",
 		"HTTP_ACCEPT_ENCODING", "HTTP_CONNECTION", "PATH_TRANSLATED", "REMOTE_USER",
-		"CONTENT_LENGHT", "SCRIPT_FILENAME", "SERVER_SOFTWARE", "SERVER_NAME", "REQUEST_URI", ""};
+		"CONTENT_LENGTH", "SCRIPT_FILENAME", "SERVER_SOFTWARE", "SERVER_NAME", "REQUEST_URI", ""};
     std::string str;
     size_t      pos;
     int         i = 0;
@@ -117,7 +117,7 @@ void Cgi::setEnv()
 {
 	std::string envVar[] = {"PATH_INFO", "REQUEST_METHOD", "PATH_TRANSLATED",
 			"REDIRECT_STATUS", "QUERY_STRING", "SERVER_PROTOCOL", "SCRIPT_NAME",
-			"SCRIPT_FILENAME", "CONTENT_TYPE", "SERVER_PORT", "CONTENT_LENGHT",
+			"SCRIPT_FILENAME", "CONTENT_TYPE", "SERVER_PORT", "CONTENT_LENGTH",
 			"REMOTE_ADDR", "REMOTE_IDENT", "REMOTE_USER", "GATEWAY_INTERFACE",
 			"SERVER_SOFTWARE", "SERVER_NAME", "REQUEST_URI", ""};
 	size_t i = 0;
@@ -178,7 +178,7 @@ std::string Cgi::execute(void)
 
 	if (pipe(fdIn) == SYSCALL_ERR || pipe(fdOut) == SYSCALL_ERR)
 		throw CgiError();
-		
+
 	// Send variables to the standard input of the program
 	if (write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size()) < 0)
 		throw CgiError();
@@ -220,7 +220,7 @@ std::string Cgi::execute(void)
 	// ##################################################################
 	if (DEBUG)
 	{
-		std::cout << "request content : " << this->_request->getContent() << std::endl;
+		std::cout << "request content :\n" << this->_request->getContent() << std::endl;
 		std::cout << "............ CGI ENVIRON ............." <<std::endl;
 		int i = -1;
 		while(this->_env[++i])
@@ -228,7 +228,6 @@ std::string Cgi::execute(void)
 		std::cout << "......................................" <<std::endl;
 	}
 	// ##################################################################
-	
 	return content;
 }
 
