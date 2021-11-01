@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 16:47:09 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/01 17:03:14 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ _BEGIN_NS_WEBSERV
 Cgi::CgiError::CgiError() {}
 
 const char*	Cgi::CgiError::what() const throw() {
-	return "CGI Error";
+	return "cgi failed";
 }
 
 Cgi::Cgi(Request *request) : _request(request), _contentLength(0) {

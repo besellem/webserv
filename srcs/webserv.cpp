@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/01 15:27:32 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/01 17:03:07 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ void			WebServer::createServers(void)
 WebServer::ParsingError::ParsingError() {}
 
 const char*		WebServer::ParsingError::what() const throw()
-{ return "Config File Error"; }
+{ return "file not served by webserv"; }
 
 
 _END_NS_WEBSERV
