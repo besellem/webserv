@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 16:49:30 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/01 18:26:21 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,22 +105,26 @@ void    Response::setContent(const std::string &file_content)
 		}
 	}
 	
-	// Autoindex
-	if (file_content.empty() && loc && loc->autoindex == ON)
-		this->_content  = generateAutoindexPage(this->_request->getConstructPath());
-	else if (file_content.empty() && ft_isDirectory(this->_request->getConstructPath()))
-		this->setStatus(403);
-	else
-		this->_content = file_content;
-	this->_contentLength = this->_content.size();
-	this->_content = NEW_LINE + this->_content;
+	// Valid case
+	if (this->_status.first == 200)
+	{
+		// Autoindex
+		if (ft_isDirectory(this->_request->getConstructPath()))
+		{
+			if (loc && loc->autoindex == ON)
+				this->_content  = generateAutoindexPage(this->_request->getConstructPath());
+			else
+				this->setStatus(403);
+		}
+		else
+			this->_content = file_content;
+		this->_contentLength = this->_content.size();
+		this->_content = NEW_LINE + this->_content;
+	}
 
 	// Error case
 	if (this->_status.first != 200)
-	{
 		this->setErrorContent();
-		return ;
-	}
 }
 
 void Response::setErrorContent(void)
