@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 20:04:58 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:39:05 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ Response::~Response() {
 
 const std::string&  			Response::getHeader(void) const { return this->_header; }
 const std::string&  			Response::getContent(void) const { return this->_content; }
-const size_t&       			Response::getContentLenght(void) const { return this->_contentLenght; }
+const size_t&       			Response::getContentLength(void) const { return this->_contentLength; }
 const Response::status_type&	Response::getStatus(void) const {return this->_status; }
 
 /*
@@ -59,7 +59,7 @@ void    Response::setHeader(void)
     this->_header = HTTP_PROTOCOL_VERSION " ";
 	this->_header += std::to_string(this->_status.first) + " ";
 	this->_header += this->_status.second + NEW_LINE;
-	this->_header += "Content-Length: " + std::to_string(this->_contentLenght);
+	this->_header += "Content-Length: " + std::to_string(this->_contentLength);
 }
 
 bool	Response::isMethodAllowed(const std::string &method)
@@ -92,7 +92,7 @@ void    Response::setContent(const std::string &file_content)
 		try
 		{
 			this->_content = this->_cgi->execute(this->_request->getConstructPath());
-			this->_contentLenght = this->_cgi->getContentLength();
+			this->_contentLength = this->_cgi->getContentLength();
 			return ;
 		}
 		catch(const std::exception& e)
@@ -108,11 +108,11 @@ void    Response::setContent(const std::string &file_content)
 		this->_content = file_content;
 		if (this->_content.empty() && loc && loc->autoindex == ON)
 			this->_content = generateAutoindexPage(this->_request->getConstructPath());
-		this->_contentLenght = this->_content.size();
+		this->_contentLength = this->_content.size();
 		this->_content = "\n" + this->_content;
 	}
 	
-	if (this->_contentLenght == 0)
+	if (this->_contentLength == 0)
 		this->setStatus(204);
 		
 	// Error case
@@ -134,7 +134,7 @@ void Response::setErrorContent(void)
 			try
 			{
 				this->_content = this->_cgi->execute(ROOT_PATH + std::string("/") + it->second);
-				this->_contentLenght = this->_cgi->getContentLength();
+				this->_contentLength = this->_cgi->getContentLength();
 				return ;
 			}
 			catch(const std::exception& e)
@@ -145,7 +145,7 @@ void Response::setErrorContent(void)
 		}
 
 		this->_content = "\n" + getFileContent(it->second);
-		this->_contentLenght = this->_content.size() - 1;
+		this->_contentLength = this->_content.size() - 1;
 		return ;
 	}
 	
@@ -170,7 +170,7 @@ void Response::setErrorContent(void)
 	content += "</html>\n";
 	
 	this->_content = "\n" + content;
-	this->_contentLenght = content.size();
+	this->_contentLength = content.size();
 }
 
 const std::string	Response::generateAutoindexPage(std::string const &path) const

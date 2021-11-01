@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 18:18:27 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:41:10 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ std::string	Cgi::getOuput(int fd)
 	return output;
 }
 
-void	Cgi::setContentLenght(const std::string &output) {
+void	Cgi::setContentLength(const std::string &output) {
 	this->_contentLength = output.size();
 	
 	// Subtract the size of the Cgi header
@@ -114,32 +114,32 @@ void	Cgi::setContentLenght(const std::string &output) {
 Returns the output in a string */
 std::string Cgi::execute(const std::string &fileName)
 {
-	pid_t               pid;
-	int                 status;
-	int                 fdIn[2];
-	int                 fdOut[2];
-	std::string		    content;
-	std::string         method = this->_request->getEnv("REQUEST_METHOD");
+	pid_t			pid;
+	int				status;
+	int				fdIn[2];
+	int				fdOut[2];
+	std::string		content;
+	std::string		method = this->_request->getEnv("REQUEST_METHOD");
 
-	if (pipe(fdIn) == -1 || pipe(fdOut) == -1)
+	if (pipe(fdIn) == SYSCALL_ERR || pipe(fdOut) == SYSCALL_ERR)
 		throw CgiError();
 
-	 char   *arg[3] = {strdup(this->_program.c_str()), strdup(fileName.c_str()), NULL};
-							
-	if ((pid = fork()) == -1)
+	char	*arg[3] = {strdup(this->_program.c_str()), strdup(fileName.c_str()), NULL};
+
+	if ((pid = fork()) == SYSCALL_ERR)
 		throw CgiError();
 	else if (pid == 0)
 	{
 		// Modify standard input and output
-		if (dup2(fdIn[0], STDIN_FILENO) == -1)
+		if (dup2(fdIn[0], STDIN_FILENO) == SYSCALL_ERR)
 			throw CgiError();
 		close(fdIn[0]); close(fdIn[1]);
-		if (dup2(fdOut[1], STDOUT_FILENO) == -1)
+		if (dup2(fdOut[1], STDOUT_FILENO) == SYSCALL_ERR)
 			throw CgiError();
 		close(fdOut[0]); close(fdOut[1]);
 		
 		// Execute the cgi program on the file
-		if (execve(arg[0], arg, this->_env)== -1)
+		if (execve(arg[0], arg, this->_env)== SYSCALL_ERR)
 			throw CgiError();
 		exit(EXIT_FAILURE);
 	}
@@ -156,7 +156,7 @@ std::string Cgi::execute(const std::string &fileName)
 		throw CgiError();
 
 	content = this->getOuput(fdOut[0]);
-	this->setContentLenght(content);
+	this->setContentLength(content);
 
 	free(arg[0]); free(arg[1]);
 	

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 18:05:47 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/01 16:38:21 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,13 +31,13 @@ class Request
 	private:
 		Request();
 		Request(const Request &);
-		Request& operator=(const Request &);
+		Request&			operator=(const Request &);
 
 	public:
 		HttpHeader&			getHeader(void);
 		const std::string&	getContent(void) const;
 		const std::string&	getConstructPath(void) const;
-		size_t				getContentLenght(void) const;
+		size_t				getContentLength(void) const;
 		const Server*		getServer(void) const;
 		const t_location*	getLocation(void) const;
 		

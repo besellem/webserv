@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 00:36:05 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 17:39:30 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:39:05 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ class Cgi
 		Cgi(const Cgi &);
 		Cgi& 			operator=(const Cgi &);
 		std::string		getOuput(int);
-		void			setContentLenght(const std::string &);
+		void			setContentLength(const std::string &);
 		void			setEnv();
 		
 	public:

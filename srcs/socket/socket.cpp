@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/31 19:52:21 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:37:15 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,8 +89,9 @@ void	Socket::readHttpRequest(Request *request, int socket_fd)
 {
 	int	ret;
 
+	request->getHeader().resetBuffer();
 	ret = recv(socket_fd, request->getHeader().buf, sizeof(request->getHeader().buf), 0);
-	if (ret == sizeof(request->getHeader().buf) || ret == -1)
+	if (ret == sizeof(request->getHeader().buf) || SYSCALL_ERR == ret)
 		LOG;
 	if (DEBUG)
 	{
@@ -103,6 +104,12 @@ void	Socket::readHttpRequest(Request *request, int socket_fd)
 /* Parse the http request */
 void	Socket::resolveHttpRequest(Request *request)
 {
+	/* the buffer is empty, therefore the header was also empty */
+	if (std::string(request->getHeader().buf).empty())
+	{
+		return ;
+	}
+
 	vector_type				buffer = split_string(request->getHeader().buf, "\n");
 	vector_type::iterator	line = buffer.begin();
 
@@ -112,15 +119,20 @@ void	Socket::resolveHttpRequest(Request *request)
 	*/
 	vector_type				first_line = split_string(*line, " ");
 	if (first_line.size() != 3)
-		throw HttpHeader::HttpBadRequestError();	
+		throw HttpHeader::HttpBadRequestError();
 	
 	request->getHeader().request_method = first_line[0];
 	request->getHeader().path = first_line[1];
 	request->setConstructPath();
 	++line;
 
-	std::cout << "Path            : [" S_CYAN << request->getHeader().path << S_NONE "]\n";
-	std::cout << "Contructed Path : [" S_CYAN << request->getConstructPath() << S_NONE "]\n";
+	if (DEBUG)
+	{
+		std::cout << "Path            : [" S_CYAN << request->getHeader().path << S_NONE "]\n";
+		std::cout << "Contructed Path : [" S_CYAN << request->getConstructPath() << S_NONE "]\n";
+	}
+
+	// std::cout << "buf: [" << buffer[buffer.size() - 1] << "]\n";
 
 	request->setContent(buffer[buffer.size() - 1]);
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpHeader.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 16:04:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/31 17:11:51 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:36:11 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ class HttpHeader
 		};
 
 
-	public:
+	private:
 		value_type		data;
 		std::string		request_method;
 		std::string		path;
@@ -54,6 +54,8 @@ class HttpHeader
 		char			buf[BUFSIZ];
 
 	friend class Socket;
+	friend class Request;
+	friend class Response;
 
 }; /* class HttpHeader */
 

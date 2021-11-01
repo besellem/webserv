@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   defs.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/31 19:30:18 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:11:06 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,11 +38,15 @@
 # define DEFAULT_CONFIG_FILE  CONFIG_DEFAULT_PATH "/default" CONFIG_FILETYPE
 
 # define ROOT_PATH            "./www"
-# define CGI_PROGRAM		  "/Users/adbenoit/.brew/bin/php-cgi"
+# define CGI_PROGRAM          "/Users/adbenoit/.brew/bin/php-cgi"
 
-# define GET     (1L << 0)
-# define POST    (1L << 1)
-# define DELETE  (1L << 2)
+# ifndef BUFSIZ
+#  define BUFSIZ  1024
+# endif
+
+// # define GET     (1L << 0)
+// # define POST    (1L << 1)
+// # define DELETE  (1L << 2)
 
 # define OFF     0
 # define ON      1
@@ -59,13 +63,12 @@
 # define EXCEPT_WARNING std::cerr << S_BLUE "Warning: " S_NONE << e.what() << std::endl
 # define EXCEPT_ERROR   std::cerr << S_RED  "Error: "   S_NONE << e.what() << std::endl
 
+# define STRINGIFY(x)   #x
+# define TOSTRING(x)    STRINGIFY(x)
+# define PRINT(x)       std::cout << TOSTRING(x) << ": [" << (x) << "]" << std::endl;
+
 /* Http response new lines (may change based on the sytem -- to check) */
 # define NEW_LINE               "\r\n"
-
-/* Listen Backlog */
-#ifndef SOMAXCONN
-# define SOMAXCONN 128
-#endif
 
 # define HTTP_PROTOCOL_VERSION  "HTTP/1.1"
 
