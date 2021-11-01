@@ -1,0 +1,64 @@
+unset PWD
+unset APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL
+unset USER
+unset ITERM_PROFILE
+unset LC_TERMINAL_VERSION
+unset LANG
+unset COMMAND_MODE
+unset __CFBundleIdentifier
+unset LOGNAME
+unset TERM
+unset PATH
+unset ZSH
+unset TERM_SESSION_ID
+unset SHLVL
+unset TERM_PROGRAM_VERSION
+unset PAGER
+unset SSH_AUTH_SOCK
+unset COLORTERM
+unset HOME
+unset SHELL
+unset LESS
+unset __CF_USER_TEXT_ENCODING
+unset COLORFGBG
+unset LSCOLORS
+unset LC_TERMINAL
+unset TERM_PROGRAM
+unset TMPDIR
+unset ITERM_SESSION_ID
+unset XPC_SERVICE_NAME
+unset XPC_FLAGS
+unset ORIGINAL_XDG_CURRENT_DESKTOP
+unset VSCODE_GIT_IPC_HANDLE
+unset GIT_ASKPASS
+unset VSCODE_GIT_ASKPASS_NODE
+unset VSCODE_GIT_ASKPASS_MAIN
+unset OLDPWD
+unset _
+
+PATH_INFO=/test_cgi/post/action.php
+REQUEST_METHOD=POST
+PATH_TRANSLATED=./www/test_cgi/post/action.php
+REDIRECT_STATUS=200
+QUERY_STRING=
+SERVER_PROTOCOL=HTTP/1.1
+SCRIPT_FILENAME=./www/test_cgi/post/action.php
+CONTENT_TYPE=application/x-www-form-urlencoded
+CONTENT_LENGTH=20
+GATEWAY_INTERFACE=CGI/1.1
+SERVER_SOFTWARE=Webserv/1.0
+export PATH_INFO
+export REQUEST_METHOD
+export PATH_TRANSLATED
+export REDIRECT_STATUS
+export QUERY_STRING
+export SERVER_PROTOCOL
+export SCRIPT_FILENAME
+export CONTENT_TYPE
+export CONTENT_LENGTH
+export GATEWAY_INTERFACE
+export SERVER_SOFTWARE
+
+export
+
+echo "name=Test&email=GOOD" | www/bin/php-cgi

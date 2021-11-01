@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 20:17:14 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/01 20:40:16 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,10 +116,8 @@ between the client and the server. */
 void Cgi::setEnv()
 {
 	std::string envVar[] = {"PATH_INFO", "REQUEST_METHOD", "PATH_TRANSLATED",
-			"REDIRECT_STATUS", "QUERY_STRING", "SERVER_PROTOCOL", "SCRIPT_NAME",
-			"SCRIPT_FILENAME", "CONTENT_TYPE", "SERVER_PORT", "CONTENT_LENGTH",
-			"REMOTE_ADDR", "REMOTE_IDENT", "REMOTE_USER", "GATEWAY_INTERFACE",
-			"SERVER_SOFTWARE", "SERVER_NAME", "REQUEST_URI", ""};
+			"REDIRECT_STATUS", "QUERY_STRING", "SERVER_PROTOCOL", "SCRIPT_FILENAME",
+			"CONTENT_TYPE", "CONTENT_LENGTH", "GATEWAY_INTERFACE", "SERVER_SOFTWARE", ""};
 	size_t i = 0;
 	size_t size = 0;
 	
@@ -151,7 +149,6 @@ std::string	Cgi::getOuput(int fd)
 		ret = read(fd, buffer, sizeof(buffer) - 1);
 		buffer[ret] = 0;
 		output += buffer;
-		std::cout << buffer << std::endl;
 	}
 	return output;
 }
@@ -193,7 +190,7 @@ std::string Cgi::execute(void)
 		if (dup2(fdIn[0], STDIN_FILENO) == SYSCALL_ERR)
 			exit(EXIT_FAILURE);
 		close(fdIn[0]); 
-		close(fdIn[1]); 
+		close(fdIn[1]);
 		if (dup2(fdOut[1], STDOUT_FILENO) == SYSCALL_ERR)
 			exit(EXIT_FAILURE);
 		close(fdOut[0]);
@@ -206,16 +203,17 @@ std::string Cgi::execute(void)
 	}
 	
 	close(fdOut[1]);
-	
 	close(fdIn[0]);
 	close(fdIn[1]);
 
 	waitpid(-1, &status, 0);
+	std::cout << "###################################\n";
 	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
 		throw CgiError();
 
 	content = this->getOuput(fdOut[0]);
 	this->setContentLength(content);
+	close(fdOut[0]);
 
 	// ##################################################################
 	if (DEBUG)
