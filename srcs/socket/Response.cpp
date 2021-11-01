@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 18:26:21 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 18:36:28 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,9 +59,13 @@ void    Response::setHeader(void)
     this->_header = HTTP_PROTOCOL_VERSION " ";
 	this->_header += std::to_string(this->_status.first) + " ";
 	this->_header += this->_status.second + NEW_LINE;
-	this->_header += "Content-Length: " + std::to_string(this->_contentLength) + NEW_LINE;
-	this->_header += "Content-Location: ";
-	this->_header += this->_request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);// + NEW_LINE;
+	this->_header += "Content-Length: " + std::to_string(this->_contentLength);
+	if (this->_status.first == 200)
+	{
+		this->_header += NEW_LINE;
+		this->_header += "Content-Location: ";
+		this->_header += this->_request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);// + NEW_LINE;
+	}
 	// this->_header += "Content-Type: text/plain";
 }
 
@@ -131,12 +135,12 @@ void Response::setErrorContent(void)
 {
 	std::map<int, std::string>::const_iterator	it;
 	it = this->_request->getServer()->errorPages().find(this->_status.first);
-
+	
 	// Default error page setup case
 	if (it != this->_request->getServer()->errorPages().end() && is_valid_path(it->second))
 	{
 		this->_content = NEW_LINE + getFileContent(it->second);
-		this->_contentLength = this->_content.size() - 1;
+		this->_contentLength = this->_content.size() - 2;
 		return ;
 	}
 	
