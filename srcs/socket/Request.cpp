@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 20:15:44 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 01:13:07 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,8 +58,14 @@ const t_location*   Request::getLocation(void) const
 ** Setters
 */
 
-void	Request::setContent(const std::string &content) {
-	this->_content = content;
+void	Request::setContent(void) {
+	std::string buf(this->_header.buf);
+	
+	size_t pos = buf.find("\r\n\r\n");
+	if (pos == std::string::npos)
+		this->_content = "";
+	else
+		this->_content = buf.substr(pos + 4, std::string::npos);
 }
 
 

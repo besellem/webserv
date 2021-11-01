@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 21:39:21 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 01:20:21 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,12 +92,13 @@ std::string	Cgi::getOuput(int fd)
 	std::string	output;
 	
 	ret = 1;
-	while ((ret = read(fd, buffer, sizeof(buffer))) > 0)
+	int i = 0;
+	while ((ret = read(fd, buffer, sizeof(buffer))) > 0 && ++i < 15)
 	{
+		read(fd, buffer, sizeof(buffer));
 		buffer[ret] = 0;
 		output += buffer;
 	}
-	close(fd);
 	return output;
 }
 
@@ -131,31 +132,34 @@ std::string Cgi::execute(const std::string &fileName)
 	else if (pid == 0)
 	{
 		// Modify standard input and output
-		if (dup2(fdOut[1], STDOUT_FILENO) == -1)
-			exit(EXIT_FAILURE);
-		close(fdOut[0]); close(fdOut[1]);
 		if (dup2(fdIn[0], STDIN_FILENO) == -1)
 			exit(EXIT_FAILURE);
-		close(fdIn[0]); close(fdIn[1]);
+		close(fdIn[0]); 
+		close(fdIn[1]); 
+		if (dup2(fdOut[1], STDOUT_FILENO) == -1)
+			exit(EXIT_FAILURE);
+		close(fdOut[0]);
+		close(fdOut[1]);
 		
 		// Execute the cgi program on the file
 		if (execve(arg[0], arg, this->_env) == -1)
 			exit(EXIT_FAILURE);
 		exit(EXIT_FAILURE);
 	}
-	
 	close(fdOut[1]);
 	
 	// Send variables to the standard input of the program
 	if (method == "POST")
 		write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size());
-		
-	close(fdIn[1]); close(fdIn[0]);
-	waitpid(pid, &status, 0);
+	close(fdIn[0]);
+	close(fdIn[1]);
+	
+	waitpid(-1, &status, 0);
 	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
 		throw CgiError();
 
 	content = this->getOuput(fdOut[0]);
+	close(fdOut[0]);
 	this->setContentLenght(content);
 
 	free(arg[0]); free(arg[1]);
