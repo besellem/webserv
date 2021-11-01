@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 17:41:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/31 00:05:27 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:24:21 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,12 @@ std::string	getExtension(const std::string& fileName)
 /* Split a string by a delimiter converting it into a vector */
 std::vector<std::string>	split_string(const std::string& s, const std::string& delim)
 {
-	std::string					tmp = s;
+	std::string					tmp(s);
 	std::vector<std::string>	v;
 	std::string					line;
 	size_t						pos = tmp.find(delim);
 
-	if (delim[0] != '\0')
+	if (delim[0] != '\0' && !s.empty())
 	{
 		while ((pos = tmp.find(delim)) != std::string::npos)
 		{

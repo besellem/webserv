@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 14:28:03 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:47:59 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,14 +23,14 @@ Request::~Request() {}
 ** Getters
 */
 
-HttpHeader&         Request::getHeader(void) { return this->_header ; }
-const std::string&  Request::getContent(void) const { return this->_content; }
-const std::string&  Request::getConstructPath(void) const { return this->_constructPath; }
-size_t       		Request::getContentLenght(void) const { return this->_content.size(); }
-const Server*       Request::getServer(void) const { return this->_server ; }
+HttpHeader&			Request::getHeader(void)              { return this->_header ; }
+const std::string&	Request::getContent(void)       const { return this->_content; }
+const std::string&	Request::getConstructPath(void) const { return this->_constructPath; }
+size_t				Request::getContentLength(void) const { return this->_content.size(); }
+const Server*		Request::getServer(void)        const { return this->_server ; }
 
 /* Find the location of the request */
-const t_location*   Request::getLocation(void) const
+const t_location*	Request::getLocation(void) const
 {
 	typedef std::vector<t_location *>	location_type;
 	std::string							parent_dir;
@@ -67,7 +67,6 @@ void	Request::setContent(void) {
 	else
 		this->_content = buf.substr(pos + 4, std::string::npos);
 }
-
 
 void	Request::setConstructPath(void)
 {
@@ -114,41 +113,46 @@ void	Request::setConstructPath(void)
 
 void	Request::setHeaderData(const std::string& line_)
 {
-	typedef std::map<std::string, std::string>  map_type;
-
-	std::vector<std::string>			methods;
-	map_type							opts;
-	map_type::const_iterator			opt_it;
-	std::pair<std::string, std::string>	mapped;
-	const size_t						pos = line_.find(": ");
+	typedef std::vector<std::string>                       vector_type;
+	typedef std::map<std::string, std::string>             map_type;
+	typedef std::pair<std::string, std::string>            pair_type;
 	
-	// if we don't find a ": " in a line of the header
-	if (pos == std::string::npos) // (?) HTTP_REQUEST_ERROR;
+	static std::string	method[] = {
+		"GET",
+		"POST",
+		"DELETE"
+	};
+	static pair_type	option[] = {
+		std::make_pair("Host",						" " ),
+		std::make_pair("Origin",					""),
+		std::make_pair("Content-Type",				""),
+		std::make_pair("Accept-Encoding",			", "),
+		std::make_pair("Connection",				" " ),
+		std::make_pair("Upgrade-Insecure-Requests",	""),
+		std::make_pair("Accept",					"," ),
+		std::make_pair("User-Agent",				""  ),
+		std::make_pair("Referer",					" " ),
+		std::make_pair("Accept-Language",			" " )
+	};
+	static vector_type	methods(method, method + sizeof(method) / sizeof(std::string));
+	static map_type		options(option, option + sizeof(option) / sizeof(pair_type));
+	static std::string	separator = ": ";
+	const size_t		pos = line_.find(separator);
+	pair_type			mapped;
+
+	
+	/* if we don't find a ": " in a line of the header */
+	if (pos == std::string::npos)
 	{
 		// throw HttpHeader::HttpHeaderParsingError();
 		return ;
 	}
 	
-	// set the key (eg: "Host") and its value (eg: "localhost:8080")
-	mapped = std::make_pair(line_.substr(0, pos), line_.substr(pos + 2));
+	/* set the key (eg: "Host") and its value (eg: "localhost:8080") */
+	mapped = std::make_pair(line_.substr(0, pos), line_.substr(pos + separator.length()));
 
-	// fill methods and options to parse
-	methods.push_back("GET");
-	methods.push_back("POST");
-	methods.push_back("DELETE");
-
-	opts.insert(std::make_pair("Host",						" " ));
-	opts.insert(std::make_pair("Origin",					""));
-	opts.insert(std::make_pair("Content-Type",				""));
-	opts.insert(std::make_pair("Accept-Encoding",			", "));
-	opts.insert(std::make_pair("Connection",				" " ));
-	opts.insert(std::make_pair("Upgrade-Insecure-Requests",	""));
-	opts.insert(std::make_pair("Accept",					"," ));
-	opts.insert(std::make_pair("User-Agent",				""  ));
-	opts.insert(std::make_pair("Referer",					" " ));
-	opts.insert(std::make_pair("Accept-Language",			" " ));
-
-	for (opt_it = opts.begin(); opt_it != opts.end(); ++opt_it)
+	/* Find the right key to add to the map */
+	for (map_type::const_iterator opt_it = options.begin(); opt_it != options.end(); ++opt_it)
 	{
 		if (opt_it->first == mapped.first)
 		{

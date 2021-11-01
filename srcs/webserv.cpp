@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/31 19:29:34 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/01 15:27:32 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,6 @@ void			WebServer::createServers(void)
 		/** @brief init server */
 		_socks[i] = Socket(_servers[i]);
 		_socks[i].startSocket();
-
 	}
 
 	/** @brief start server */

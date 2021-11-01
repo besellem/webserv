@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 16:13:57 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:47:09 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,7 +156,7 @@ std::string	Cgi::getOuput(int fd)
 	return output;
 }
 
-void	Cgi::setContentLenght(const std::string &output) {
+void	Cgi::setContentLength(const std::string &output) {
 	this->_contentLength = output.size();
 	
 	// Subtract the size of the Cgi header
@@ -176,31 +176,31 @@ std::string Cgi::execute(void)
 	std::string	content;
 	std::string	method = this->getEnv("REQUEST_METHOD");
 
-	if (pipe(fdIn) == -1 || pipe(fdOut) == -1)
+	if (pipe(fdIn) == SYSCALL_ERR || pipe(fdOut) == SYSCALL_ERR)
 		throw CgiError();
 		
 	// Send variables to the standard input of the program
 	if (write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size()) < 0)
 		throw CgiError();
 
-	if ((pid = fork()) == -1)
+	if ((pid = fork()) == SYSCALL_ERR)
 		throw CgiError();
 	else if (pid == 0)
 	{
 		char * const * nll = NULL;
 
 		// Modify standard input and output
-		if (dup2(fdIn[0], STDIN_FILENO) == -1)
+		if (dup2(fdIn[0], STDIN_FILENO) == SYSCALL_ERR)
 			exit(EXIT_FAILURE);
 		close(fdIn[0]); 
 		close(fdIn[1]); 
-		if (dup2(fdOut[1], STDOUT_FILENO) == -1)
+		if (dup2(fdOut[1], STDOUT_FILENO) == SYSCALL_ERR)
 			exit(EXIT_FAILURE);
 		close(fdOut[0]);
 		close(fdOut[1]);
 		
 		// Execute the cgi program on the file
-		if (execve(this->_program.c_str(), nll, this->_env) == -1)
+		if (execve(this->_program.c_str(), nll, this->_env) == SYSCALL_ERR)
 			exit(EXIT_FAILURE);
 		exit(EXIT_FAILURE);
 	}
@@ -215,8 +215,7 @@ std::string Cgi::execute(void)
 		throw CgiError();
 
 	content = this->getOuput(fdOut[0]);
-	close(fdOut[0]);
-	this->setContentLenght(content);
+	this->setContentLength(content);
 
 	// ##################################################################
 	if (DEBUG)

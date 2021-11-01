@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 15:00:35 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:49:30 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ Response::~Response() {
 
 const std::string&  			Response::getHeader(void) const { return this->_header; }
 const std::string&  			Response::getContent(void) const { return this->_content; }
-const size_t&       			Response::getContentLenght(void) const { return this->_contentLenght; }
+const size_t&       			Response::getContentLength(void) const { return this->_contentLength; }
 const Response::status_type&	Response::getStatus(void) const {return this->_status; }
 
 /*
@@ -59,7 +59,7 @@ void    Response::setHeader(void)
     this->_header = HTTP_PROTOCOL_VERSION " ";
 	this->_header += std::to_string(this->_status.first) + " ";
 	this->_header += this->_status.second + NEW_LINE;
-	this->_header += "Content-Length: " + std::to_string(this->_contentLenght) + NEW_LINE;
+	this->_header += "Content-Length: " + std::to_string(this->_contentLength) + NEW_LINE;
 	this->_header += "Content-Location: ";
 	this->_header += this->_request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);// + NEW_LINE;
 	// this->_header += "Content-Type: text/plain";
@@ -95,7 +95,7 @@ void    Response::setContent(const std::string &file_content)
 		try
 		{
 			this->_content = this->_cgi->execute();
-			this->_contentLenght = this->_cgi->getContentLength();
+			this->_contentLength = this->_cgi->getContentLength();
 			return ;
 		}
 		catch(const std::exception& e)
@@ -112,7 +112,7 @@ void    Response::setContent(const std::string &file_content)
 		this->setStatus(403);
 	else
 		this->_content = file_content;
-	this->_contentLenght = this->_content.size();
+	this->_contentLength = this->_content.size();
 	this->_content = NEW_LINE + this->_content;
 
 	// Error case
@@ -132,7 +132,7 @@ void Response::setErrorContent(void)
 	if (it != this->_request->getServer()->errorPages().end() && is_valid_path(it->second))
 	{
 		this->_content = NEW_LINE + getFileContent(it->second);
-		this->_contentLenght = this->_content.size() - 1;
+		this->_contentLength = this->_content.size() - 1;
 		return ;
 	}
 	
@@ -157,7 +157,7 @@ void Response::setErrorContent(void)
 	content += "</html>\n";
 	
 	this->_content = NEW_LINE + content;
-	this->_contentLenght = content.size();
+	this->_contentLength = content.size();
 }
 
 const std::string	Response::generateAutoindexPage(std::string const &path) const

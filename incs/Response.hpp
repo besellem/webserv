@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/31 19:45:44 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/01 16:39:05 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ class Response
     public:
         const std::string&  getHeader(void) const;
         const std::string&  getContent(void) const;
-        const size_t&       getContentLenght(void) const;
+        const size_t&       getContentLength(void) const;
         const status_type&  getStatus(void) const;
         
         const std::string   generateAutoindexPage(std::string const &) const;
@@ -52,7 +52,7 @@ class Response
     private:
         std::string         _header;
         std::string         _content;
-        size_t              _contentLenght;
+        size_t              _contentLength;
         status_type         _status;
         Request*            _request;
         Cgi*                _cgi;
