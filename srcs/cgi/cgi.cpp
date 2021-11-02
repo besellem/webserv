@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 15:43:44 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/02 15:46:08 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ const std::string	Cgi::getEnv(const std::string &varName)
 	case 6: return "200";
 	case 7: return _request->getHeader().request_method;
 	case 8: return _request->getConstructPath();
-	case 9: return "HTTP/1.1";
+	case 9: return HTTP_PROTOCOL_VERSION;
 	case 10: return std::to_string(_request->getServer()->port());
 	default: return std::string("");
 	}
@@ -230,6 +230,5 @@ std::string Cgi::execute(void)
 	
 	return content;
 }
-
 
 _END_NS_WEBSERV
