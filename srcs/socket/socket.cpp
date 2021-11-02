@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/01 16:49:36 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/02 13:39:11 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,7 @@ void	Socket::resolveHttpRequest(Request *request)
 		return ;
 	}
 
-	vector_type				buffer = split_string(request->getHeader().buf, "\n");
+	vector_type				buffer = split_string(request->getHeader().buf, "\r\n");
 	vector_type::iterator	line = buffer.begin();
 
 	/*
