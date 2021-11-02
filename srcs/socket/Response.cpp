@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 18:36:28 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 13:52:49 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,7 +249,10 @@ const std::string	Response::generateAutoindexPage(std::string const &path) const
 
 		/* element 3: file size */
 		content += "<td>";
-		content += fileSize;
+		if (S_ISDIR(statBuf.st_mode))
+			content += "_";
+		else
+			content += fileSize;
 		content += "</td>";
 
 		/* end of content */
