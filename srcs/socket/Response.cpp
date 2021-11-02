@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 13:52:49 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/02 17:19:54 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ void    Response::setStatus(const status_type& status) {
 }
 
 void    Response::setStatus(int code) {
-	int 		codeTab[] = {200, 403, 404, 405, 500};
-	std::string actionTab[] = {"OK", "Forbidden", "Not Found", "Method Not Allowed",
+	int 		codeTab[] = {200, 202, 403, 404, 405, 500};
+	std::string actionTab[] = {"OK", "Accepted", "Forbidden", "Not Found", "Method Not Allowed",
 			"Internal Server Error"};
 	int			i = 0;
 

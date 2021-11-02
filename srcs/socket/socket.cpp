@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/02 14:12:20 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/02 17:19:54 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,7 @@ void	Socket::resolveHttpRequest(Request *request)
 		return ;
 	}
 
-	vector_type				buffer = split_string(request->getHeader().buf, "\r\n");
+	vector_type				buffer = split_string(request->getHeader().buf, NEW_LINE);
 	vector_type::iterator	line = buffer.begin();
 
 	/*
@@ -122,13 +122,13 @@ void	Socket::resolveHttpRequest(Request *request)
 		throw HttpHeader::HttpBadRequestError();
 	
 	request->getHeader().request_method = first_line[0];
-	request->getHeader().path = first_line[1];
+	request->getHeader().uri = first_line[1];
 	request->setConstructPath();
 	++line;
 
 	if (DEBUG)
 	{
-		std::cout << "Path            : [" S_CYAN << request->getHeader().path << S_NONE "]\n";
+		std::cout << "Path            : [" S_CYAN << request->getHeader().uri << S_NONE "]\n";
 		std::cout << "Contructed Path : [" S_CYAN << request->getConstructPath() << S_NONE "]\n";
 	}
 
@@ -137,14 +137,14 @@ void	Socket::resolveHttpRequest(Request *request)
 	request->setContent();
 
 	// set query string
-	size_t pos = request->getHeader().path.find("?");
+	size_t pos = request->getHeader().uri.find("?");
 	if (pos != std::string::npos)
-		request->getHeader().queryString = request->getHeader().path.substr(pos + 1);
+		request->getHeader().queryString = request->getHeader().uri.substr(pos + 1);
 
 	for ( ; line != buffer.end() - 1; ++line)
 		request->setHeaderData(*line);
 	
-	// std::cout << S_RED "path_constructed: " S_NONE << header.path_constructed << std::endl;
+	// std::cout << S_RED "path_constructed: " S_NONE << header.uri_constructed << std::endl;
 }
 
 /* Construct the htttp response and send it to the server */

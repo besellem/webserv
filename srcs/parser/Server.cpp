@@ -153,7 +153,6 @@ void	Server::newLocation(const tokens_type &tok) {
 		throw WebServer::ParsingError();
 	t_location* loc = new t_location;
 	loc->path = tok[1];
-    loc->root = tok[1];
 	loc->methods.push_back("GET");
 	loc->autoindex = OFF;
 	this->_locations.push_back(loc);
