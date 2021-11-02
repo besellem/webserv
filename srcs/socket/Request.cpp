@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 20:14:59 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 12:28:27 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,16 +123,16 @@ void	Request::setHeaderData(const std::string& line_)
 		"DELETE"
 	};
 	static pair_type	option[] = {
-		std::make_pair("Host",						" " ),
-		std::make_pair("Origin",					""),
-		std::make_pair("Content-Type",				""),
-		std::make_pair("Accept-Encoding",			", "),
-		std::make_pair("Connection",				" " ),
-		std::make_pair("Upgrade-Insecure-Requests",	""),
-		std::make_pair("Accept",					"," ),
-		std::make_pair("User-Agent",				""  ),
-		std::make_pair("Referer",					" " ),
-		std::make_pair("Accept-Language",			" " )
+		std::make_pair("Host",						"\r " ),
+		std::make_pair("Origin",					"\r"  ),
+		std::make_pair("Content-Type",				"\r"  ),
+		std::make_pair("Accept-Encoding",			"\r, "),
+		std::make_pair("Connection",				"\r " ),
+		std::make_pair("Upgrade-Insecure-Requests",	"\r"  ),
+		std::make_pair("Accept",					"\r," ),
+		std::make_pair("User-Agent",				"\r"  ),
+		std::make_pair("Referer",					"\r " ),
+		std::make_pair("Accept-Language",			"\r " )
 	};
 	static vector_type	methods(method, method + sizeof(method) / sizeof(std::string));
 	static map_type		options(option, option + sizeof(option) / sizeof(pair_type));

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/shc
 REQUEST_DATA="name=val_1&email=val_2"
 export GATEWAY_INTERFACE="CGI/1.1"
 export SERVER_PROTOCOL="HTTP/1.1"

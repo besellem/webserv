@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 21:21:49 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 12:37:17 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,17 +44,13 @@ const std::string&	Cgi::getExtension() const { return this->_extension; }
 const std::string&	Cgi::getProgram() const { return this->_program; }
 char**	            Cgi::getEnv() const { return this->_env; }
 
-/* Returns the value of a environment variables of the request */
+/* Returns the value of a cgi environment variables */
 const std::string	Cgi::getEnv(const std::string &varName)
 {
-    std::string envVar[] = {"SERVER_PORT", "REQUEST_METHOD", "PATH_INFO",
-        "SCRIPT_NAME", "REMOTE_ADDR", "REMOTE_IDENT", "HTTP_ACCEPT",
-        "HTTP_ACCEPT_LANGUAGE", "HTTP_USER_AGENT", "HTTP_REFERER", "SERVER_PROTOCOL",
-        "GATEWAY_INTERFACE", "CONTENT_TYPE", "QUERY_STRING", "REDIRECT_STATUS",
-		"HTTP_ACCEPT_ENCODING", "HTTP_CONNECTION", "PATH_TRANSLATED", "REMOTE_USER",
-		"CONTENT_LENGTH", "SCRIPT_FILENAME", "SERVER_SOFTWARE", "SERVER_NAME", "REQUEST_URI", ""};
+    std::string envVar[] = {"CONTENT_LENGTH", "CONTENT_TYPE", "GATEWAY_INTERFACE", "PATH_INFO",
+			"PATH_TRANSLATED", "QUERY_STRING", "REDIRECT_STATUS", "REQUEST_METHOD",
+			"SCRIPT_FILENAME", "SERVER_PROTOCOL", "SERVER_PORT", ""};
     std::string str;
-    size_t      pos;
     int         i = 0;
     
     for (; !envVar[i].empty(); i++)
@@ -62,35 +58,17 @@ const std::string	Cgi::getEnv(const std::string &varName)
             break ;
     switch (i)
     {
-    case 0:
-        str = vectorJoin(_request->getHeader().data["Host"], ' ');
-        pos = str.find(":");
-        if (pos == std::string::npos)
-            return std::string("");
-       return str.substr(pos + 1);
-    case 1: return _request->getHeader().request_method;
-    case 2: return _request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);
-    case 3: return _request->getConstructPath();
-    case 4: return std::string("127.0.0.1");
-    case 5: return std::string("");
-    case 6: return vectorJoin(_request->getHeader().data["Accept"], ',');
-    case 7: return vectorJoin(_request->getHeader().data["Accept-Language"], ' ');
-    case 8: return vectorJoin(_request->getHeader().data["User-Agent"], ' ');
-    case 9: return vectorJoin(_request->getHeader().data["Referer"], ' ');
-    case 10: return std::string(HTTP_PROTOCOL_VERSION);
-    case 11: return std::string("CGI/1.1");
-    case 12: return vectorJoin(_request->getHeader().data["Content-Type"], ' ');
-    case 13: return _request->getHeader().queryString;
-    case 14: return std::string("200");
-    case 15: return vectorJoin(_request->getHeader().data["Accept-Encoding"], ' ');
-    case 16: return vectorJoin(_request->getHeader().data["Connection"], ' ');
-    case 17: return _request->getConstructPath();
-    case 18: return std::string("");
-    case 19: return std::to_string(_request->getContent().size());
-    case 20: return _request->getConstructPath();
-    case 21: return "Webserv/1.0";
-    case 22: return vectorJoin(_request->getServer()->name(), ' '); //tous ou juste 1 ?
-    case 23: return _request->getHeader().path;
+    case 0: return std::to_string(_request->getContent().size());
+    case 1: return vectorJoin(_request->getHeader().data["Content-Type"], '\0');
+    case 2: return "CGI/1.1";
+    case 3: return _request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);
+    case 4: return _request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);
+    case 5: return _request->getHeader().queryString;
+    case 6: return "200";
+    case 7: return _request->getHeader().request_method;
+    case 8: return _request->getConstructPath();
+    case 9: return "HTTP/1.1";
+    case 10: return std::to_string(_request->getServer()->port());
     default: return std::string("");
     }
 }
@@ -115,9 +93,9 @@ CGI Environment variables contain data about the transaction
 between the client and the server. */
 void Cgi::setEnv()
 {
-	std::string envVar[] = {"PATH_INFO", "REQUEST_METHOD", "PATH_TRANSLATED",
-			"REDIRECT_STATUS", "QUERY_STRING", "SERVER_PROTOCOL", "SCRIPT_FILENAME",
-			"CONTENT_TYPE", "CONTENT_LENGTH", "GATEWAY_INTERFACE", "SERVER_SOFTWARE", ""};
+	std::string envVar[] = {"CONTENT_LENGTH", "CONTENT_TYPE", "GATEWAY_INTERFACE", "PATH_INFO",
+			"PATH_TRANSLATED", "QUERY_STRING", "REDIRECT_STATUS", "REQUEST_METHOD",
+			"SCRIPT_FILENAME", "SERVER_PROTOCOL", "SERVER_PORT", ""};
 	size_t i = 0;
 	size_t size = 0;
 	
@@ -205,7 +183,6 @@ std::string Cgi::execute(void)
 	close(fdIn[1]);
 
 	waitpid(-1, &status, 0);
-	std::cout << "###################################\n";
 	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
 		throw CgiError();
 
@@ -224,6 +201,7 @@ std::string Cgi::execute(void)
 		std::cout << "......................................" <<std::endl;
 	}
 	// ##################################################################
+	
 	return content;
 }
 
