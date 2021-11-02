@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 17:19:54 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 18:27:07 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ class Response
         void                setErrorContent(void);
         
         bool                isMethodAllowed(const std::string &);
+        void                doRedirection(void);
 
     private:
         std::string         _header;

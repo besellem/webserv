@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 17:49:48 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 18:41:53 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 _BEGIN_NS_WEBSERV
 
 Response::Response(Request *req) : _request(req) {
-    if (req->getLocation() && !req->getLocation()->cgi.empty())
+    if (req->getLocation() && !req->getLocation()->cgi.first.empty())
         _cgi = new Cgi(req);
     else
         _cgi = NULL;
@@ -44,9 +44,10 @@ void    Response::setStatus(const status_type& status) {
 }
 
 void    Response::setStatus(int code) {
-	int 		codeTab[] = {200, 202, 403, 404, 405, 500};
-	std::string actionTab[] = {"OK", "Accepted", "Forbidden", "Not Found", "Method Not Allowed",
-			"Internal Server Error"};
+	int 		codeTab[] = {200, 202, 300, 301, 302, 303, 304, 307, 308, 403, 404, 405, 500};
+	std::string actionTab[] = {"OK", "Accepted", "Multiple Choice", "Moved Permanently",
+			"Found", "See Other", "Not Modified", "Temporary Redirect", "Temporary Redirect",
+			"Forbidden", "Not Found", "Method Not Allowed", "Internal Server Error"};
 	int			i = 0;
 
 	while (i < 4 && codeTab[i] != code)
@@ -86,11 +87,18 @@ bool	Response::isMethodAllowed(const std::string &method)
 	return 0;
 }
 
+void	Response::doRedirection(void) {
+}
+
 void    Response::setContent(const std::string &file_content)
 {
 	this->isMethodAllowed(this->_request->getHeader().request_method);
 	
 	const t_location	*loc = this->_request->getLocation();
+	
+	// redirection
+	if (!loc->redirection.second.empty())
+		this->setStatus(loc->redirection.first);
 	
 	// cgi case
 	if (this->_status.first == 200 && this->_cgi
@@ -110,7 +118,7 @@ void    Response::setContent(const std::string &file_content)
 	}
 	
 	// Valid case
-	if (this->_status.first == 200)
+	if (this->_status.first < 400)
 	{
 		// Autoindex
 		if (ft_isDirectory(this->_request->getConstructPath()))
@@ -127,7 +135,7 @@ void    Response::setContent(const std::string &file_content)
 	}
 
 	// Error case
-	if (this->_status.first != 200)
+	if (this->_status.first >= 400)
 		this->setErrorContent();
 }
 

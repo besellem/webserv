@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 17:49:32 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 18:18:18 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,10 @@ Cgi::Cgi(Request *request) : _request(request), _contentLength(0)
 {
 	const t_location	*loc = request->getLocation();
 
-	if (loc && !loc->cgi.empty())
+	if (loc && !loc->cgi.first.empty())
 	{
-		_extension = loc->cgi[0];
-		_program = loc->cgi[1];
+		_extension = loc->cgi.first;
+		_program = loc->cgi.second;
 		this->setEnv();
 	}
 }

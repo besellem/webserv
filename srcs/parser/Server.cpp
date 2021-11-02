@@ -90,7 +90,10 @@ void	Server::setCliMaxSize(const tokens_type &tok) {
 }
 
 void	Server::setCgi(t_location  *loc, const tokens_type &tok) {
-    loc->cgi.assign(tok.begin() + 1, tok.end());
+     if (tok.size() != 3)
+        throw WebServer::ParsingError();
+    loc->cgi.first = tok[1];
+    loc->cgi.second = tok[2];
 }
 
 void	Server::setIndex(t_location  *loc, const tokens_type &tok) {
@@ -107,9 +110,13 @@ void	Server::setAutoIndex(t_location  *loc, const tokens_type &tok) {
 }
 
 void	Server::setRedirection(t_location  *loc, const tokens_type &tok) {
-    if (tok.size() != 2)
+     if (tok.size() != 3)
         throw WebServer::ParsingError();
-    loc->redirection = tok[1];
+    loc->redirection.first = atoi(tok[1].c_str());
+    if (loc->redirection.first != 307 && loc->redirection.first != 308
+        && (loc->redirection.first < 300 || loc->redirection.first > 304))
+        throw WebServer::ParsingError();
+    loc->redirection.second = tok[2];
 }
 
 void	Server::setRoot(t_location  *loc, const tokens_type &tok) {
@@ -158,13 +165,15 @@ void	Server::newLocation(const tokens_type &tok) {
 	loc->path = tok[1];
 	loc->methods.push_back("GET");
 	loc->autoindex = OFF;
+    // loc->redirection = std::make_pair(0,"");
+    // loc->cgi = std::make_pair("","");
 	this->_locations.push_back(loc);
 }
 
 /* Adds the new directive to the location */
 void	Server::newLocationDirective(const tokens_type &tok)
 {
-    std::string directives[] = {"allow", "rewrite", "root",
+    std::string directives[] = {"allow", "return", "root",
             "index", "autoindex", "cgi_pass"};
 	static method_function1   method_ptr[] = {&Server::setMethods,
 		    &Server::setRedirection, &Server::setRoot, &Server::setIndex,
@@ -210,8 +219,6 @@ void	Server::newDirective(const tokens_type &tokens)
 /* Display location block like the config file */
 std::ostream& operator<<(std::ostream& os, const t_location& loc)
 {
-    std::string directives[] = {"rewrite", "root"};
-    const std::string* loc_atrr[] = {&loc.redirection, &loc.root};
     os << "\tlocation " << loc.path << std::endl << "\t{" << std::endl;
     if (loc.autoindex == ON)
         os << "\t\tautoindex on" << std::endl;
@@ -222,13 +229,8 @@ std::ostream& operator<<(std::ostream& os, const t_location& loc)
             os << " " << loc.methods[k];
         os << std::endl;
     }
-    if (!loc.cgi.empty())
-    {
-        os << "\t\tcgi";
-        for (size_t k = 0; k < loc.cgi.size(); k++)
-            os << " " << loc.cgi[k];
-        os << std::endl;
-    }
+    if (!loc.cgi.first.empty())
+        os << "\t\tcgi " << loc.cgi.first << " " << loc.cgi.second << std::endl;
     if (!loc.index.empty())
     {
         os << "\t\tindex";
@@ -236,9 +238,10 @@ std::ostream& operator<<(std::ostream& os, const t_location& loc)
             os << " " << loc.index[k];
         os << std::endl;
     }
-    for (size_t k = 0; k < 2; k++)
-        if (!(*loc_atrr)[k].empty())
-            os << "\t\t" << directives[k] << " " << (*loc_atrr)[k] << std::endl;
+    if (!loc.redirection.second.empty())
+            os << "\t\t" << "return " << loc.redirection.first << " " << loc.redirection.second << std::endl;
+    if (!loc.root.empty())
+            os << "\t\t" << "root " << loc.root << std::endl;
     os << "\t}" << std::endl;
     return os;
 }
