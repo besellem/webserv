@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 18:41:53 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 23:29:56 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,10 @@
 
 _BEGIN_NS_WEBSERV
 
-Response::Response(Request *req) : _request(req) {
-    if (req->getLocation() && !req->getLocation()->cgi.first.empty())
+Response::Response(Request *req) : _request(req), _location(req->getLocation()) {
+    if (_location->cgi.first.empty())
         _cgi = new Cgi(req);
+		
     else
         _cgi = NULL;
 	setStatus(200);
@@ -50,8 +51,14 @@ void    Response::setStatus(int code) {
 			"Forbidden", "Not Found", "Method Not Allowed", "Internal Server Error"};
 	int			i = 0;
 
-	while (i < 4 && codeTab[i] != code)
+	while (i < 13 && codeTab[i] != code)
 		++i;
+	std::cout << "code : " << code << " redirection : " << _location->redirection.first << std::endl;
+	if (code == 404 && this->_location->redirection.first == 301)
+	{
+		this->_request->setConstructPath(ROOT_PATH + this->_location->redirection.second);
+		i = 3;
+	}
 	this->_status = std::make_pair<int, std::string>(codeTab[i], actionTab[i]);
 }
 
@@ -65,40 +72,36 @@ void    Response::setHeader(void)
 	{
 		this->_header += NEW_LINE;
 		this->_header += "Content-Location: ";
-		this->_header += this->_request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);// + NEW_LINE;
+		this->_header += this->_request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);
 	}
-	// this->_header += "Content-Type: text/plain";
+	else if (this->_status.first >= 300 && this->_status.first <= 308)
+	{
+		this->_header += NEW_LINE;
+		this->_header += "Location: ";
+		this->_header += this->_location->redirection.second;
+	}
 }
 
 bool	Response::isMethodAllowed(const std::string &method)
 {
-	const t_location	*loc = this->_request->getLocation();
-
 	if (method == "GET")
 		return 1;
 
-	if (loc)
+	if (this->_location)
 	{
-		for (size_t i = 0; i < loc->methods.size(); i++)
-			if (method == loc->methods[i])
+		for (size_t i = 0; i < this->_location->methods.size(); i++)
+			if (method == this->_location->methods[i])
 				return 1;
 	}
 	this->setStatus(405);
 	return 0;
 }
 
-void	Response::doRedirection(void) {
-}
-
 void    Response::setContent(const std::string &file_content)
 {
 	this->isMethodAllowed(this->_request->getHeader().request_method);
 	
-	const t_location	*loc = this->_request->getLocation();
-	
-	// redirection
-	if (!loc->redirection.second.empty())
-		this->setStatus(loc->redirection.first);
+	const t_location	*loc = this->_location;
 	
 	// cgi case
 	if (this->_status.first == 200 && this->_cgi

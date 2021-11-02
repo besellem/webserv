@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 18:43:38 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 23:12:18 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,10 @@ void	Request::setContent(void) {
 		this->_content = buf.substr(pos + 4, std::string::npos);
 }
 
+void	Request::setConstructPath(const std::string &path) {
+	this->_constructPath = path;
+}
+
 void	Request::setConstructPath(void)
 {
 	// main paths
@@ -103,12 +107,7 @@ void	Request::setConstructPath(void)
 	std::string							uriPath = ft_strcut(this->_header.uri, '?');
 	
 	ret = ROOT_PATH;
-	if (loc && !loc->redirection.second.empty())
-	{
-		this->_constructPath = ret + loc->redirection.second;
-		return ;
-	}
-	else if (loc)
+	if (loc)
 	{
 		std::cout << "location        : [" S_GREEN << loc->path << S_NONE "]" << std::endl;
 		// add the root to the path

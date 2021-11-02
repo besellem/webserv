@@ -165,8 +165,8 @@ void	Server::newLocation(const tokens_type &tok) {
 	loc->path = tok[1];
 	loc->methods.push_back("GET");
 	loc->autoindex = OFF;
-    // loc->redirection = std::make_pair(0,"");
-    // loc->cgi = std::make_pair("","");
+    loc->redirection = std::make_pair(0, "");
+    loc->cgi = std::make_pair("", "");
 	this->_locations.push_back(loc);
 }
 
