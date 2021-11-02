@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/02 13:39:11 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 14:12:20 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,9 +95,9 @@ void	Socket::readHttpRequest(Request *request, int socket_fd)
 		LOG;
 	if (DEBUG)
 	{
-		std::cout << "++++++++++++++ REQUEST +++++++++++++++" << std::endl;
+		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
 		write(STDOUT_FILENO, request->getHeader().buf, ret); // (?) may be chunked
-		std::cout << "++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
+		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
 	}
 }
 
