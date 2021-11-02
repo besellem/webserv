@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 12:37:17 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 15:43:44 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,10 @@ const char*	Cgi::CgiError::what() const throw() {
 	return "cgi failed";
 }
 
-Cgi::Cgi(Request *request) : _request(request), _contentLength(0) {
-	const t_location *loc = request->getLocation();
+Cgi::Cgi(Request *request) : _request(request), _contentLength(0)
+{
+	const t_location	*loc = request->getLocation();
+
 	if (loc && !loc->cgi.empty())
 	{
 		_extension = loc->cgi[0];
@@ -39,38 +41,51 @@ Cgi::~Cgi() {
 ** Getters
 */
 
-const size_t&	    Cgi::getContentLength() const { return this->_contentLength; }
-const std::string&	Cgi::getExtension() const { return this->_extension; }
-const std::string&	Cgi::getProgram() const { return this->_program; }
-char**	            Cgi::getEnv() const { return this->_env; }
+const size_t&		Cgi::getContentLength() const { return this->_contentLength; }
+const std::string&	Cgi::getExtension()     const { return this->_extension; }
+const std::string&	Cgi::getProgram()       const { return this->_program; }
+char**				Cgi::getEnv()           const { return this->_env; }
 
 /* Returns the value of a cgi environment variables */
 const std::string	Cgi::getEnv(const std::string &varName)
 {
-    std::string envVar[] = {"CONTENT_LENGTH", "CONTENT_TYPE", "GATEWAY_INTERFACE", "PATH_INFO",
-			"PATH_TRANSLATED", "QUERY_STRING", "REDIRECT_STATUS", "REQUEST_METHOD",
-			"SCRIPT_FILENAME", "SERVER_PROTOCOL", "SERVER_PORT", ""};
-    std::string str;
-    int         i = 0;
-    
-    for (; !envVar[i].empty(); i++)
-        if (varName == envVar[i])
-            break ;
-    switch (i)
-    {
-    case 0: return std::to_string(_request->getContent().size());
-    case 1: return vectorJoin(_request->getHeader().data["Content-Type"], '\0');
-    case 2: return "CGI/1.1";
-    case 3: return _request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);
-    case 4: return _request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);
-    case 5: return _request->getHeader().queryString;
-    case 6: return "200";
-    case 7: return _request->getHeader().request_method;
-    case 8: return _request->getConstructPath();
-    case 9: return "HTTP/1.1";
-    case 10: return std::to_string(_request->getServer()->port());
-    default: return std::string("");
-    }
+	std::string	envVar[] = {
+		"CONTENT_LENGTH",
+		"CONTENT_TYPE",
+		"GATEWAY_INTERFACE",
+		"PATH_INFO",
+		"PATH_TRANSLATED",
+		"QUERY_STRING",
+		"REDIRECT_STATUS",
+		"REQUEST_METHOD",
+		"SCRIPT_FILENAME",
+		"SERVER_PROTOCOL",
+		"SERVER_PORT",
+		""
+	};
+	std::string	str;
+	int			i = 0;
+	
+	for ( ; !envVar[i].empty(); ++i)
+	{
+		if (varName == envVar[i])
+			break ;
+	}
+	switch (i)
+	{
+	case 0: return std::to_string(_request->getContent().size());
+	case 1: return vectorJoin(_request->getHeader().data["Content-Type"], '\0');
+	case 2: return "CGI/1.1";
+	case 3: return _request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);
+	case 4: return _request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);
+	case 5: return _request->getHeader().queryString;
+	case 6: return "200";
+	case 7: return _request->getHeader().request_method;
+	case 8: return _request->getConstructPath();
+	case 9: return "HTTP/1.1";
+	case 10: return std::to_string(_request->getServer()->port());
+	default: return std::string("");
+	}
 }
 
 /*
@@ -81,7 +96,7 @@ const std::string	Cgi::getEnv(const std::string &varName)
 void    Cgi::clear() {
 	if (this->_env)
 	{
-		for (int i = 0; this->_env[i]; i++)
+		for (int i = 0; this->_env[i]; ++i)
 			free(this->_env[i]);
 		free(this->_env);
 		this->_env = 0;
@@ -93,32 +108,43 @@ CGI Environment variables contain data about the transaction
 between the client and the server. */
 void Cgi::setEnv()
 {
-	std::string envVar[] = {"CONTENT_LENGTH", "CONTENT_TYPE", "GATEWAY_INTERFACE", "PATH_INFO",
-			"PATH_TRANSLATED", "QUERY_STRING", "REDIRECT_STATUS", "REQUEST_METHOD",
-			"SCRIPT_FILENAME", "SERVER_PROTOCOL", "SERVER_PORT", ""};
-	size_t i = 0;
-	size_t size = 0;
+	std::string	envVar[] = {
+		"CONTENT_LENGTH",
+		"CONTENT_TYPE",
+		"GATEWAY_INTERFACE",
+		"PATH_INFO",
+		"PATH_TRANSLATED",
+		"QUERY_STRING",
+		"REDIRECT_STATUS",
+		"REQUEST_METHOD",
+		"SCRIPT_FILENAME",
+		"SERVER_PROTOCOL",
+		"SERVER_PORT",
+		""
+	};
+	size_t	size = 0;
+	size_t	i = 0;
 	
 	while (!envVar[size].empty())
 		++size;
 	this->_env = (char **)malloc(sizeof(char *) * (size + 1));
 	if (!this->_env)
 		throw std::bad_alloc();
-	for (; i < size; i++)
+	for ( ; i < size; ++i)
 	{
 		std::string str = envVar[i] + "=" + this->getEnv(envVar[i]);
 		this->_env[i] = strdup(str.c_str());
 		if (!this->_env[i])
 			throw std::bad_alloc();
 	}  
-	this->_env[i] = 0;
+	this->_env[i] = NULL;
 }
 
 /* Read the standard output of the program */
 std::string	Cgi::getOuput(int fd)
 {
 	int			ret;
-	char		buffer[4098];
+	char		buffer[BUFFER_SIZE];
 	std::string	output;
 	
 	ret = 1;
@@ -135,7 +161,7 @@ void	Cgi::setContentLength(const std::string &output) {
 	this->_contentLength = output.size();
 	
 	// Subtract the size of the Cgi header
-	size_t pos = output.find("\r\n\r\n"); // delimiter
+	size_t pos = output.find(DELIMITER); // delimiter
 	if (pos != std::string::npos)
 		this->_contentLength -= pos + 4;
 }

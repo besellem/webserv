@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/01 15:50:58 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/02 15:33:29 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,7 +178,7 @@ void	Epoll::handleRequest(int const & fd, Socket & sock) {
 		sock.sendHttpResponse(&request, fd);
 	}
 	catch (std::exception &e) {
-		EXCEPT_WARNING;
+		EXCEPT_WARNING(e);
 	}
 }
 

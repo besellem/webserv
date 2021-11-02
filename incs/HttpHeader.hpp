@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 16:04:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/01 16:50:38 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/02 15:30:29 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ class HttpHeader
 		std::string		request_method;
 		std::string		path;
 		std::string		queryString;
-		char			buf[BUFSIZ];
+		char			buf[BUFFER_SIZE];
 
 	friend class Socket;
 	friend class Request;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 13:52:49 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/02 15:33:35 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ void    Response::setContent(const std::string &file_content)
 		catch(const std::exception& e)
 		{
 			this->setStatus(500);
-			EXCEPT_WARNING;
+			EXCEPT_WARNING(e);
 		}
 	}
 	

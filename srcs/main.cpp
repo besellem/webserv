@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/25 17:16:42 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/02 15:33:17 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ int	main(int ac, char **av, __unused char **env)
 	}
 	catch (std::exception &e)
 	{
-		return (EXCEPT_ERROR), EXIT_FAILURE;
+		EXCEPT_ERROR(e);
+		return EXIT_FAILURE;
 	}
 
 	serv.createServers();

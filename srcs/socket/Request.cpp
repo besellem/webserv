@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 13:39:26 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 15:36:50 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ const t_location*	Request::getLocation(void) const
 void	Request::setContent(void) {
 	std::string buf(this->_header.buf);
 	
-	size_t pos = buf.find("\r\n\r\n");
+	size_t pos = buf.find(DELIMITER);
 	if (pos == std::string::npos)
 		this->_content = "";
 	else

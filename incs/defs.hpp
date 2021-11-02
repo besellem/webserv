@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   defs.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/01 17:07:19 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/02 15:36:38 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,30 +38,20 @@
 # define DEFAULT_CONFIG_FILE  CONFIG_DEFAULT_PATH "/default" CONFIG_FILETYPE
 
 # define ROOT_PATH            "./www"
-# define CGI_PROGRAM          "/Users/adbenoit/.brew/bin/php-cgi"
 
-# ifndef BUFSIZ
-#  define BUFSIZ  1024
-# endif
+# define BUFFER_SIZE  4096
 
-// # define GET     (1L << 0)
-// # define POST    (1L << 1)
-// # define DELETE  (1L << 2)
-
-# define OFF     0
-# define ON      1
+# define OFF          0
+# define ON           1
 
 /** @brief epoll utils define */
-# define EP_EVENTS 2 // 2: read / write
-
-/* Compare two strings. Returns a bool */
-# define CMP_STRINGS(s1, s2) (0 == std::strcmp(s1, s2))
+# define EP_EVENTS    2 // 2: read / write
 
 /* Logs & messages to print */
 # define LOG \
 	std::cout << S_RED << __FILE__ << ":" << __LINE__ << S_NONE ": Here\n" << std::endl
-# define EXCEPT_WARNING std::cerr << S_BLUE "Warning: " S_NONE << e.what() << std::endl
-# define EXCEPT_ERROR   std::cerr << S_RED  "Error: "   S_NONE << e.what() << std::endl
+# define EXCEPT_WARNING(exception) std::cerr << S_BLUE "Warning: " S_NONE << exception.what() << std::endl
+# define EXCEPT_ERROR(exception)   std::cerr << S_RED  "Error: "   S_NONE << exception.what() << std::endl
 
 # define STRINGIFY(x)   #x
 # define TOSTRING(x)    STRINGIFY(x)
@@ -69,6 +59,7 @@
 
 /* Http response new lines (may change based on the sytem -- to check) */
 # define NEW_LINE               "\r\n"
+# define DELIMITER              "\r\n\r\n"
 
 # define HTTP_PROTOCOL_VERSION  "HTTP/1.1"
 
@@ -92,9 +83,9 @@
 # include <sys/types.h>
 # include <sys/cdefs.h>
 # include <netinet/in.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <sys/stat.h>
+# include <sys/types.h>
+# include <dirent.h>
+# include <sys/stat.h>
 # include <fcntl.h>
 # include <unistd.h>
 # include <sys/stat.h>
