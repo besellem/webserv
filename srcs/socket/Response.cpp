@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 23:29:56 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 23:48:07 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,17 +68,11 @@ void    Response::setHeader(void)
 	this->_header += std::to_string(this->_status.first) + " ";
 	this->_header += this->_status.second + NEW_LINE;
 	this->_header += "Content-Length: " + std::to_string(this->_contentLength);
-	if (this->_status.first == 200)
-	{
-		this->_header += NEW_LINE;
-		this->_header += "Content-Location: ";
-		this->_header += this->_request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);
-	}
-	else if (this->_status.first >= 300 && this->_status.first <= 308)
+	if (this->_status.first >= 300 && this->_status.first <= 400)
 	{
 		this->_header += NEW_LINE;
 		this->_header += "Location: ";
-		this->_header += this->_location->redirection.second;
+		this->_header += this->_request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);
 	}
 }
 

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 18:18:18 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 23:44:01 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ Cgi::Cgi(Request *request) : _request(request), _contentLength(0)
 		_program = loc->cgi.second;
 		this->setEnv();
 	}
+	this->_env = NULL;
 }
 
 Cgi::~Cgi() {
