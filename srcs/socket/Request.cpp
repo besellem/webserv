@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 17:49:44 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 19:01:08 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,6 +164,7 @@ void	Request::setHeaderData(const std::string& line_)
 		std::make_pair("Connection",				" " ),
 		std::make_pair("Upgrade-Insecure-Requests",	""  ),
 		std::make_pair("Accept",					"," ),
+		std::make_pair("Transfer-Encoding",         ""  ),
 		std::make_pair("User-Agent",				""  ),
 		std::make_pair("Referer",					" " ),
 		std::make_pair("Accept-Language",			" " )
