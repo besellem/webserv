@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 16:09:26 by besellem          #+#    #+#             */
-/*   Updated: 2021/10/31 17:14:08 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 17:12:47 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ _BEGIN_NS_WEBSERV
 HttpHeader::HttpHeader(void) :
 	data(),
 	request_method(),
-	path(),
+	uri(),
 	queryString("")
 { this->resetBuffer(); }
 
@@ -34,7 +34,7 @@ HttpHeader&			HttpHeader::operator=(const HttpHeader &x)
 		return *this;
 	data = x.data;
 	request_method = x.request_method;
-	path = x.path;
+	uri = x.uri;
 	queryString = x.queryString;
 	memcpy(buf, x.buf, sizeof(buf));
 	return *this;

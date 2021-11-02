@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 15:36:50 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/02 17:49:44 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,21 +36,44 @@ const t_location*	Request::getLocation(void) const
 	std::string							parent_dir;
 	location_type::const_iterator		it;
 	const location_type					loc = this->_server->locations();
+	size_t								pos;
 	
-	parent_dir = ft_strcut(this->_header.path, '?');
+	parent_dir = ft_strcut(this->_header.uri, '?');
+	
+	// get the parent directory of the file
 	if (!ft_isDirectory(ROOT_PATH + parent_dir))
 	{
-		size_t	pos = parent_dir.find_last_of('/');
+		pos = parent_dir.find_last_of('/');
 		if (pos == std::string::npos)
 			parent_dir = "/";
 		else
-			parent_dir = parent_dir.substr(0, pos);
+			parent_dir = parent_dir.substr(0, pos + 1);
 	}
-	for (it = loc.begin(); it != loc.end(); ++it)
+	
+	// found a match with a location block
+	while (1)
 	{
-		if (parent_dir == (*it)->path)
-			return *it;
+		// looking for an exact match with parent_dir
+		for (it = loc.begin(); it != loc.end(); ++it)
+		{
+			if (parent_dir == (*it)->path)
+				return *it;
+		}
+		
+		// no match found
+		if (parent_dir == "/")
+			return NULL;
+			
+		// get the longest prefixes
+		if (parent_dir.find_last_of('/') == 0)
+			parent_dir = "/";
+		else
+		{
+			pos = parent_dir.substr(0, parent_dir.size() - 1).find_last_of('/');
+			parent_dir = parent_dir.substr(0, pos + 1);
+		}
 	}
+	
 	return NULL;
 }
 
@@ -77,13 +100,24 @@ void	Request::setConstructPath(void)
 	// tmp variables
 	std::string							index_tmp;
 	Server::tokens_type::const_iterator	idx; // iterator on indexes
+	std::string							uriPath = ft_strcut(this->_header.uri, '?');
 	
 	ret = ROOT_PATH;
 	if (loc)
 	{
-		std::cout << "location root   : [" S_GREEN << loc->root << S_NONE "]" << std::endl;
-		ret += loc->root;
-		ret += this->_header.path.substr(loc->path.size(), this->_header.path.size());
+		std::cout << "location        : [" S_GREEN << loc->path << S_NONE "]" << std::endl;
+		// add the root to the path
+		if (!loc->root.empty())
+		{
+			std::cout << "location root   : [" S_GREEN << loc->root << S_NONE "]" << std::endl;
+			ret += loc->root;
+			if (ret[ret.size() - 1] == '/')
+				ret += uriPath.substr(uriPath.find_last_of('/') + 1, uriPath.size());
+			else
+				ret += uriPath.substr(uriPath.find_last_of('/'), uriPath.size());
+		}
+		else
+			ret += uriPath;
 
 		// use default index
 		if (ft_isDirectory(ret))
@@ -105,10 +139,10 @@ void	Request::setConstructPath(void)
 	else
 	{
 		std::cout << "location root   : [" S_RED << "unknow" << S_NONE "]" << std::endl;
-		ret += this->_header.path;
+		ret += uriPath;
 	}
 	
-	this->_constructPath = ft_strcut(ret, '?');
+	this->_constructPath = ret;
 }
 
 void	Request::setHeaderData(const std::string& line_)
