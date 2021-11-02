@@ -115,7 +115,10 @@ void	Server::setRedirection(t_location  *loc, const tokens_type &tok) {
 void	Server::setRoot(t_location  *loc, const tokens_type &tok) {
     if (tok.size() != 2)
         throw WebServer::ParsingError();
-    loc->root = tok[1];
+    if (tok[1][0] != '/')
+        loc->root = loc->path + tok[1];
+    else
+        loc->root = tok[1];
 }
 
 void	Server::setMethods(t_location  *loc, const tokens_type &tok)
