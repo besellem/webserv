@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 23:11:33 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 20:04:19 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,23 @@
 
 _BEGIN_NS_WEBSERV
 
+enum e_uploadKey
+{
+	FN = 0,
+	DQ,
+	CT,
+	RN,
+	DRN,
+	LAST_BOUNDARY
+};
+
 class Cgi;
 
 class Request
 {
 	public:
+		typedef std::map<std::string, std::string> info_type;
+	
 		Request(const Server *);
 		~Request();
 
@@ -41,16 +53,25 @@ class Request
 		const Server*		getServer(void) const;
 		const t_location*	getLocation(void) const;
 		
+		
 		void				setConstructPath(void);
 		void				setConstructPath(const std::string &);
 		void				setContent(void);
 		void				setHeaderData(const std::string &);
+
+		const info_type&	getFileInfo(void) const;
+		bool				checkIsUploadCase(void);
+		const std::string&	getBoundary(void) const;
+		bool				parseFile(void);
 
 	private:
 		HttpHeader			_header;
 		std::string			_constructPath;
 		std::string			_content;
 		const Server		*_server;
+	
+		info_type			_fileInfo;
+		std::string			_boundary;
 };
 
 

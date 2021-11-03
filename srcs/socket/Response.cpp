@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 18:25:48 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/03 20:24:44 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,18 +45,18 @@ void    Response::setStatus(const status_type& status) {
 }
 
 void    Response::setStatus(int code) {
-	int 		codeTab[] = {200, 202, 300, 301, 302, 303, 304, 308, 403, 404, 405, 500};
+	int 		codeTab[] = {200, 202, 300, 301, 302, 303, 304, 308, 403, 404, 405, 500, 204};
 	std::string actionTab[] = {"OK", "Accepted", "Multiple Choice", "Moved Permanently",
 			"Found", "See Other", "Not Modified", "Temporary Redirect",
-			"Forbidden", "Not Found", "Method Not Allowed", "Internal Server Error"};
+			"Forbidden", "Not Found", "Method Not Allowed", "Internal Server Error", "No Content"};
 	int			i = 0;
 
 	if (this->_location && !this->_location->redirection.second.empty())
 		code = is_valid_path(ROOT_PATH + this->_location->redirection.second) ?
 			this->_location->redirection.first : 404;
-	while (i < 12 && codeTab[i] != code)
+	while (i < 13 && codeTab[i] != code)
 		++i;
-	this->_status = std::make_pair<int, std::string>(codeTab[i], actionTab[i]);
+	this->_status = std::make_pair(codeTab[i], actionTab[i]);
 }
 
 void    Response::setHeader(void)
@@ -119,11 +119,19 @@ void    Response::setContent(const std::string &file_content)
 			EXCEPT_WARNING(e);
 		}
 	}
+
 	// Valid case
-	// if (this->_request->getHeader().request_method == "POST" && this->_status.first == 200)
-	// 	post(); // set status if error
-	// else if (this->_status.first < 400)
-	if (this->_status.first < 400)
+	if (this->_request->getHeader().request_method == "POST" && this->_status.first == 200) {
+		if (uploadFile() == true) {
+			std::cout << "ok" << std::endl;
+		}
+		else {
+			this->setStatus(204);
+		}
+		// post(); // set status if error
+	}
+	else if (this->_status.first < 400)
+	// if (this->_status.first < 400)
 	{
 		// Autoindex
 		if (ft_isDirectory(this->_request->getConstructPath()))
@@ -287,5 +295,24 @@ const std::string	Response::generateAutoindexPage(std::string const &path) const
 	return content;
 }
 
+bool				Response::uploadFile(void) const {
+	if (_request->parseFile() == true) {
+		std::map<std::string, std::string> fileInfo = _request->getFileInfo();
+		std::string const absolutePath = ROOT_PATH"/uploads/";
+
+		for (info_type::iterator it = fileInfo.begin(); it != fileInfo.end(); it++) {
+			std::string toUploadPath = absolutePath + it->first;
+			std::ofstream ofs(toUploadPath);
+			if (!ofs.is_open()) {
+				std::cerr << "open [" << it->first << "] failed !" << std::endl;
+				return false;
+			}
+
+			ofs << it->second;
+		}
+		return true;
+	}
+	return false;
+}
 
 _END_NS_WEBSERV
