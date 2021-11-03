@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 14:30:13 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 19:22:22 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,11 +23,11 @@ Request::~Request() {}
 ** Getters
 */
 
-HttpHeader&			Request::getHeader(void)              { return this->_header ; }
-const std::string&	Request::getContent(void)       const { return this->_content; }
-const std::string&	Request::getConstructPath(void) const { return this->_constructPath; }
-size_t				Request::getContentLength(void) const { return this->_content.size(); }
-const Server*		Request::getServer(void)        const { return this->_server ; }
+HttpHeader&									Request::getHeader(void)              { return this->_header ; }
+const std::string&							Request::getContent(void)       const { return this->_content; }
+const std::string&							Request::getConstructPath(void) const { return this->_constructPath; }
+size_t										Request::getContentLength(void) const { return this->_content.size(); }
+const Server*								Request::getServer(void)        const { return this->_server; }
 
 /* Find the location of the request */
 const t_location*	Request::getLocation(void) const
@@ -168,7 +168,6 @@ void	Request::setHeaderData(const std::string& line_)
 	static std::string	separator = ": ";
 	const size_t		pos = line_.find(separator);
 	pair_type			mapped;
-
 	
 	/* if we don't find a ": " in a line of the header */
 	if (pos == std::string::npos)
@@ -188,6 +187,83 @@ void	Request::setHeaderData(const std::string& line_)
 			this->_header.data[mapped.first] = split_string(mapped.second, opt_it->second);
 		}
 	}
+}
+
+const std::pair<std::string, std::string>&	Request::getFileInfo(void)		const { return this->_fileInfo; }
+const std::string&	Request::getBoundary(void) const { return this->_boundary; }
+
+bool	Request::checkIsUploadCase(void) {
+	std::string	toFind[] = {"POST", "multipart/form-data", "boundary", "filename", ""};
+	std::string	headerBuf(_header.buf);
+	size_t		pos;
+
+	for (int i = 0; toFind[i].empty() == false; i++) {
+		if ((pos = headerBuf.find(toFind[i])) == std::string::npos)
+			return false;
+	}
+
+	std::string boundary = "boundary=";
+	_boundary = headerBuf;
+	if ((pos = _boundary.find(boundary)) != std::string::npos) {
+		_boundary.erase(0, pos + boundary.length());
+		if ((pos = _boundary.find("\r\n")) != std::string::npos) {
+			_boundary.erase(pos);
+			_boundary.insert(0, "--");
+		}
+		else
+			return false;
+	}
+	else
+		return false;
+	return true;
+}
+
+bool	Request::parseFile(void) {
+	if (this->checkIsUploadCase() == false) {
+		LOG;
+		std::cout << "is not upload case!" << std::endl;
+		return false;
+	}
+	else {
+		LOG;
+		std::cout << this->getBoundary() << std::endl;
+		LOG;
+	}
+
+	std::string toParse = this->getContent();
+
+	std::string key[] = {"filename=\"", "\"", "Content-Type", "\r\n", "\r\n\r\n", this->getBoundary() + "--\r\n"};
+
+	std::string getName;
+	std::string getContent;
+
+	size_t begin;
+	size_t end;
+
+	// get file name
+	if ((begin = toParse.find(key[FN])) != std::string::npos)
+		toParse.erase(0, begin + key[FN].length());
+	if ((end = toParse.find(key[DQ])) != std::string::npos)
+		getName = toParse.substr(0, end);
+
+	std::cout << "Name: [" << getName << "]" << std::endl;
+
+	// get file content;
+	if ((begin = toParse.find(key[CT])) != std::string::npos)
+		toParse.erase(0, begin + key[CT].length());
+	if ((begin = toParse.find(key[DRN])) != std::string::npos)
+		toParse.erase(0, begin + key[DRN].length());
+	if ((end = toParse.find(key[RN])) != std::string::npos)
+		getContent = toParse.substr(0, end);
+
+	std::cout << "Content: [" << getContent << "]" << std::endl;
+
+	toParse.erase(0, getContent.length() + key[RN].length());
+	if (toParse == key[LAST_BOUNDARY])
+		std::cout << "is last" << std::endl;
+
+	std::cout << S_RED "\n>>>>>>>>>>>>>>toparse<<<<<<<<<<<<<\n" S_NONE << toParse << S_RED "\n>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<\n" S_NONE << std::endl;
+	return false;
 }
 
 _END_NS_WEBSERV

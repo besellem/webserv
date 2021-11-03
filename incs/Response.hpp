@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 23:27:41 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 16:32:34 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class Response
 		const status_type&  getStatus(void) const;
 		
 		const std::string   generateAutoindexPage(std::string const &) const;
+		bool				uploadFile(void) const;
 	
 		void		        setContent(const std::string &);
 		void		        setHeader(void);
