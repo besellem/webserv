@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 23:01:14 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 23:35:14 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,13 +120,14 @@ void    Response::setContent(const std::string &file_content)
 		}
 	}
 
-	// UPLOAD case
-	if (this->_request->getHeader().request_method == "POST" && this->_status.first == 200)
+	// Upload case
+	if (this->_request->getHeader().request_method == "POST" && this->_status.first == 200
+		&& this->_location && !this->_location->uploadStore.empty())
 	{
 		if (uploadFile() == true)
 			std::cout << "ok" << std::endl;
 		else
-			this->setStatus(204);
+			this->setStatus(403);
 	}
 	// Default case
 	else if (this->_status.first < 400)
@@ -296,7 +297,7 @@ const std::string	Response::generateAutoindexPage(std::string const &path) const
 bool				Response::uploadFile(void) const {
 	if (_request->parseFile() == true) {
 		std::map<std::string, std::string> fileInfo = _request->getFileInfo();
-		std::string const absolutePath = ROOT_PATH"/uploads/";
+		std::string const absolutePath = ROOT_PATH + this->_location->uploadStore;
 		for (info_type::iterator it = fileInfo.begin(); it != fileInfo.end(); it++) {
 			if (it->first.empty() == true)
 				continue ;

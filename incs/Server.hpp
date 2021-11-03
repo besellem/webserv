@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 18:04:54 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 23:14:08 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ typedef struct s_location
 	std::vector<std::string>	index;			// default file to answer if the request is a directory
 	bool						autoindex;		// turn on or off directory listing
 	cgi_type					cgi;			// execute the cgi program
+	std::string					uploadStore;	// execute the cgi program
 }				t_location;
 
 class Server
@@ -67,6 +68,7 @@ class Server
 		void	setIndex(t_location  *, const tokens_type &);
 		void	setAutoIndex(t_location  *, const tokens_type &);
 		void	setCgi(t_location  *, const tokens_type &);
+		void	setUploadStore(t_location  *, const tokens_type &);
 		void	newLocationDirective(const tokens_type &);
 		
 		void	newLocation(const std::vector<std::string> &);

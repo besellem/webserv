@@ -153,6 +153,14 @@ void	Server::setMethods(t_location  *loc, const tokens_type &tok)
     }
 }
 
+void	Server::setUploadStore(t_location  *loc, const tokens_type &tok) {
+    if (tok.size() != 2 || !ft_isDirectory(ROOT_PATH + tok[1]))
+		throw WebServer::ParsingError();
+    loc->uploadStore = tok[1];
+    if (tok[1].back() != '/')
+        loc->uploadStore += "/";
+}
+
 /*
 **  Modifiers
 */
@@ -174,15 +182,15 @@ void	Server::newLocation(const tokens_type &tok) {
 void	Server::newLocationDirective(const tokens_type &tok)
 {
     std::string directives[] = {"allow", "return", "root",
-            "index", "autoindex", "cgi_pass"};
+            "index", "autoindex", "cgi_pass", "upload_store"};
 	static method_function1   method_ptr[] = {&Server::setMethods,
 		    &Server::setRedirection, &Server::setRoot, &Server::setIndex,
-            &Server::setAutoIndex, &Server::setCgi,};
+            &Server::setAutoIndex, &Server::setCgi, &Server::setUploadStore};
     t_location* loc = this->_locations.back();
 
     if (tok.size() < 2)
         throw WebServer::ParsingError();
-	for (size_t i = 0; i < 6; i++)
+	for (size_t i = 0; i < 7; i++)
 	{
 		if (tok[0] == directives[i])
 		{
@@ -242,6 +250,8 @@ std::ostream& operator<<(std::ostream& os, const t_location& loc)
             os << "\t\t" << "return " << loc.redirection.first << " " << loc.redirection.second << std::endl;
     if (!loc.root.empty())
             os << "\t\t" << "root " << loc.root << std::endl;
+    if (!loc.uploadStore.empty())
+            os << "\t\t" << "upload_store " << loc.uploadStore << std::endl;
     os << "\t}" << std::endl;
     return os;
 }
