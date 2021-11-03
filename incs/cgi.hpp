@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 00:36:05 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/01 17:08:50 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 17:40:26 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,8 @@ class Cgi
 		const std::string&	getProgram() const;
 		char**				getEnv() const;
 		const std::string	getEnv(const std::string &);
-		
+		std::string			getHeaderData(const std::string &);
+	
 		std::string			execute(void);
 		void				clear();
 		
@@ -40,6 +41,7 @@ class Cgi
 		Cgi& 			operator=(const Cgi &);
 		std::string		getOuput(int);
 		void			setContentLength(const std::string &);
+		int				setStatusCode();
 		void			setEnv();
 		
 	public:
@@ -55,6 +57,7 @@ class Cgi
 		std::string			_program;
 		std::string			_extension;
 		Request*			_request;
+		std::string			_header;
 		size_t				_contentLength;
 		
 };

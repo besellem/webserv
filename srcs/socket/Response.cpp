@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 15:35:02 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 17:46:21 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,13 +69,16 @@ void    Response::setHeader(void)
 	{
 		this->_header += NEW_LINE;
 		this->_header += "Location: ";
-		this->_header += this->_location->redirection.second;
+		if (this->_cgi && !this->_cgi->getHeaderData("Location").empty())
+			this->_header += this->_cgi->getHeaderData("Location");
+		else
+			this->_header += this->_location->redirection.second;
 	}
 }
 
 bool	Response::isMethodAllowed(const std::string &method)
 {
-	if (method == "GET")
+if (method == "GET")
 		return 1;
 
 	if (this->_location)
@@ -101,6 +104,9 @@ void    Response::setContent(const std::string &file_content)
 		try
 		{
 			this->_content = this->_cgi->execute();
+			std::string status = this->_cgi->getHeaderData("Status").c_str();
+			if (!status.empty())
+				this->setStatus(atoi(status.c_str()));
 			this->_contentLength = this->_cgi->getContentLength();
 			return ;
 		}

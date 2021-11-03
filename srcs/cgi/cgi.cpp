@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 01:21:04 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 17:54:46 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ const char*	Cgi::CgiError::what() const throw() {
 	return "cgi failed";
 }
 
-Cgi::Cgi(Request *request) : _request(request), _contentLength(0)
+Cgi::Cgi(Request *request) : _request(request), _header(""), _contentLength(0)
 {
 	const t_location	*loc = request->getLocation();
 
@@ -47,6 +47,17 @@ const size_t&		Cgi::getContentLength() const { return this->_contentLength; }
 const std::string&	Cgi::getExtension()     const { return this->_extension; }
 const std::string&	Cgi::getProgram()       const { return this->_program; }
 char**				Cgi::getEnv()           const { return this->_env; }
+
+std::string	Cgi::getHeaderData(const std::string &data) {
+	std::vector<std::string> lines = split_string(this->_header, NEW_LINE);
+	
+	for (size_t i = 0 ; i < lines.size(); i++)
+	{
+		if (ft_strcut(lines[i], ':') == data)
+			return lines[i].substr(data.size() + 2);
+	}
+	return std::string();
+}
 
 /* Returns the value of a cgi environment variables */
 const std::string	Cgi::getEnv(const std::string &varName)
@@ -230,6 +241,11 @@ std::string Cgi::execute(void)
 		std::cout << "......................................" <<std::endl;
 	}
 	// ##################################################################
+	
+	this->_header = content.substr(0, content.find("\r\n\r\n"));
+	
+	// remove cgi header
+	content = content.substr(content.find("\r\n\r\n"));
 	
 	return content;
 }
