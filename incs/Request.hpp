@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 19:18:23 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/03 19:40:36 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ class Request
 		void				setContent(void);
 		void				setHeaderData(const std::string &);
 
-		const std::pair<std::string, std::string>&	getFileInfo(void) const;
+		const std::map<std::string, std::string>&	getFileInfo(void) const;
 		bool				checkIsUploadCase(void);
 		const std::string&	getBoundary(void) const;
 		bool				parseFile(void);
@@ -68,7 +68,7 @@ class Request
 		std::string							_content;
 		const Server						*_server;
 
-		std::pair<std::string, std::string>	_fileInfo;
+		std::map<std::string, std::string>	_fileInfo;
 		std::string							_boundary;
 };
 

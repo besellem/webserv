@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 19:22:22 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/03 19:49:32 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,7 +189,7 @@ void	Request::setHeaderData(const std::string& line_)
 	}
 }
 
-const std::pair<std::string, std::string>&	Request::getFileInfo(void)		const { return this->_fileInfo; }
+const std::map<std::string, std::string>&	Request::getFileInfo(void)		const { return this->_fileInfo; }
 const std::string&	Request::getBoundary(void) const { return this->_boundary; }
 
 bool	Request::checkIsUploadCase(void) {
@@ -220,49 +220,52 @@ bool	Request::checkIsUploadCase(void) {
 
 bool	Request::parseFile(void) {
 	if (this->checkIsUploadCase() == false) {
-		LOG;
-		std::cout << "is not upload case!" << std::endl;
 		return false;
-	}
-	else {
-		LOG;
-		std::cout << this->getBoundary() << std::endl;
-		LOG;
 	}
 
 	std::string toParse = this->getContent();
 
 	std::string key[] = {"filename=\"", "\"", "Content-Type", "\r\n", "\r\n\r\n", this->getBoundary() + "--\r\n"};
 
-	std::string getName;
-	std::string getContent;
+	std::string fileName;
+	std::string fileContent;
 
 	size_t begin;
 	size_t end;
 
-	// get file name
-	if ((begin = toParse.find(key[FN])) != std::string::npos)
-		toParse.erase(0, begin + key[FN].length());
-	if ((end = toParse.find(key[DQ])) != std::string::npos)
-		getName = toParse.substr(0, end);
+	while (true) {
+		// get file name
+		if ((begin = toParse.find(key[FN])) != std::string::npos)
+			toParse.erase(0, begin + key[FN].length());
+		if ((end = toParse.find(key[DQ])) != std::string::npos)
+			fileName = toParse.substr(0, end);
 
-	std::cout << "Name: [" << getName << "]" << std::endl;
+		// get file content;
+		if ((begin = toParse.find(key[CT])) != std::string::npos)
+			toParse.erase(0, begin + key[CT].length());
+		if ((begin = toParse.find(key[DRN])) != std::string::npos)
+			toParse.erase(0, begin + key[DRN].length());
+		if ((end = toParse.find(key[RN])) != std::string::npos)
+			fileContent = toParse.substr(0, end);
 
-	// get file content;
-	if ((begin = toParse.find(key[CT])) != std::string::npos)
-		toParse.erase(0, begin + key[CT].length());
-	if ((begin = toParse.find(key[DRN])) != std::string::npos)
-		toParse.erase(0, begin + key[DRN].length());
-	if ((end = toParse.find(key[RN])) != std::string::npos)
-		getContent = toParse.substr(0, end);
+		_fileInfo.insert(std::make_pair(fileName, fileContent));
 
-	std::cout << "Content: [" << getContent << "]" << std::endl;
-
-	toParse.erase(0, getContent.length() + key[RN].length());
-	if (toParse == key[LAST_BOUNDARY])
-		std::cout << "is last" << std::endl;
+		toParse.erase(0, fileContent.length() + key[RN].length());
+		if (toParse == key[LAST_BOUNDARY]) {
+			LOG;
+			std::cout << "is last" << std::endl;
+			LOG;
+			break ;
+		}
+		else
+			toParse.erase(0, this->getBoundary().length() + key[RN].length());
+	}
 
 	std::cout << S_RED "\n>>>>>>>>>>>>>>toparse<<<<<<<<<<<<<\n" S_NONE << toParse << S_RED "\n>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<\n" S_NONE << std::endl;
+
+	for (std::map<std::string, std::string>::iterator it = _fileInfo.begin(); it != _fileInfo.end(); it++)
+		std::cout << "[" << it->first << "]: [" << it->second << "]" << std::endl;
+
 	return false;
 }
 
