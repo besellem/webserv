@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 23:48:07 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 01:10:30 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 _BEGIN_NS_WEBSERV
 
 Response::Response(Request *req) : _request(req), _location(req->getLocation()) {
-    if (_location->cgi.first.empty())
+    if (_location && !_location->cgi.first.empty())
         _cgi = new Cgi(req);
 		
     else
@@ -45,16 +45,15 @@ void    Response::setStatus(const status_type& status) {
 }
 
 void    Response::setStatus(int code) {
-	int 		codeTab[] = {200, 202, 300, 301, 302, 303, 304, 307, 308, 403, 404, 405, 500};
+	int 		codeTab[] = {200, 202, 300, 301, 302, 303, 304, 308, 403, 404, 405, 500};
 	std::string actionTab[] = {"OK", "Accepted", "Multiple Choice", "Moved Permanently",
-			"Found", "See Other", "Not Modified", "Temporary Redirect", "Temporary Redirect",
+			"Found", "See Other", "Not Modified", "Temporary Redirect",
 			"Forbidden", "Not Found", "Method Not Allowed", "Internal Server Error"};
 	int			i = 0;
 
 	while (i < 13 && codeTab[i] != code)
 		++i;
-	std::cout << "code : " << code << " redirection : " << _location->redirection.first << std::endl;
-	if (code == 404 && this->_location->redirection.first == 301)
+	if (code == 404 && this->_location && this->_location->redirection.first == 301)
 	{
 		this->_request->setConstructPath(ROOT_PATH + this->_location->redirection.second);
 		i = 3;

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 23:12:18 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 01:07:00 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ void	Request::setContent(void) {
 	if (pos == std::string::npos)
 		this->_content = "";
 	else
-		this->_content = buf.substr(pos + 4, std::string::npos);
+		this->_content = buf.substr(pos + 4);
 }
 
 void	Request::setConstructPath(const std::string &path) {
@@ -116,9 +116,9 @@ void	Request::setConstructPath(void)
 			std::cout << "location root   : [" S_GREEN << loc->root << S_NONE "]" << std::endl;
 			ret += loc->root;
 			if (ret[ret.size() - 1] == '/')
-				ret += uriPath.substr(uriPath.find_last_of('/') + 1, uriPath.size());
+				ret += uriPath.substr(uriPath.find_last_of('/') + 1);
 			else
-				ret += uriPath.substr(uriPath.find_last_of('/'), uriPath.size());
+				ret += uriPath.substr(uriPath.find_last_of('/'));
 		}
 		else
 			ret += uriPath;
