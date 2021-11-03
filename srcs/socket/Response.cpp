@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 04:40:04 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 14:42:17 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,8 @@ void    Response::setStatus(int code) {
 		++i;
 	if (code == 404 && this->_location && this->_location->redirection.first == 301)
 		i = is_valid_path(ROOT_PATH + this->_location->redirection.second) ? 3 : 11;
+	else if (this->_location && this->_location->redirection.first == 308)
+		i = 7;
 	this->_status = std::make_pair<int, std::string>(codeTab[i], actionTab[i]);
 }
 
@@ -128,7 +130,7 @@ void    Response::setContent(const std::string &file_content)
 	}
 
 	// Error case
-	if (this->_status.first >= 400)
+	if (this->_status.first >= 300)
 		this->setErrorContent();
 }
 
