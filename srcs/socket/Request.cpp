@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 20:24:42 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/03 22:52:59 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,7 +215,7 @@ const std::string&	Request::getBoundary(void) const { return this->_boundary; }
 
 bool	Request::checkIsUploadCase(void) {
 	std::string	toFind[] = {"POST", "multipart/form-data", "boundary", "filename", ""};
-	std::string	headerBuf(_header.buf);
+	std::string	headerBuf(_header.content);
 	size_t		pos;
 
 	for (int i = 0; toFind[i].empty() == false; i++) {
@@ -269,8 +269,8 @@ bool	Request::parseFile(void) {
 			fileContent = toParse.substr(0, end);
 
 		// add to list of file info
-		_fileInfo.insert(std::make_pair(fileName, fileContent));
-
+		if(!fileName.empty())
+			_fileInfo.insert(std::make_pair(fileName, fileContent));
 		toParse.erase(0, fileContent.length() + key[RN].length());
 		if (toParse == key[LAST_BOUNDARY])
 			break ;
