@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 17:46:21 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 18:25:48 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,24 +78,27 @@ void    Response::setHeader(void)
 
 bool	Response::isMethodAllowed(const std::string &method)
 {
-if (method == "GET")
-		return 1;
+	// GET is always allowed
+	if (method == "GET")
+		return true;
 
 	if (this->_location)
 	{
 		for (size_t i = 0; i < this->_location->methods.size(); i++)
+		{
 			if (method == this->_location->methods[i])
-				return 1;
+				return true;
+		}
 	}
 	this->setStatus(405);
-	return 0;
+	return false;
 }
 
 void    Response::setContent(const std::string &file_content)
 {
-	this->isMethodAllowed(this->_request->getHeader().request_method);
-	
 	const t_location	*loc = this->_location;
+	
+	this->isMethodAllowed(this->_request->getHeader().request_method);
 	
 	// cgi case
 	if (this->_status.first == 200 && this->_cgi

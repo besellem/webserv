@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpHeader.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 16:09:26 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/02 17:12:47 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 18:58:55 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,9 @@ HttpHeader::HttpHeader(void) :
 	data(),
 	request_method(),
 	uri(),
-	queryString("")
+	queryString(""),
+	content(),
+	chunked(false)
 { this->resetBuffer(); }
 
 HttpHeader::HttpHeader(const HttpHeader &x)
@@ -36,6 +38,8 @@ HttpHeader&			HttpHeader::operator=(const HttpHeader &x)
 	request_method = x.request_method;
 	uri = x.uri;
 	queryString = x.queryString;
+	content = x.content;
+	chunked = x.chunked;
 	memcpy(buf, x.buf, sizeof(buf));
 	return *this;
 }

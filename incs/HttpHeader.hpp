@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpHeader.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 16:04:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/02 17:49:28 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 19:09:39 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ class HttpHeader
 		std::string		request_method;
 		std::string		uri;
 		std::string		queryString;
+		std::string		content; // complete request converted to string from `buf'
+		bool			chunked;
 		char			buf[BUFFER_SIZE];
 
 	friend class Socket;

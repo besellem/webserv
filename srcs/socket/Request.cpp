@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 17:59:38 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 20:03:02 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,17 +71,41 @@ const t_location*	Request::getLocation(void) const
 ** Setters
 */
 
-void	Request::setContent(void) {
-	std::string buf(this->_header.buf);
+void	Request::setContent(void)
+{
+	typedef	std::vector<std::string>                                vector_type;
+
+	std::string					buf(this->_header.content);
+	const std::string			delim(DELIMITER);
+	const size_t				pos = buf.find(delim);
 	
-	size_t pos = buf.find(DELIMITER);
+	vector_type					content__;
+	vector_type::const_iterator	it;
+	std::string					tmp_string = "";
+
 	if (pos == std::string::npos)
 		this->_content = "";
 	else
-		this->_content = buf.substr(pos + 4);
+	{
+		buf = buf.substr(pos + delim.length());
+		if (this->_header.chunked)
+		{
+			content__ = split_string(buf, NEW_LINE);
+			for (it = content__.begin() + 1; it != content__.end() - 1; it += 2)
+				tmp_string += *it;
+		}
+		else
+			tmp_string = buf;
+		
+		this->_content = tmp_string;
+	}
+	std::cout << S_GREEN "> CONTENT" S_NONE << std::endl;
+	std::cout << "[" << this->_content << "]" << std::endl;
+	std::cout << S_GREEN "< END CONTENT" S_NONE << std::endl;
 }
 
-void	Request::setConstructPath(const std::string &path) {
+void	Request::setConstructPath(const std::string &path)
+{
 	this->_constructPath = path;
 }
 
@@ -172,10 +196,7 @@ void	Request::setHeaderData(const std::string& line_)
 	
 	/* if we don't find a ": " in a line of the header */
 	if (pos == std::string::npos)
-	{
-		// throw HttpHeader::HttpHeaderParsingError();
 		return ;
-	}
 	
 	/* set the key (eg: "Host") and its value (eg: "localhost:8080") */
 	mapped = std::make_pair(line_.substr(0, pos), line_.substr(pos + separator.length()));

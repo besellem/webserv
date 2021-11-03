@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/02 17:49:53 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 19:46:35 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,14 +89,47 @@ void	Socket::readHttpRequest(Request *request, int socket_fd)
 {
 	int	ret;
 
-	request->getHeader().resetBuffer();
-	ret = recv(socket_fd, request->getHeader().buf, sizeof(request->getHeader().buf), 0);
-	if (ret == sizeof(request->getHeader().buf) || SYSCALL_ERR == ret)
-		LOG;
+	while (true)
+	{
+		request->getHeader().resetBuffer();
+		ret = recv(socket_fd, request->getHeader().buf, sizeof(request->getHeader().buf), 0);
+		if (SYSCALL_ERR == ret)
+		{
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+				break;
+			else
+				errorExit("read http request");
+		}
+		else if (0 == ret)
+		{
+			std::cout << "Client disconnected" << std::endl;
+			break;
+		}
+		else
+		{
+			// if (DEBUG)
+			// {
+			// 	std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
+			// 	write(STDOUT_FILENO, request->getHeader().buf, ret); // (?) may be chunked
+			// 	std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
+			// }
+			request->getHeader().buf[ret] = '\0';
+			request->getHeader().content += request->getHeader().buf;
+		}
+	}
+
+	// define if the request is chunked by searching for the "0/r/n/r/n" string
+	if (request->getHeader().content.find("0\r\n\r\n") != std::string::npos)
+	{
+		std::cout << S_GREEN "Chunked request found" S_NONE << std::endl;
+		request->getHeader().chunked = true;
+	}
+
 	if (DEBUG)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
-		write(STDOUT_FILENO, request->getHeader().buf, ret); // (?) may be chunked
+		std::cout << request->getHeader().content << std::endl;
+		// write(STDOUT_FILENO, request->getHeader().content.c_str(), request->getHeader().content.length());
 		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
 	}
 }
@@ -105,12 +138,10 @@ void	Socket::readHttpRequest(Request *request, int socket_fd)
 void	Socket::resolveHttpRequest(Request *request)
 {
 	/* the buffer is empty, therefore the header was also empty */
-	if (std::string(request->getHeader().buf).empty())
-	{
+	if (request->getHeader().content.empty())
 		return ;
-	}
-
-	vector_type				buffer = split_string(request->getHeader().buf, NEW_LINE);
+	
+	vector_type				buffer = split_string(request->getHeader().content, NEW_LINE);
 	vector_type::iterator	line = buffer.begin();
 
 	/*
@@ -132,8 +163,6 @@ void	Socket::resolveHttpRequest(Request *request)
 		std::cout << "Contructed Path : [" S_CYAN << request->getConstructPath() << S_NONE "]\n";
 	}
 
-	// std::cout << "buf: [" << buffer[buffer.size() - 1] << "]\n";
-
 	request->setContent();
 
 	// set query string
@@ -141,10 +170,36 @@ void	Socket::resolveHttpRequest(Request *request)
 	if (pos != std::string::npos)
 		request->getHeader().queryString = request->getHeader().uri.substr(pos + 1);
 
-	for ( ; line != buffer.end() - 1; ++line)
+	/* map each line of the header */
+	for ( ; line != buffer.end() && !(*line).empty(); ++line)
+	{
 		request->setHeaderData(*line);
-	
-	// std::cout << S_RED "path_constructed: " S_NONE << header.uri_constructed << std::endl;
+	}
+
+	/* there's some more info to parse */
+	// if (line != buffer.end() && (*line).empty())
+	// {
+	// 	++line; // first line is always empty
+		
+	// 	std::cout << S_RED "-> afterward" S_NONE << std::endl;
+
+	// 	if (request->getHeader().chunked)
+	// 	{
+	// 		for ( ; line != buffer.end(); ++line)
+	// 		{
+	// 			// std::cout << "[" << std::stoul(*line, NULL, 16) << "]" << std::endl;
+	// 			PRINT(*line);
+	// 		}
+	// 	}
+	// 	else
+	// 	{
+	// 		for ( ; line != buffer.end(); ++line)
+	// 		{
+	// 			PRINT(*line);
+	// 		}
+	// 	}
+	// 	std::cout << S_RED "-> end" S_NONE << std::endl;
+	// }
 }
 
 /* Construct the htttp response and send it to the server */
