@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 01:07:00 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 04:38:13 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,44 +33,34 @@ const Server*		Request::getServer(void)        const { return this->_server ; }
 const t_location*	Request::getLocation(void) const
 {
 	typedef std::vector<t_location *>	location_type;
-	std::string							parent_dir;
 	location_type::const_iterator		it;
 	const location_type					loc = this->_server->locations();
+	std::string							path;
 	size_t								pos;
 	
-	parent_dir = ft_strcut(this->_header.uri, '?');
-	
-	// get the parent directory of the file
-	if (!ft_isDirectory(ROOT_PATH + parent_dir))
-	{
-		pos = parent_dir.find_last_of('/');
-		if (pos == std::string::npos)
-			parent_dir = "/";
-		else
-			parent_dir = parent_dir.substr(0, pos + 1);
-	}
+	path = ft_strcut(this->_header.uri, '?');
 	
 	// found a match with a location block
 	while (1)
 	{
-		// looking for an exact match with parent_dir
+		// looking for an exact match with path
 		for (it = loc.begin(); it != loc.end(); ++it)
 		{
-			if (parent_dir == (*it)->path)
+			if (path == (*it)->path)
 				return *it;
 		}
 		
 		// no match found
-		if (parent_dir == "/")
+		if (path == "/")
 			return NULL;
 			
 		// get the longest prefixes
-		if (parent_dir.find_last_of('/') == 0)
-			parent_dir = "/";
+		if (path.find_last_of('/') == 0)
+			path = "/";
 		else
 		{
-			pos = parent_dir.substr(0, parent_dir.size() - 1).find_last_of('/');
-			parent_dir = parent_dir.substr(0, pos + 1);
+			pos = path.substr(0, path.size() - 1).find_last_of('/');
+			path = path.substr(0, pos + 1);
 		}
 	}
 	

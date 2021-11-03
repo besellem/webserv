@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 01:10:30 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 04:27:42 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,12 +51,15 @@ void    Response::setStatus(int code) {
 			"Forbidden", "Not Found", "Method Not Allowed", "Internal Server Error"};
 	int			i = 0;
 
-	while (i < 13 && codeTab[i] != code)
+	while (i < 12 && codeTab[i] != code)
 		++i;
 	if (code == 404 && this->_location && this->_location->redirection.first == 301)
 	{
-		this->_request->setConstructPath(ROOT_PATH + this->_location->redirection.second);
 		i = 3;
+		if (!is_valid_path(ROOT_PATH + this->_location->redirection.second))
+			i = 11;
+		// 	this->_request->setConstructPath(ROOT_PATH + this->_location->redirection.second);
+		// else
 	}
 	this->_status = std::make_pair<int, std::string>(codeTab[i], actionTab[i]);
 }
@@ -71,7 +74,7 @@ void    Response::setHeader(void)
 	{
 		this->_header += NEW_LINE;
 		this->_header += "Location: ";
-		this->_header += this->_request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);
+		this->_header += this->_location->redirection.second;
 	}
 }
 
