@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 14:42:17 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 15:31:00 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ void    Response::setStatus(int code) {
 
 	while (i < 12 && codeTab[i] != code)
 		++i;
-	if (code == 404 && this->_location && this->_location->redirection.first == 301)
+	if (this->_location->redirection.second)
 		i = is_valid_path(ROOT_PATH + this->_location->redirection.second) ? 3 : 11;
 	else if (this->_location && this->_location->redirection.first == 308)
 		i = 7;
@@ -111,8 +111,10 @@ void    Response::setContent(const std::string &file_content)
 			EXCEPT_WARNING(e);
 		}
 	}
-	
 	// Valid case
+	// if (this->_request->getHeader().request_method == "POST" && this->_status.first == 200)
+	// 	post(); // set status if error
+	// else if (this->_status.first < 400)
 	if (this->_status.first < 400)
 	{
 		// Autoindex
