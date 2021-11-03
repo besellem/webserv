@@ -6,7 +6,11 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2021/11/03 20:24:44 by kaye             ###   ########.fr       */
+=======
+/*   Updated: 2021/11/03 20:29:26 by kaye             ###   ########.fr       */
+>>>>>>> kaye
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -301,6 +305,9 @@ bool				Response::uploadFile(void) const {
 		std::string const absolutePath = ROOT_PATH"/uploads/";
 
 		for (info_type::iterator it = fileInfo.begin(); it != fileInfo.end(); it++) {
+			if (it->first.empty() == true)
+				continue ;
+
 			std::string toUploadPath = absolutePath + it->first;
 			std::ofstream ofs(toUploadPath);
 			if (!ofs.is_open()) {
