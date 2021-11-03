@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 14:42:17 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 15:35:02 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,12 +51,11 @@ void    Response::setStatus(int code) {
 			"Forbidden", "Not Found", "Method Not Allowed", "Internal Server Error"};
 	int			i = 0;
 
+	if (this->_location && !this->_location->redirection.second.empty())
+		code = is_valid_path(ROOT_PATH + this->_location->redirection.second) ?
+			this->_location->redirection.first : 404;
 	while (i < 12 && codeTab[i] != code)
 		++i;
-	if (code == 404 && this->_location && this->_location->redirection.first == 301)
-		i = is_valid_path(ROOT_PATH + this->_location->redirection.second) ? 3 : 11;
-	else if (this->_location && this->_location->redirection.first == 308)
-		i = 7;
 	this->_status = std::make_pair<int, std::string>(codeTab[i], actionTab[i]);
 }
 
@@ -111,8 +110,10 @@ void    Response::setContent(const std::string &file_content)
 			EXCEPT_WARNING(e);
 		}
 	}
-	
 	// Valid case
+	// if (this->_request->getHeader().request_method == "POST" && this->_status.first == 200)
+	// 	post(); // set status if error
+	// else if (this->_status.first < 400)
 	if (this->_status.first < 400)
 	{
 		// Autoindex
