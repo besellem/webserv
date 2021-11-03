@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/10/27 14:26:06 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 18:04:54 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,16 @@ _BEGIN_NS_WEBSERV
 
 typedef struct s_location
 {
+	typedef	std::pair<int, std::string> 		redirection_type;
+	typedef	std::pair<std::string, std::string>	cgi_type;
+	
 	std::string					path;			// location
 	std::vector<std::string>	methods;		// list of accepted HTTP Methods for the root
-	std::string					redirection;	// HTTP redirection
+	redirection_type			redirection;	// HTTP redirection
 	std::string					root;			// directory or a file from where the file should be search
 	std::vector<std::string>	index;			// default file to answer if the request is a directory
 	bool						autoindex;		// turn on or off directory listing
-	std::vector<std::string>	cgi;			// a comprendre
+	cgi_type					cgi;			// execute the cgi program
 }				t_location;
 
 class Server

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 17:19:54 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/02 23:11:33 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ class Request
 		const t_location*	getLocation(void) const;
 		
 		void				setConstructPath(void);
+		void				setConstructPath(const std::string &);
 		void				setContent(void);
 		void				setHeaderData(const std::string &);
 

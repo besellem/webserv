@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/02 17:49:32 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 01:21:04 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,14 @@ Cgi::Cgi(Request *request) : _request(request), _contentLength(0)
 {
 	const t_location	*loc = request->getLocation();
 
-	if (loc && !loc->cgi.empty())
+	if (loc && !loc->cgi.first.empty())
 	{
-		_extension = loc->cgi[0];
-		_program = loc->cgi[1];
+		_extension = loc->cgi.first;
+		_program = loc->cgi.second;
 		this->setEnv();
 	}
+	else
+		this->_env = NULL;
 }
 
 Cgi::~Cgi() {
@@ -177,6 +179,7 @@ std::string Cgi::execute(void)
 	std::string	content;
 	std::string	method = this->getEnv("REQUEST_METHOD");
 
+	std::cout << "Executing cgi ..." << std::endl;
 	if (pipe(fdIn) == SYSCALL_ERR || pipe(fdOut) == SYSCALL_ERR)
 		throw CgiError();
 
@@ -222,7 +225,7 @@ std::string Cgi::execute(void)
 		std::cout << "request content :\n" << this->_request->getContent() << std::endl;
 		std::cout << "............ CGI ENVIRON ............." <<std::endl;
 		int i = -1;
-		while(this->_env[++i])
+		while(this->_env && this->_env[++i])
 			std::cout << this->_env[i] << std::endl;
 		std::cout << "......................................" <<std::endl;
 	}
