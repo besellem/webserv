@@ -3,14 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2021/11/03 20:24:44 by kaye             ###   ########.fr       */
-=======
-/*   Updated: 2021/11/03 20:29:26 by kaye             ###   ########.fr       */
->>>>>>> kaye
+/*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
+/*   Updated: 2021/11/03 23:01:14 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +14,7 @@
 
 _BEGIN_NS_WEBSERV
 
-Response::Response(Request *req) : _request(req), _location(req->getLocation()) {
+Response::Response(Request *req) : _contentLength(0), _request(req), _location(req->getLocation()) {
     if (_location && !_location->cgi.first.empty())
         _cgi = new Cgi(req);
 		
@@ -124,18 +120,16 @@ void    Response::setContent(const std::string &file_content)
 		}
 	}
 
-	// Valid case
-	if (this->_request->getHeader().request_method == "POST" && this->_status.first == 200) {
-		if (uploadFile() == true) {
+	// UPLOAD case
+	if (this->_request->getHeader().request_method == "POST" && this->_status.first == 200)
+	{
+		if (uploadFile() == true)
 			std::cout << "ok" << std::endl;
-		}
-		else {
+		else
 			this->setStatus(204);
-		}
-		// post(); // set status if error
 	}
+	// Default case
 	else if (this->_status.first < 400)
-	// if (this->_status.first < 400)
 	{
 		// Autoindex
 		if (ft_isDirectory(this->_request->getConstructPath()))
@@ -303,19 +297,18 @@ bool				Response::uploadFile(void) const {
 	if (_request->parseFile() == true) {
 		std::map<std::string, std::string> fileInfo = _request->getFileInfo();
 		std::string const absolutePath = ROOT_PATH"/uploads/";
-
 		for (info_type::iterator it = fileInfo.begin(); it != fileInfo.end(); it++) {
 			if (it->first.empty() == true)
 				continue ;
 
 			std::string toUploadPath = absolutePath + it->first;
-			std::ofstream ofs(toUploadPath);
+			std::ofstream ofs(toUploadPath, std::ofstream::out);
 			if (!ofs.is_open()) {
 				std::cerr << "open [" << it->first << "] failed !" << std::endl;
 				return false;
 			}
-
 			ofs << it->second;
+			ofs.close();
 		}
 		return true;
 	}
