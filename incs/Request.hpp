@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 19:40:36 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/03 20:04:19 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ class Cgi;
 class Request
 {
 	public:
+		typedef std::map<std::string, std::string> info_type;
+	
 		Request(const Server *);
 		~Request();
 
@@ -44,12 +46,12 @@ class Request
 		Request&			operator=(const Request &);
 
 	public:
-		HttpHeader&									getHeader(void);
-		const std::string&							getContent(void) const;
-		const std::string&							getConstructPath(void) const;
-		size_t										getContentLength(void) const;
-		const Server*								getServer(void) const;
-		const t_location*							getLocation(void) const;
+		HttpHeader&			getHeader(void);
+		const std::string&	getContent(void) const;
+		const std::string&	getConstructPath(void) const;
+		size_t				getContentLength(void) const;
+		const Server*		getServer(void) const;
+		const t_location*	getLocation(void) const;
 		
 		
 		void				setConstructPath(void);
@@ -57,19 +59,19 @@ class Request
 		void				setContent(void);
 		void				setHeaderData(const std::string &);
 
-		const std::map<std::string, std::string>&	getFileInfo(void) const;
+		const info_type&	getFileInfo(void) const;
 		bool				checkIsUploadCase(void);
 		const std::string&	getBoundary(void) const;
 		bool				parseFile(void);
 
 	private:
-		HttpHeader							_header;
-		std::string							_constructPath;
-		std::string							_content;
-		const Server						*_server;
-
-		std::map<std::string, std::string>	_fileInfo;
-		std::string							_boundary;
+		HttpHeader			_header;
+		std::string			_constructPath;
+		std::string			_content;
+		const Server		*_server;
+	
+		info_type			_fileInfo;
+		std::string			_boundary;
 };
 
 

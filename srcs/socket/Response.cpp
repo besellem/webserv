@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 16:25:51 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/03 20:12:55 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -288,12 +288,22 @@ const std::string	Response::generateAutoindexPage(std::string const &path) const
 
 bool				Response::uploadFile(void) const {
 	if (_request->parseFile() == true) {
-		std::cout << "uploading ..." << std::endl;
+		std::map<std::string, std::string> fileInfo = _request->getFileInfo();
+		std::string const absolutePath = ROOT_PATH"/uploads/";
+
+		for (info_type::iterator it = fileInfo.begin(); it != fileInfo.end(); it++) {
+			std::string toUploadPath = absolutePath + it->first;
+			std::ofstream ofs(toUploadPath);
+			if (!ofs.is_open()) {
+				std::cerr << "open [" << it->first << "] failed !" << std::endl;
+				return false;
+			}
+
+			ofs << it->second;
+		}
 		return true;
 	}
-	else {
-		return false;
-	}
+	return false;
 }
 
 _END_NS_WEBSERV

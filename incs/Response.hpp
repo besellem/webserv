@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 16:32:34 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/03 20:03:11 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class Response
 {
 	public:
 		typedef std::pair<int, std::string> status_type;
+		typedef std::map<std::string, std::string> info_type;
 
 		Response(Request *);
 		~Response();

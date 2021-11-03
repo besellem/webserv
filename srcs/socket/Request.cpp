@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 19:49:32 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/03 19:59:18 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,7 +224,6 @@ bool	Request::parseFile(void) {
 	}
 
 	std::string toParse = this->getContent();
-
 	std::string key[] = {"filename=\"", "\"", "Content-Type", "\r\n", "\r\n\r\n", this->getBoundary() + "--\r\n"};
 
 	std::string fileName;
@@ -248,25 +247,19 @@ bool	Request::parseFile(void) {
 		if ((end = toParse.find(key[RN])) != std::string::npos)
 			fileContent = toParse.substr(0, end);
 
+		// add to list of file info
 		_fileInfo.insert(std::make_pair(fileName, fileContent));
 
 		toParse.erase(0, fileContent.length() + key[RN].length());
-		if (toParse == key[LAST_BOUNDARY]) {
-			LOG;
-			std::cout << "is last" << std::endl;
-			LOG;
+		if (toParse == key[LAST_BOUNDARY])
 			break ;
-		}
 		else
 			toParse.erase(0, this->getBoundary().length() + key[RN].length());
 	}
 
-	std::cout << S_RED "\n>>>>>>>>>>>>>>toparse<<<<<<<<<<<<<\n" S_NONE << toParse << S_RED "\n>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<\n" S_NONE << std::endl;
-
-	for (std::map<std::string, std::string>::iterator it = _fileInfo.begin(); it != _fileInfo.end(); it++)
-		std::cout << "[" << it->first << "]: [" << it->second << "]" << std::endl;
-
-	return false;
+	// for (std::map<std::string, std::string>::iterator it = _fileInfo.begin(); it != _fileInfo.end(); it++)
+	// 	std::cout << "[" << it->first << "]: [" << it->second << "]" << std::endl;
+	return true;
 }
 
 _END_NS_WEBSERV
