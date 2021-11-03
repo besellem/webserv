@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:54:55 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 15:31:00 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/03 15:35:02 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,12 +51,11 @@ void    Response::setStatus(int code) {
 			"Forbidden", "Not Found", "Method Not Allowed", "Internal Server Error"};
 	int			i = 0;
 
+	if (this->_location && !this->_location->redirection.second.empty())
+		code = is_valid_path(ROOT_PATH + this->_location->redirection.second) ?
+			this->_location->redirection.first : 404;
 	while (i < 12 && codeTab[i] != code)
 		++i;
-	if (this->_location->redirection.second)
-		i = is_valid_path(ROOT_PATH + this->_location->redirection.second) ? 3 : 11;
-	else if (this->_location && this->_location->redirection.first == 308)
-		i = 7;
 	this->_status = std::make_pair<int, std::string>(codeTab[i], actionTab[i]);
 }
 
