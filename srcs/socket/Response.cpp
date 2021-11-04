@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/04 14:19:06 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/04 16:10:06 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,8 +117,12 @@ void	Response::postMethod(void) {
 	 if (this->_status.first != 200)
 	 	return ;
 		 
+	std::string contentType(vectorJoin(_request->getHeader().data["Content-Type"], '\0'));
+
+	if (contentType == "application/x-www-form-urlencoded")
+		this->_content = NEW_LINE + this->_request->getContent();
 	// upload case
-	if (this->_location && !this->_location->uploadStore.empty())
+	else if (this->_location && !this->_location->uploadStore.empty())
 	{
 		if (uploadFile() == true)
 			std::cout << "ok" << std::endl;
