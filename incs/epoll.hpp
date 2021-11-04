@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 14:27:23 by kaye              #+#    #+#             */
-/*   Updated: 2021/10/31 20:03:24 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/04 18:58:03 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ class Epoll {
 		int					_epollFd;
 
 		static const int	_nEvents = 1024;	// max tigger event list
-		struct kevent		*_chlist; 			// listen event list
+		struct kevent		_chlist[_nEvents]; 			// listen event list
 		struct kevent		_evlist[_nEvents];	// tigger event list
 };
 
