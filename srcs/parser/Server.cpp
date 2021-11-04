@@ -15,7 +15,7 @@
 _BEGIN_NS_WEBSERV
 
 
-Server::Server() : _port(8000), _cliMaxSize(-1) {}
+Server::Server() : _port(8000), _cliBodyMaxSize(1000000) {}
 
 Server::~Server() {
     for (size_t i = 0; i < this->_locations.size(); i++)
@@ -31,7 +31,7 @@ Server& Server::operator=(const Server &x) {
 	this->_port = x._port;
 	this->_name = x._name;
 	this->_errorPages = x._errorPages;
-	this->_cliMaxSize = x._cliMaxSize;
+	this->_cliBodyMaxSize = x._cliBodyMaxSize;
 	this->_locations = x._locations;
 	return *this;
 }
@@ -43,7 +43,7 @@ Server& Server::operator=(const Server &x) {
 const int&							Server::port()              const { return this->_port; }
 const std::vector<std::string>&		Server::name()              const { return this->_name; }
 const std::map<int, std::string>&	Server::errorPages()        const { return this->_errorPages; }
-const int&							Server::cliMaxSize()        const { return this->_cliMaxSize; }
+const int&							Server::cliBodyMaxSize()        const { return this->_cliBodyMaxSize; }
 const t_location&	                Server::locations(int i)    const { return *(this->_locations[i]); }
 const std::vector<t_location *>&	Server::locations(void)     const { return this->_locations; }
 size_t  Server::nLoc()									        const { return this->_locations.size(); }
@@ -81,12 +81,12 @@ void	Server::setErrorPages(const tokens_type &tok) {
     }
 }
 
-void	Server::setCliMaxSize(const tokens_type &tok) {
+void	Server::setcliBodyMaxSize(const tokens_type &tok) {
      if (tok.size() != 2)
         throw WebServer::ParsingError();
     if (!ft_isNumeric(tok[1]))
         throw WebServer::ParsingError();
-    std::stringstream(tok[1]) >> this->_cliMaxSize;
+    std::stringstream(tok[1]) >> this->_cliBodyMaxSize;
 }
 
 void	Server::setCgi(t_location  *loc, const tokens_type &tok) {
@@ -208,7 +208,7 @@ void	Server::newDirective(const tokens_type &tokens)
 	if (tokens.empty())
 		return ;
 	static method_function   method_ptr[] = {&Server::setPort,
-            &Server::setName, &Server::setErrorPages, &Server::setCliMaxSize};
+            &Server::setName, &Server::setErrorPages, &Server::setcliBodyMaxSize};
 	static std::string  directives[] = {"listen", "server_name",
 			"error_page", "client_max_body_size"};
 
@@ -276,8 +276,8 @@ std::ostream& operator<<(std::ostream& os, const Server& server)
             it != server.errorPages().end(); it++)
             os << "\terror_page " << it->first << " " << it->second << std::endl;
     }
-    if (server.cliMaxSize() != -1)
-        os << "\tclient_max_body_size " << server.cliMaxSize() << std::endl;
+    if (server.cliBodyMaxSize() != 1000000)
+        os << "\tclient_max_body_size " << server.cliBodyMaxSize() << std::endl;
     for (size_t j = 0; j < server.nLoc(); j++)
         os << server.locations(j);
     os << "}" << std::endl;

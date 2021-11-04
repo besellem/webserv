@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/04 13:43:39 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/04 14:19:06 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,10 +45,10 @@ void    Response::setStatus(const status_type& status) {
 }
 
 void    Response::setStatus(int code) {
-	int 		codeTab[] = {200, 202, 300, 301, 302, 303, 304, 308, 403, 404, 405, 500, 204};
+	int 		codeTab[] = {200, 202, 300, 301, 302, 303, 304, 308, 403, 404, 405, 413, 500, 204};
 	std::string actionTab[] = {"OK", "Accepted", "Multiple Choice", "Moved Permanently",
-			"Found", "See Other", "Not Modified", "Temporary Redirect",
-			"Forbidden", "Not Found", "Method Not Allowed", "Internal Server Error", "No Content"};
+			"Found", "See Other", "Not Modified", "Temporary Redirect", "Forbidden",
+			"Not Found", "Method Not Allowed", "Request Entity Too Large", "Internal Server Error", "No Content"};
 	int			i = 0;
 
 	if (this->_location && !this->_location->redirection.second.empty())
@@ -122,8 +122,6 @@ void	Response::postMethod(void) {
 	{
 		if (uploadFile() == true)
 			std::cout << "ok" << std::endl;
-		else
-			this->setStatus(403);
 	}
 }
 
@@ -319,18 +317,19 @@ const std::string	Response::generateAutoindexPage(std::string const &path) const
 	return content;
 }
 
-bool				Response::uploadFile(void) const {
+bool	Response::uploadFile(void) {
 	if (_request->parseFile() == true) {
 		std::map<std::string, std::string> fileInfo = _request->getFileInfo();
 		std::string const absolutePath = ROOT_PATH + this->_location->uploadStore;
 		for (info_type::iterator it = fileInfo.begin(); it != fileInfo.end(); it++) {
-			if (it->first.empty() == true)
-				continue ;
-
 			std::string toUploadPath = absolutePath + it->first;
+			if (this->_request->getServer()->cliBodyMaxSize() && getFileLength(toUploadPath) > this->_request->getServer()->cliBodyMaxSize()) {
+				this->setStatus(413);
+				return false;
+			}
 			std::ofstream ofs(toUploadPath, std::ofstream::out);
 			if (!ofs.is_open()) {
-				std::cerr << "open [" << it->first << "] failed !" << std::endl;
+				this->setStatus(403);
 				return false;
 			}
 			ofs << it->second;
@@ -338,6 +337,7 @@ bool				Response::uploadFile(void) const {
 		}
 		return true;
 	}
+	this->setStatus(500);
 	return false;
 }
 

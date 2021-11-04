@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/04 13:36:38 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/04 14:13:22 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ class Response
 		const status_type&  getStatus(void) const;
 		
 		const std::string   generateAutoindexPage(std::string const &) const;
-		bool				uploadFile(void) const;
+		bool				uploadFile(void);
 	
 		void		        setContent(const std::string &);
 		void		        setHeader(void);
