@@ -155,7 +155,7 @@ void bad_request(int client)
     send(client, buf, sizeof(buf), 0);
     sprintf(buf, "Content-type: text/html\r\n");
     send(client, buf, sizeof(buf), 0);
-    sprintf(buf, "\r\n");
+    sprintf(buf, NEW_LINE);
     send(client, buf, sizeof(buf), 0);
     sprintf(buf, "<P>Your browser sent a bad request, ");
     send(client, buf, sizeof(buf), 0);
@@ -196,7 +196,7 @@ void cannot_execute(int client)
     send(client, buf, strlen(buf), 0);
     sprintf(buf, "Content-type: text/html\r\n");
     send(client, buf, strlen(buf), 0);
-    sprintf(buf, "\r\n");
+    sprintf(buf, NEW_LINE);
     send(client, buf, strlen(buf), 0);
     sprintf(buf, "<P>Error prohibited CGI execution.\r\n");
     send(client, buf, strlen(buf), 0);
@@ -402,7 +402,7 @@ void headers(int client, const char *filename)
     send(client, buf, strlen(buf), 0);
     sprintf(buf, "Content-Type: text/html\r\n");
     send(client, buf, strlen(buf), 0);
-    strcpy(buf, "\r\n");
+    strcpy(buf, NEW_LINE);
     send(client, buf, strlen(buf), 0);
 }
 
@@ -421,7 +421,7 @@ void not_found(int client)
     send(client, buf, strlen(buf), 0);
     sprintf(buf, "Content-Type: text/html\r\n");
     send(client, buf, strlen(buf), 0);
-    sprintf(buf, "\r\n");
+    sprintf(buf, NEW_LINE);
     send(client, buf, strlen(buf), 0);
     sprintf(buf, "<HTML><TITLE>Not Found</TITLE>\r\n");
     send(client, buf, strlen(buf), 0);
@@ -522,7 +522,7 @@ void unimplemented(int client)
     send(client, buf, strlen(buf), 0);
     sprintf(buf, "Content-Type: text/html\r\n");
     send(client, buf, strlen(buf), 0);
-    sprintf(buf, "\r\n");
+    sprintf(buf, NEW_LINE);
     send(client, buf, strlen(buf), 0);
     sprintf(buf, "<HTML><HEAD><TITLE>Method Not Implemented\r\n");
     send(client, buf, strlen(buf), 0);

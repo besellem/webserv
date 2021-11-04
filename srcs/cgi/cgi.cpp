@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 17:54:46 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/04 16:12:46 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,10 +242,10 @@ std::string Cgi::execute(void)
 	}
 	// ##################################################################
 	
-	this->_header = content.substr(0, content.find("\r\n\r\n"));
+	this->_header = content.substr(0, content.find(DELIMITER));
 	
 	// remove cgi header
-	content = content.substr(content.find("\r\n\r\n"));
+	content = content.substr(content.find(DELIMITER));
 	
 	return content;
 }

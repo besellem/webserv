@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/04 15:43:46 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/04 16:12:46 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -252,7 +252,7 @@ bool	Request::checkIsUploadCase(void) {
 	_boundary = headerBuf;
 	if ((pos = _boundary.find(boundary)) != std::string::npos) {
 		_boundary.erase(0, pos + boundary.length());
-		if ((pos = _boundary.find("\r\n")) != std::string::npos) {
+		if ((pos = _boundary.find(NEW_LINE)) != std::string::npos) {
 			_boundary.erase(pos);
 			_boundary.insert(0, "--");
 		}
@@ -270,7 +270,7 @@ bool	Request::parseFile(void) {
 	}
 
 	std::string toParse = this->getContent();
-	std::string key[] = {"filename=\"", "\"", "Content-Type", "\r\n", "\r\n\r\n", this->getBoundary() + "--\r\n"};
+	std::string key[] = {"filename=\"", "\"", "Content-Type", NEW_LINE, DELIMITER, this->getBoundary() + "--\r\n"};
 
 	std::string fileName;
 	std::string fileContent;
