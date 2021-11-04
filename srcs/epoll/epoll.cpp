@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   epoll.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/02 15:33:29 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/04 17:08:08 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,8 @@ void	Epoll::startEpoll(void) {
 		EV_SET(&_chlist[i], sockFd, EVFILT_READ, EV_ADD, 0, 0, 0);
 	}
 
-	int kevt = kevent(_epollFd, _chlist, _serverSize, NULL, 0, NULL);
+	struct timespec tmout = {1, 0};
+	int kevt = kevent(_epollFd, _chlist, _serverSize, NULL, 0, &tmout);
 	if (kevt < 0)
 		errorExit("epoll start failed!");
 
@@ -60,11 +61,12 @@ void	Epoll::serverLoop(void) {
 	std::map<const int, Socket> sockConn;
 
 	for(;;) {
-		int readyEvts = kevent(_epollFd, NULL, 0, _evlist, _nEvents, NULL);
+		struct timespec tmout = {1, 0};
+		int readyEvts = kevent(_epollFd, NULL, 0, _evlist, _nEvents, &tmout);
 		if (readyEvts < 0)
 			errorExit("kevent failed in loop");
 		// else if (readyEvts == 0) { // time out
-		// 	continue ;
+		// 	return ;
 		// }
 
 		if (readyEvts > 0)
@@ -144,7 +146,8 @@ bool	Epoll::clientConnect(int const & toConnect, std::map<const int, Socket> & s
 	sockConn[newSock] = _serverSocks[i];
 
 	EV_SET(&_chlist[i], newSock, EVFILT_READ, EV_ADD, 0, 0, 0);
-	int addEvts = kevent(_epollFd, _chlist + i, 1, NULL, 0, NULL);
+	struct timespec tmout = {1, 0};
+	int addEvts = kevent(_epollFd, _chlist + i, 1, NULL, 0, &tmout);
 	if (addEvts < 0)
 		errorExit("kevent failed in loop");
 
