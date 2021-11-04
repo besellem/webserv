@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 22:52:59 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/04 15:43:46 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 _BEGIN_NS_WEBSERV
 
-Request::Request(const Server *server) : _server(server) {}
+Request::Request(const Server *server) : _server(server), _isChunked(false) {}
 
 Request::~Request() {}
 
@@ -23,11 +23,11 @@ Request::~Request() {}
 ** Getters
 */
 
-HttpHeader&									Request::getHeader(void)              { return this->_header ; }
-const std::string&							Request::getContent(void)       const { return this->_content; }
-const std::string&							Request::getConstructPath(void) const { return this->_constructPath; }
-size_t										Request::getContentLength(void) const { return this->_content.size(); }
-const Server*								Request::getServer(void)        const { return this->_server; }
+HttpHeader&			Request::getHeader(void)              { return this->_header ; }
+const std::string&	Request::getContent(void)       const { return this->_content; }
+const std::string&	Request::getConstructPath(void) const { return this->_constructPath; }
+size_t				Request::getContentLength(void) const { return this->_content.size(); }
+const Server*		Request::getServer(void)        const { return this->_server; }
 
 /* Find the location of the request */
 const t_location*	Request::getLocation(void) const
@@ -73,8 +73,6 @@ const t_location*	Request::getLocation(void) const
 
 void	Request::setContent(void)
 {
-	typedef	std::vector<std::string>                                vector_type;
-
 	std::string					buf(this->_header.content);
 	const std::string			delim(DELIMITER);
 	const size_t				pos = buf.find(delim);
@@ -91,8 +89,19 @@ void	Request::setContent(void)
 		if (this->_header.chunked)
 		{
 			content__ = split_string(buf, NEW_LINE);
-			for (it = content__.begin() + 1; it != content__.end() - 1; it += 2)
-				tmp_string += *it;
+			it = content__.begin();
+			if (it != content__.end() && (it + 1) != content__.end())
+			{
+				++it;
+				for ( ; it != content__.end(); it += 2)
+				{
+					if ((it + 1) == content__.end())
+						break ;
+					tmp_string += *it;
+				}
+			}
+			else
+				tmp_string = buf;
 		}
 		else
 			tmp_string = buf;
@@ -165,7 +174,6 @@ void	Request::setConstructPath(void)
 
 void	Request::setHeaderData(const std::string& line_)
 {
-	typedef std::vector<std::string>                       vector_type;
 	typedef std::map<std::string, std::string>             map_type;
 	typedef std::pair<std::string, std::string>            pair_type;
 	
@@ -182,7 +190,7 @@ void	Request::setHeaderData(const std::string& line_)
 		std::make_pair("Connection",				" " ),
 		std::make_pair("Upgrade-Insecure-Requests",	""  ),
 		std::make_pair("Accept",					"," ),
-		std::make_pair("Transfer-Encoding",         ""  ),
+		std::make_pair("Transfer-Encoding",         ", "),
 		std::make_pair("User-Agent",				""  ),
 		std::make_pair("Referer",					" " ),
 		std::make_pair("Accept-Language",			" " )
@@ -210,8 +218,25 @@ void	Request::setHeaderData(const std::string& line_)
 	}
 }
 
-const std::map<std::string, std::string>&	Request::getFileInfo(void)		const { return this->_fileInfo; }
-const std::string&	Request::getBoundary(void) const { return this->_boundary; }
+void	Request::setChunked(void)
+{
+	const vector_type			transfert_encoding = _header.data["Transfer-Encoding"];
+	vector_type::const_iterator	it = transfert_encoding.begin();
+
+	_header.chunked = false;
+	for ( ; it != transfert_encoding.end(); ++it)
+	{
+		if (*it == "chunked")
+		{
+			std::cout << S_GREEN "Chunked request found" S_NONE << std::endl;
+			_header.chunked = true;
+			break ;
+		}
+	}
+}
+
+const Request::info_type&	Request::getFileInfo(void) const { return this->_fileInfo; }
+const std::string&			Request::getBoundary(void) const { return this->_boundary; }
 
 bool	Request::checkIsUploadCase(void) {
 	std::string	toFind[] = {"POST", "multipart/form-data", "boundary", "filename", ""};

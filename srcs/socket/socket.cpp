@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/03 21:42:55 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/04 15:44:52 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,10 +95,11 @@ void	Socket::readHttpRequest(Request *request, int socket_fd)
 		ret = recv(socket_fd, request->getHeader().buf, sizeof(request->getHeader().buf), 0);
 		if (SYSCALL_ERR == ret)
 		{
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-				break;
-			else
-				errorExit("read http request");
+			break ;
+			// if (errno == EAGAIN || errno == EWOULDBLOCK)
+			// 	break;
+			// else
+			// 	errorExit("read http request");
 		}
 		else if (0 == ret)
 		{
@@ -107,22 +108,9 @@ void	Socket::readHttpRequest(Request *request, int socket_fd)
 		}
 		else
 		{
-			// if (DEBUG)
-			// {
-			// 	std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
-			// 	write(STDOUT_FILENO, request->getHeader().buf, ret); // (?) may be chunked
-			// 	std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
-			// }
 			request->getHeader().buf[ret] = '\0';
 			request->getHeader().content += request->getHeader().buf;
 		}
-	}
-
-	// define if the request is chunked by searching for the "0/r/n/r/n" string
-	if (request->getHeader().content.find("0\r\n\r\n") != std::string::npos)
-	{
-		std::cout << S_GREEN "Chunked request found" S_NONE << std::endl;
-		request->getHeader().chunked = true;
 	}
 
 	if (DEBUG)
@@ -163,8 +151,6 @@ void	Socket::resolveHttpRequest(Request *request)
 		std::cout << "Contructed Path : [" S_CYAN << request->getConstructPath() << S_NONE "]\n";
 	}
 
-	request->setContent();
-
 	// set query string
 	size_t pos = request->getHeader().uri.find("?");
 	if (pos != std::string::npos)
@@ -175,6 +161,9 @@ void	Socket::resolveHttpRequest(Request *request)
 	{
 		request->setHeaderData(*line);
 	}
+
+	request->setChunked();
+	request->setContent();
 
 	/* there's some more info to parse */
 	// if (line != buffer.end() && (*line).empty())

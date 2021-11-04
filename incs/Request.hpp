@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 20:04:19 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/04 15:20:42 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,8 @@ class Cgi;
 class Request
 {
 	public:
-		typedef std::map<std::string, std::string> info_type;
+		typedef std::map<std::string, std::string>             info_type;
+		typedef std::vector<std::string>                       vector_type;
 	
 		Request(const Server *);
 		~Request();
@@ -58,6 +59,7 @@ class Request
 		void				setConstructPath(const std::string &);
 		void				setContent(void);
 		void				setHeaderData(const std::string &);
+		void				setChunked(void);
 
 		const info_type&	getFileInfo(void) const;
 		bool				checkIsUploadCase(void);
@@ -69,6 +71,7 @@ class Request
 		std::string			_constructPath;
 		std::string			_content;
 		const Server		*_server;
+		bool				_isChunked;
 	
 		info_type			_fileInfo;
 		std::string			_boundary;
