@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 23:14:08 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/04 14:09:47 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ class Server
 		const int&							port() const;
 		const std::vector<std::string>&		name() const;
 		const std::map<int, std::string>&	errorPages() const;
-		const int&							cliMaxSize() const;
+		const int&							cliBodyMaxSize() const;
 		const t_location&					locations(int) const;
 		const std::vector<t_location *>&	locations(void) const;
 		size_t								nLoc() const;
@@ -61,7 +61,7 @@ class Server
 		void	setPort(const tokens_type &);
 		void	setName(const tokens_type &);
 		void	setErrorPages(const tokens_type &);
-		void	setCliMaxSize(const tokens_type &);
+		void	setcliBodyMaxSize(const tokens_type &);
 		void	setMethods(t_location  *, const tokens_type &);
 		void	setRedirection(t_location  *, const tokens_type &);
 		void	setRoot(t_location  *, const tokens_type &);
@@ -75,11 +75,11 @@ class Server
 		void	newDirective(const std::vector<std::string> &);
 		
 	private:
-		int					        _port;			// listen port
-		std::vector<std::string>	_name;			// server names
-		std::map<int, std::string>  _errorPages;	// default error pages
-		int							_cliMaxSize;	// client max body size
-		std::vector<t_location *>	_locations;		// routes with rules
+		int					        _port;				// listen port
+		std::vector<std::string>	_name;				// server names
+		std::map<int, std::string>  _errorPages;		// default error pages
+		int							_cliBodyMaxSize;	// client max body size (byte)
+		std::vector<t_location *>	_locations;			// routes with rules
 
 		Server& operator=(const Server &);
 		Server(const Server &);
