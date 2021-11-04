@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 23:35:14 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/04 13:37:41 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,60 +94,83 @@ bool	Response::isMethodAllowed(const std::string &method)
 	return false;
 }
 
-void    Response::setContent(const std::string &file_content)
-{
-	const t_location	*loc = this->_location;
-	
-	this->isMethodAllowed(this->_request->getHeader().request_method);
-	
-	// cgi case
-	if (this->_status.first == 200 && this->_cgi
-	&& getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension())
+void	Response::getMethod(const std::string &file_content) {
+	 if (this->_status.first != 200)
+	 	return ;
+		 
+	// Autoindex
+	if (ft_isDirectory(this->_request->getConstructPath()))
 	{
-		try
-		{
-			this->_content = this->_cgi->execute();
-			std::string status = this->_cgi->getHeaderData("Status").c_str();
-			if (!status.empty())
-				this->setStatus(atoi(status.c_str()));
-			this->_contentLength = this->_cgi->getContentLength();
-			return ;
-		}
-		catch(const std::exception& e)
-		{
-			this->setStatus(500);
-			EXCEPT_WARNING(e);
-		}
+		if (this->_location && this->_location->autoindex == ON)
+			this->_content  = generateAutoindexPage(this->_request->getConstructPath());
+		else
+			this->setStatus(403);
 	}
+	// Default case
+	else
+		this->_content = file_content;
+	this->_contentLength = this->_content.size();
+	this->_content = NEW_LINE + this->_content;
+}
 
-	// Upload case
-	if (this->_request->getHeader().request_method == "POST" && this->_status.first == 200
-		&& this->_location && !this->_location->uploadStore.empty())
+void	Response::postMethod(void) {
+	 if (this->_status.first != 200)
+	 	return ;
+		 
+	// upload case
+	if (this->_location && !this->_location->uploadStore.empty())
 	{
 		if (uploadFile() == true)
 			std::cout << "ok" << std::endl;
 		else
 			this->setStatus(403);
 	}
-	// Default case
-	else if (this->_status.first < 400)
-	{
-		// Autoindex
-		if (ft_isDirectory(this->_request->getConstructPath()))
-		{
-			if (loc && loc->autoindex == ON)
-				this->_content  = generateAutoindexPage(this->_request->getConstructPath());
-			else
-				this->setStatus(403);
-		}
-		else
-			this->_content = file_content;
-		this->_contentLength = this->_content.size();
-		this->_content = NEW_LINE + this->_content;
-	}
+}
 
+void	Response::deleteMethod(void) {
+	 if (this->_status.first != 200)
+	 	return ;
+	
+}
+
+void	Response::cgi(void) {
+	 if (this->_status.first != 200)
+	 	return ;
+	
+	try
+	{
+		this->_content = this->_cgi->execute();
+		std::string status = this->_cgi->getHeaderData("Status").c_str();
+		if (!status.empty())
+			this->setStatus(atoi(status.c_str()));
+		this->_contentLength = this->_cgi->getContentLength();
+	}
+	catch(const std::exception& e)
+	{
+		this->setStatus(500);
+		EXCEPT_WARNING(e);
+	}
+}
+
+void    Response::setContent(const std::string &file_content)
+{
+	this->isMethodAllowed(this->_request->getHeader().request_method);
+	
+	// CGI case
+	if (this->_cgi && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension())
+		this->cgi();
+	// GET case
+	else if (this->_request->getHeader().request_method == "GET")
+		this->getMethod(file_content);
+	// POST case
+	else if (this->_request->getHeader().request_method == "POST")
+		this->postMethod();
+	// DELETE case
+	else if (this->_request->getHeader().request_method == "DELETE")
+		this->deleteMethod();
+		
 	// Error case
-	if (this->_status.first >= 300)
+	if (this->_status.first >= 400)
 		this->setErrorContent();
 }
 
