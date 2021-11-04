@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/04 17:08:08 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/04 18:21:24 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,8 @@ void	Epoll::startEpoll(void) {
 		EV_SET(&_chlist[i], sockFd, EVFILT_READ, EV_ADD, 0, 0, 0);
 	}
 
-	struct timespec tmout = {1, 0};
-	int kevt = kevent(_epollFd, _chlist, _serverSize, NULL, 0, &tmout);
+	// struct timespec tmout = {1, 0};
+	int kevt = kevent(_epollFd, _chlist, _serverSize, NULL, 0, NULL);
 	if (kevt < 0)
 		errorExit("epoll start failed!");
 
@@ -61,8 +61,11 @@ void	Epoll::serverLoop(void) {
 	std::map<const int, Socket> sockConn;
 
 	for(;;) {
-		struct timespec tmout = {1, 0};
-		int readyEvts = kevent(_epollFd, NULL, 0, _evlist, _nEvents, &tmout);
+		// struct timespec tmout = {1, 0};
+		int readyEvts = kevent(_epollFd, NULL, 0, _evlist, _nEvents, NULL);
+		std::cout << "1: " << _evlist[0].ident << std::endl;
+		std::cout << "2: " << _evlist[1].ident << std::endl;
+		std::cout << "3: " << _evlist[3].ident << std::endl;
 		if (readyEvts < 0)
 			errorExit("kevent failed in loop");
 		// else if (readyEvts == 0) { // time out
@@ -146,8 +149,8 @@ bool	Epoll::clientConnect(int const & toConnect, std::map<const int, Socket> & s
 	sockConn[newSock] = _serverSocks[i];
 
 	EV_SET(&_chlist[i], newSock, EVFILT_READ, EV_ADD, 0, 0, 0);
-	struct timespec tmout = {1, 0};
-	int addEvts = kevent(_epollFd, _chlist + i, 1, NULL, 0, &tmout);
+	// struct timespec tmout = {1, 0};
+	int addEvts = kevent(_epollFd, _chlist + i, 1, NULL, 0, NULL);
 	if (addEvts < 0)
 		errorExit("kevent failed in loop");
 
