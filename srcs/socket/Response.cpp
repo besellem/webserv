@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/04 16:20:19 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/04 17:51:45 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,10 +45,10 @@ void    Response::setStatus(const status_type& status) {
 }
 
 void    Response::setStatus(int code) {
-	int 		codeTab[] = {200, 202, 300, 301, 302, 303, 304, 308, 403, 404, 405, 413, 500, 204};
-	std::string actionTab[] = {"OK", "Accepted", "Multiple Choice", "Moved Permanently",
-			"Found", "See Other", "Not Modified", "Temporary Redirect", "Forbidden",
-			"Not Found", "Method Not Allowed", "Request Entity Too Large", "Internal Server Error", "No Content"};
+	int 		codeTab[] = {200, 202, 204 , 300, 301, 302, 303, 304, 308, 403, 404, 405, 408, 413, 500};
+	std::string actionTab[] = {"OK", "Accepted", "No Content", "Multiple Choice", "Moved Permanently",
+			"Found", "See Other", "Not Modified", "Temporary Redirect", "Forbidden", "Not Found",
+			"Method Not Allowed", "Request Timeout", "Request Entity Too Large", "Internal Server Error"};
 	int			i = 0;
 
 	if (this->_location && !this->_location->redirection.second.empty())
