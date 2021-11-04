@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/04 13:37:41 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/04 13:43:39 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,6 +131,8 @@ void	Response::deleteMethod(void) {
 	 if (this->_status.first != 200)
 	 	return ;
 	
+	if (std::remove(this->_request->getConstructPath().c_str()) != 0)
+		this->setStatus(403);
 }
 
 void	Response::cgi(void) {
