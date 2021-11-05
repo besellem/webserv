@@ -2,12 +2,12 @@
 
 ## Configuration File’s Structure
 
-- [server block](#server block)
-- [location block](#location block)
+- [server block](#server_block)
+- [location block](#location_block)
 
 (accept ';' at the end of the line and comments(#))
 
-### server block
+### server_block
 
 - listen: choose the port of each server
 - server_name: setup the server names or not
@@ -30,7 +30,7 @@ server
 }
 ```
 
-### location block
+### location_block
 - allow: define a list of accepted HTTP Methods for the route
 - return: define an HTTP redirection
 - root: define a directory or a file from where the file should be search
