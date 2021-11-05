@@ -1,5 +1,12 @@
 # WEBSERV
 
+## Usage
+```
+$ git clone https://github.com/besellem/webserv.git
+$ cd webserv/
+$ make
+$ ./webserv [config_file]
+```
 ## Configuration File’s Structure
 
 - [server block](#server_block)
