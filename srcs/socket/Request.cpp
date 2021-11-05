@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/04 16:12:46 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/05 17:55:52 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,14 +120,13 @@ void	Request::setConstructPath(const std::string &path)
 
 void	Request::setConstructPath(void)
 {
-	// main paths
 	std::string			ret;
 	const t_location	*loc = this->getLocation();
+	std::string			uriPath = ft_strcut(this->_header.uri, '?');
 	
 	// tmp variables
 	std::string							index_tmp;
 	Server::tokens_type::const_iterator	idx; // iterator on indexes
-	std::string							uriPath = ft_strcut(this->_header.uri, '?');
 	
 	ret = ROOT_PATH;
 	if (loc)
