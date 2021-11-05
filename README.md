@@ -2,8 +2,8 @@
 
 ## Configuration File’s Structure
 
-- [server block]
-- [location block]
+- [server block](#server block)
+- [location block](#location block)
 
 (accept ';' at the end of the line and comments(#))
 
