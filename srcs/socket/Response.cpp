@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/04 17:51:45 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/05 15:19:42 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ void    Response::setStatus(int code) {
 	if (this->_location && !this->_location->redirection.second.empty())
 		code = is_valid_path(ROOT_PATH + this->_location->redirection.second) ?
 			this->_location->redirection.first : 404;
-	while (i < 13 && codeTab[i] != code)
+	while (i < 15 && codeTab[i] != code)
 		++i;
 	this->_status = std::make_pair(codeTab[i], actionTab[i]);
 }
@@ -116,7 +116,6 @@ void	Response::getMethod(const std::string &file_content) {
 void	Response::postMethod(void) {
 	 if (this->_status.first != 200)
 	 	return ;
-		 
 	// upload case
 	if (this->_location && !this->_location->uploadStore.empty())
 		if (uploadFile() == true)
@@ -134,6 +133,7 @@ void	Response::deleteMethod(void) {
 }
 
 void	Response::cgi(void) {
+	
 	 if (this->_status.first != 200)
 	 	return ;
 	
@@ -188,24 +188,59 @@ void Response::setErrorContent(void)
 	}
 	
 	// Default case
-	std::string content = "<html>\n";
-	content += "  <head>\n";
-	content += "    <meta charset=\"utf-8\">\n";
-	content += "    <title>";
-	content += std::to_string(this->_status.first);
-	content += " ";
+	std::string content = "<!DOCTYPE html>\n";
+	content += "<html lang=\"en\">\n";
+	content += "<head>\n";
+	content += "<meta charset=\"utf-8\" /><meta http-equiv=\"X-UA-Compatible\" ";
+	content += "content=\"IE=edge\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n";
+	content += "<title>";
 	content += this->_status.second;
+	content += " | ";
+	content += std::to_string(this->_status.first);
 	content += "</title>\n";
-	content += "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n";
-	content += "  </head>\n";
+	content += "<style type=\"text/css\">/*! normalize.css v5.0.0 | MIT License | github.com/necolas/normalize.css ";
+	content += "*/html{font-family:sans-serif;line-height:1.15;-ms-text-size-adjust:100%;";
+	content += "-webkit-text-size-adjust:100%}body{margin:0}article,aside,footer,header,nav,";
+	content += "section{display:block}h1{font-size:2em;margin:.67em 0}figcaption,figure,main{display:block}";
+	content += "figure{margin:1em 40px}hr{box-sizing:content-box;height:0;overflow:visible}pre{font-family:";
+	content += "monospace,monospace;font-size:1em}a{background-color:transparent;-webkit-text-decoration-skip:";
+	content += "objects}a:active,a:hover{outline-width:0}abbr[title]{border-bottom:none;text-decoration:underline;";
+	content += "text-decoration:underline dotted}b,strong{font-weight:inherit}b,strong{font-weight:bolder}code,kbd,";
+	content += "samp{font-family:monospace,monospace;font-size:1em}dfn{font-style:italic}mark{background-color:#ff0;";
+	content += "color:#000}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:";
+	content += "baseline}sub{bottom:-.25em}sup{top:-.5em}audio,video{display:inline-block}audio:not([controls])";
+	content += "{display:none;height:0}img{border-style:none}svg:not(:root){overflow:hidden}button,input,optgroup,";
+	content += "select,textarea{font-family:sans-serif;font-size:100%;line-height:1.15;margin:0}button,input{overflow:";
+	content += "visible}button,select{text-transform:none}[type=reset],[type=submit],button,html [type=button]";
+	content += "{-webkit-appearance:button}[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,";
+	content += "[type=submit]::-moz-focus-inner,button::-moz-focus-inner{border-style:none;padding:0}[type=button]";
+	content += ":-moz-focusring,[type=reset]:-moz-focusring,[type=submit]:-moz-focusring,button:-moz-focusring";
+	content += "{outline:1px dotted ButtonText}fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}";
+	content += "legend{box-sizing:border-box;color:inherit;display:table;max-width:100%;padding:0;white-space:normal}";
+	content += "progress{display:inline-block;vertical-align:baseline}textarea{overflow:auto}[type=checkbox],[type=radio]";
+	content += "{box-sizing:border-box;padding:0}[type=number]::-webkit-inner-spin-button,[type=number]::";
+	content += "-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}";
+	content += "[type=search]::-webkit-search-cancel-button,[type=search]::-webkit-search-decoration{-webkit-appearance:none}";
+	content += "::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}details,menu{display:block}summary";
+	content += "{display:list-item}canvas{display:inline-block}template{display:none}[hidden]{display:none}/*! ";
+	content += "Simple HttpErrorPages | MIT X11 License | https://github.com/AndiDittrich/HttpErrorPages */";
+	content += "body,html{width:100%;height:100%;background-color:#21232a}body{color:#fff;text-align:center;";
+	content += "text-shadow:0 2px 4px rgba(0,0,0,.5);padding:0;min-height:100%;-webkit-box-shadow:inset 0 0 100px ";
+	content += "rgba(0,0,0,.8);box-shadow:inset 0 0 100px rgba(0,0,0,.8);display:table;font-family:\"Open Sans\",";
+	content += "Arial,sans-serif}h1{font-family:inherit;font-weight:500;line-height:1.1;color:inherit;font-size:36px}";
+	content += "h1 small{font-size:68%;font-weight:400;line-height:1;color:#777}a{text-decoration:none;color:#fff;";
+	content += "font-size:inherit;border-bottom:dotted 1px #707070}.lead{color:silver;font-size:21px;line-height:1.4}";
+	content += ".cover{display:table-cell;vertical-align:middle;padding:0 20px}footer{position:fixed;width:100%;height:";
+	content += "40px;left:0;bottom:0;color:#a0a0a0;font-size:14px}</style>\n";
+	content += "</head>\n";
 	content += "<body>\n";
-	content += "    <h1>";
-	content += std::to_string(this->_status.first);
-	content += " ";
+	content += "<body>\n";
+	content += "<div class=\"cover\"><h1>";
 	content += this->_status.second;
-	content += "</h1>\n";
+	content += " <small>";
+	content += std::to_string(this->_status.first);
+	content += "</small></h1></div>\n";
 	content += "</body>\n";
-	content += "</html>\n";
 	
 	this->_content = NEW_LINE + content;
 	this->_contentLength = content.size();
