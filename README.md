@@ -17,7 +17,7 @@ $ ./webserv [config_file]
 
 ### server_block
 
-- **listen**: choose the port of each server
+- **listen**: choose the port and the host of each server
 - **server_name**: setup the server names or not
 - **error_page**: setup default error pages
 - **client_max_body_size**: limit client body size
@@ -26,7 +26,7 @@ $ ./webserv [config_file]
 ```
 server
 {
-    listen [port]
+    listen [host:port]
     server_name [list of names]
     error_page [list of error code] [file path]
     client_max_body_size [number of bytes]
