@@ -41,7 +41,7 @@ Server& Server::operator=(const Server &x) {
 **  Getters
 */
 const int&							Server::port()              const { return this->_port; }
-const std::string&		            Server::ip()              const { return this->_ip; }
+const unsigned char*		        Server::ip()                const { return this->_ip; }
 const std::vector<std::string>&		Server::name()              const { return this->_name; }
 const std::map<int, std::string>&	Server::errorPages()        const { return this->_errorPages; }
 const int&							Server::clientMaxBodySize() const { return this->_clientMaxBodySize; }
@@ -57,6 +57,31 @@ void	Server::setName(const tokens_type &tok) {
     this->_name.assign(tok.begin() + 1, tok.end());
 }
 
+void    Server::setIP(const std::string& str) {
+    size_t 		x;
+	size_t 		n = 0;
+	std::string	tmp = "";
+	
+	for (size_t i = 0; i < str.size(); i++)
+	{
+		if (!std::isdigit(str[i]) && str[i] != '.')
+            throw WebServer::ParsingError();
+		if (std::isdigit(str[i]))
+			tmp += str[i];
+		if (str[i] == '.' || i == str.size() - 1)
+		{
+			std::stringstream(tmp) >> x;
+			tmp = "";
+			if (x > 255 || n > 3)
+                throw WebServer::ParsingError();
+            this->_ip[n] = x;
+			++n;
+		}
+	}
+	if (n != 4)
+        throw WebServer::ParsingError();
+}
+
 void	Server::setSocket(const tokens_type &tok) {
      if (tok.size() != 2)
         throw WebServer::ParsingError();
@@ -66,16 +91,16 @@ void	Server::setSocket(const tokens_type &tok) {
 
     if (pos == std::string::npos)
     {
-        this->_ip = "127.0.0.1";
+        this->setIP("127.0.0.1");
         port = tok[1];
     }
     else
     {
-        this->_ip = ft_strcut(tok[1], ':');
+        this->setIP(tok[1].substr(0, pos));
         port = tok[1].substr(pos + 1);
     }
 
-    if (!ft_isNumeric(port) || !ft_isIpAddress(this->_ip))
+    if (!ft_isNumeric(port))
         throw WebServer::ParsingError();
     std::stringstream(port) >> this->_port;
     if (this->_port > std::numeric_limits<unsigned short>().max())
@@ -277,7 +302,10 @@ std::ostream& operator<<(std::ostream& os, const Server& server)
 {
     os << "server\n" << "{" << std::endl;
     if (server.port() != -1)
-        os << "\tlisten " << server.ip() << ":" << server.port() << std::endl;
+    {
+        os << "\tlisten " << (int)server.ip()[0] << "." << (int)server.ip()[1] << "." << (int)server.ip()[2] << "." << (int)server.ip()[3]
+            << ":" << server.port() << std::endl;
+    }
     if (!server.name().empty())
     {
         os << "\tserver_name";

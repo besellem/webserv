@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 17:49:10 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/06 17:07:29 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/06 17:25:21 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@ bool	                    ft_isDirectory(const std::string& path);
 std::string	                getFileContent(const std::string& file);
 ssize_t		                getFileLength(const std::string& file);
 bool						ft_isNumeric(const std::string &str);
-bool	                    ft_isIpAddress(const std::string &str);
 
 
 _END_NS_WEBSERV

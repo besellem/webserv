@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 15:53:27 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/06 17:10:16 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/06 17:33:49 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ class Server
 		*/
 	
 		const int&							port(void)				const;
-		const std::string&					ip(void)				const;
+		const unsigned char*				ip(void)				const;
 		const std::vector<std::string>&		name(void)				const;
 		const std::map<int, std::string>&	errorPages(void)		const;
 		const int&							clientMaxBodySize(void)	const;
@@ -59,6 +59,7 @@ class Server
 		**  Setters
 		*/
 	
+		void	setIP(const std::string &);
 		void	setSocket(const tokens_type &);
 		void	setName(const tokens_type &);
 		void	setErrorPages(const tokens_type &);
@@ -77,7 +78,7 @@ class Server
 		
 	private:
 		int					        _port;				// listen port
-		std::string					_ip;				// ip address
+		unsigned char				_ip[4];				// ip address
 		std::vector<std::string>	_name;				// server names
 		std::map<int, std::string>  _errorPages;		// default error pages
 		int							_clientMaxBodySize;	// client max body size (byte)
