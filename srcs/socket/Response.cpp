@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/05 17:54:45 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/06 16:45:46 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -336,7 +336,7 @@ bool	Response::uploadFile(void) {
 		std::string const absolutePath = ROOT_PATH + this->_location->uploadStore;
 		for (info_type::iterator it = fileInfo.begin(); it != fileInfo.end(); it++) {
 			std::string toUploadPath = absolutePath + it->first;
-			if (this->_request->getServer()->cliBodyMaxSize() && getFileLength(toUploadPath) > this->_request->getServer()->cliBodyMaxSize()) {
+			if (this->_request->getServer()->clientMaxBodySize() && getFileLength(toUploadPath) > this->_request->getServer()->clientMaxBodySize()) {
 				this->setStatus(413);
 				return false;
 			}

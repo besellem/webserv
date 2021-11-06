@@ -3,17 +3,17 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+         #
+#    By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/11/04 18:11:49 by kaye             ###   ########.fr        #
+#    Updated: 2021/11/06 16:43:21 by adbenoit         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # COMPILATION
 
 CC		= clang++
-CFLAGS 	= -Wall -Wextra -Werror -std=c++98 #-fsanitize=address -g3
+CFLAGS 	= -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3
 IFLAGS 	= -I./incs
 
 # DIRECTORIES

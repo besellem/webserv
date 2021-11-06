@@ -15,7 +15,7 @@
 _BEGIN_NS_WEBSERV
 
 
-Server::Server() : _port(8000), _cliBodyMaxSize(1000000) {}
+Server::Server() : _port(8000), _clientMaxBodySize(1000000) {}
 
 Server::~Server() {
     for (size_t i = 0; i < this->_locations.size(); i++)
@@ -31,7 +31,7 @@ Server& Server::operator=(const Server &x) {
 	this->_port = x._port;
 	this->_name = x._name;
 	this->_errorPages = x._errorPages;
-	this->_cliBodyMaxSize = x._cliBodyMaxSize;
+	this->_clientMaxBodySize = x._clientMaxBodySize;
 	this->_locations = x._locations;
 	return *this;
 }
@@ -41,9 +41,10 @@ Server& Server::operator=(const Server &x) {
 **  Getters
 */
 const int&							Server::port()              const { return this->_port; }
+const std::string&		            Server::ip()              const { return this->_ip; }
 const std::vector<std::string>&		Server::name()              const { return this->_name; }
 const std::map<int, std::string>&	Server::errorPages()        const { return this->_errorPages; }
-const int&							Server::cliBodyMaxSize()        const { return this->_cliBodyMaxSize; }
+const int&							Server::clientMaxBodySize() const { return this->_clientMaxBodySize; }
 const t_location&	                Server::locations(int i)    const { return *(this->_locations[i]); }
 const std::vector<t_location *>&	Server::locations(void)     const { return this->_locations; }
 size_t  Server::nLoc()									        const { return this->_locations.size(); }
@@ -56,12 +57,27 @@ void	Server::setName(const tokens_type &tok) {
     this->_name.assign(tok.begin() + 1, tok.end());
 }
 
-void	Server::setPort(const tokens_type &tok) {
+void	Server::setSocket(const tokens_type &tok) {
      if (tok.size() != 2)
         throw WebServer::ParsingError();
-    if (!ft_isNumeric(tok[1]))
+
+    size_t      pos = tok[1].find(':');
+    std::string port;
+
+    if (pos == std::string::npos)
+    {
+        this->_ip = "127.0.0.1";
+        port = tok[1];
+    }
+    else
+    {
+        this->_ip = ft_strcut(tok[1], ':');
+        port = tok[1].substr(pos + 1);
+    }
+
+    if (!ft_isNumeric(port) || !ft_isIpAddress(this->_ip))
         throw WebServer::ParsingError();
-    std::stringstream(tok[1]) >> this->_port;
+    std::stringstream(port) >> this->_port;
     if (this->_port > std::numeric_limits<unsigned short>().max())
         throw WebServer::ParsingError();
 }
@@ -81,12 +97,12 @@ void	Server::setErrorPages(const tokens_type &tok) {
     }
 }
 
-void	Server::setcliBodyMaxSize(const tokens_type &tok) {
+void	Server::setClientMaxBodySize(const tokens_type &tok) {
      if (tok.size() != 2)
         throw WebServer::ParsingError();
     if (!ft_isNumeric(tok[1]))
         throw WebServer::ParsingError();
-    std::stringstream(tok[1]) >> this->_cliBodyMaxSize;
+    std::stringstream(tok[1]) >> this->_clientMaxBodySize;
 }
 
 void	Server::setCgi(t_location  *loc, const tokens_type &tok) {
@@ -207,8 +223,8 @@ void	Server::newDirective(const tokens_type &tokens)
 {
 	if (tokens.empty())
 		return ;
-	static method_function   method_ptr[] = {&Server::setPort,
-            &Server::setName, &Server::setErrorPages, &Server::setcliBodyMaxSize};
+	static method_function   method_ptr[] = {&Server::setSocket,
+            &Server::setName, &Server::setErrorPages, &Server::setClientMaxBodySize};
 	static std::string  directives[] = {"listen", "server_name",
 			"error_page", "client_max_body_size"};
 
@@ -261,7 +277,7 @@ std::ostream& operator<<(std::ostream& os, const Server& server)
 {
     os << "server\n" << "{" << std::endl;
     if (server.port() != -1)
-        os << "\tlisten " << server.port() << std::endl;
+        os << "\tlisten " << server.ip() << ":" << server.port() << std::endl;
     if (!server.name().empty())
     {
         os << "\tserver_name";
@@ -276,8 +292,8 @@ std::ostream& operator<<(std::ostream& os, const Server& server)
             it != server.errorPages().end(); it++)
             os << "\terror_page " << it->first << " " << it->second << std::endl;
     }
-    if (server.cliBodyMaxSize() != 1000000)
-        os << "\tclient_max_body_size " << server.cliBodyMaxSize() << std::endl;
+    if (server.clientMaxBodySize() != 1000000)
+        os << "\tclient_max_body_size " << server.clientMaxBodySize() << std::endl;
     for (size_t j = 0; j < server.nLoc(); j++)
         os << server.locations(j);
     os << "}" << std::endl;
