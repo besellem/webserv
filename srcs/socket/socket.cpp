@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/05 14:30:01 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/06 21:42:23 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,8 @@ Socket::Socket(const Server *serv) :
 	if (SYSCALL_ERR == _serverFd)
 		errorExit("socket init");
 	_addr.sin_family = AF_INET;
-	_addr.sin_addr.s_addr = INADDR_ANY;
+	if ((_addr.sin_addr.s_addr = inet_addr(serv->ip().c_str())) == (in_addr_t)-1)
+		errorExit("socket address");
 	_addr.sin_port = htons(_port);
 	memset(_addr.sin_zero, 0, sizeof(_addr.sin_zero));
 

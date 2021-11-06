@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 17:41:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/06 17:25:14 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/06 21:39:00 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,34 @@ bool	ft_isNumeric(const std::string &str)
 	for (size_t i = 0; i < str.size(); i++)
 		if (std::isdigit(str[i]) == 0)
 			return 0;
+	return 1;
+}
+
+/* Returns 1 if the string is an ip address.
+Otherwise, returns 0. */
+bool	ft_isIpAddress(const std::string &str)
+{
+	size_t 		x;
+	size_t 		n = 0;
+	std::string	tmp = "";
+	
+	for (size_t i = 0; i < str.size(); i++)
+	{
+		if (!std::isdigit(str[i]) && str[i] != '.')
+			return 0;
+		if (std::isdigit(str[i]))
+			tmp += str[i];
+		if (str[i] == '.' || i == str.size() - 1)
+		{
+			++n;
+			std::stringstream(tmp) >> x;
+			if (x > 255 || n > 4)
+				return 0;
+			tmp = "";
+		}
+	}
+	if (n != 4)
+		return 0;
 	return 1;
 }
 
