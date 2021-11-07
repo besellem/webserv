@@ -44,8 +44,8 @@
 # define OFF          0
 # define ON           1
 
-/* timeout */
-# define TIME_MAX     3
+/* Timeout in seconds */
+# define TIMEOUT     3
 
 
 /** @brief epoll utils define */

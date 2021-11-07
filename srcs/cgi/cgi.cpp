@@ -21,7 +21,7 @@ const char*	Cgi::CgiError::what() const throw() {
 	return "cgi failed";
 }
 
-Cgi::Cgi(Request *request) : _request(request), _header(""), _contentLength(0)
+Cgi::Cgi(Request *request) : _request(request), _header(""), _contentLength(0), _status(200)
 {
 	const t_location	*loc = request->getLocation();
 
@@ -43,12 +43,11 @@ Cgi::~Cgi() {
 ** Getters
 */
 
-const size_t&		Cgi::getContentLength(void) const { return this->_contentLength; }
-const std::string&	Cgi::getExtension(void)     const { return this->_extension; }
-const std::string&	Cgi::getProgram(void)       const { return this->_program; }
-char**				Cgi::getEnv(void)           const { return this->_env; }
-
-bool				Cgi::timeout(void)           const { return this->_timeout; }
+const size_t&		Cgi::getContentLength(void)	const { return this->_contentLength; }
+const std::string&	Cgi::getExtension(void)		const { return this->_extension; }
+const std::string&	Cgi::getProgram(void)		const { return this->_program; }
+char**				Cgi::getEnv(void)			const { return this->_env; }
+const int&			Cgi::getStatus(void)		const { return this->_status; }
 
 std::string	Cgi::getHeaderData(const std::string &data) {
 	std::vector<std::string> lines = split_string(this->_header, NEW_LINE);
@@ -118,6 +117,8 @@ void    Cgi::clear() {
 	}
 }
 
+void	Cgi::setStatus(const int& status) { this->_status = status; }
+
 /* Set the CGI environment variables.
 CGI Environment variables contain data about the transaction
 between the client and the server. */
@@ -180,27 +181,29 @@ void	Cgi::setContentLength(const std::string &output) {
 		this->_contentLength -= pos + 4;
 }
 
+/* Check if the cgi failed or timeout */
 void	Cgi::handleProcess(int pid, time_t beginTime) {
 
 	int		status = 0;
 	double	seconds;
 
-	while ((seconds = difftime(time(NULL), beginTime)) < TIME_MAX)
+	while ((seconds = difftime(time(NULL), beginTime)) < TIMEOUT)
 	{
 		if (waitpid(-1, &status, WNOHANG) == pid)
 			break ;
 		usleep(100);
 	}
 
-	this->_timeout = seconds == TIME_MAX ? 1 : 0;
-
-	if (this->_timeout) {
+	if (seconds == TIMEOUT) {
+		this->_status = 408;
 		kill(pid, SIGKILL);
-		throw CgiError();
 	}
-
-	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
-		throw CgiError();
+	else if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
+		this->_status = 502;
+	else
+		return ;
+	
+	throw CgiError();
 }
 
 /* Executes the CGI program on a file.

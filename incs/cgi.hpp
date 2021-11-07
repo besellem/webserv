@@ -31,9 +31,9 @@ class Cgi
 		char**				getEnv(void) const;
 		const std::string	getEnv(const std::string &);
 		std::string			getHeaderData(const std::string &);
+		const int&			getStatus(void) const;
 
-		bool				timeout(void) const;
-		void				handleProcess(int, time_t);
+		void				setStatus(const int &);
 	
 		std::string			execute(void);
 		void				clear(void);
@@ -44,7 +44,7 @@ class Cgi
 		Cgi& 			operator=(const Cgi &);
 		std::string		getOuput(int);
 		void			setContentLength(const std::string &);
-		int				setStatusCode();
+		void			handleProcess(int, time_t);
 		void			setEnv();
 
 	public:
@@ -62,7 +62,7 @@ class Cgi
 		Request*			_request;
 		std::string			_header;
 		size_t				_contentLength;
-		bool				_timeout;
+		int					_status;
 		
 };
 
