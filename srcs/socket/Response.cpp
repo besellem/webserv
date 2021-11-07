@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/07 22:39:31 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/07 22:58:12 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 _BEGIN_NS_WEBSERV
 
-Response::Response(Request *req) : _contentLength(0), _request(req), _location(req->getLocation()) {
+Response::Response(Request *req) : _request(req), _location(req->getLocation()) {
     if (_location && !_location->cgi.first.empty())
         _cgi = new Cgi(req);
 		
@@ -33,7 +33,7 @@ Response::~Response() {
 
 const std::string&  			Response::getHeader(void) const { return this->_header; }
 const std::string&  			Response::getContent(void) const { return this->_content; }
-const size_t&       			Response::getContentLength(void) const { return this->_contentLength; }
+size_t       					Response::getContentLength(void) const { return this->_content.size(); }
 const Response::status_type&	Response::getStatus(void) const {return this->_status; }
 
 /*
@@ -66,15 +66,15 @@ void    Response::setHeader(void)
     this->_header = HTTP_PROTOCOL_VERSION " ";
 	this->_header += std::to_string(this->_status.first) + " ";
 	this->_header += this->_status.second + NEW_LINE;
-	this->_header += "Content-Length: " + std::to_string(this->_contentLength);
+	this->_header += "Content-Length: " + std::to_string(this->_content.size()) + NEW_LINE;
 	if (this->_status.first >= 300 && this->_status.first <= 400)
 	{
-		this->_header += NEW_LINE;
 		this->_header += "Location: ";
 		if (this->_cgi && !this->_cgi->getHeaderData("Location").empty())
 			this->_header += this->_cgi->getHeaderData("Location");
 		else
 			this->_header += this->_location->redirection.second;
+		this->_header += NEW_LINE;
 	}
 }
 
@@ -111,8 +111,6 @@ void	Response::getMethod(const std::string &file_content) {
 	// Default case
 	else
 		this->_content = file_content;
-	this->_contentLength = this->_content.size();
-	this->_content = NEW_LINE + this->_content;
 }
 
 void	Response::postMethod(void) {
@@ -123,7 +121,7 @@ void	Response::postMethod(void) {
 		if (uploadFile() == true)
 			return ;
 	
-	this->_content = NEW_LINE + this->_request->getContent();
+	this->_content = this->_request->getContent();
 }
 
 void	Response::deleteMethod(void) {
@@ -143,7 +141,6 @@ void	Response::cgi(void) {
 	{
 		this->_content = this->_cgi->execute();
 		this->setStatus(this->_cgi->getStatus());
-		this->_contentLength = this->_cgi->getContentLength();
 	}
 	catch(const std::exception& e)
 	{
@@ -192,8 +189,7 @@ void Response::setErrorContent(void)
 	// Default error page setup case
 	if (it != this->_request->getServer()->errorPages().end() && is_valid_path(it->second))
 	{
-		this->_content = NEW_LINE + getFileContent(it->second);
-		this->_contentLength = this->_content.size() - 2;
+		this->_content = getFileContent(it->second);
 		return ;
 	}
 	
@@ -230,8 +226,7 @@ void Response::setErrorContent(void)
 	content += "</small></h1></div>\n";
 	content += "</body>\n";
 	
-	this->_content = NEW_LINE + content;
-	this->_contentLength = content.size();
+	this->_content = content;
 }
 
 const std::string	Response::generateAutoindexPage(std::string const &path) const

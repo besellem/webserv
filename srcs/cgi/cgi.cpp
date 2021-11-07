@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/07 22:43:56 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/07 22:57:54 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ const char*	Cgi::CgiError::what() const throw() {
 	return "cgi failed";
 }
 
-Cgi::Cgi(Request *request) : _request(request), _header(""), _contentLength(0), _status(200)
+Cgi::Cgi(Request *request) : _request(request), _header(""), _status(200)
 {
 	const t_location	*loc = request->getLocation();
 
@@ -43,7 +43,6 @@ Cgi::~Cgi() {
 ** Getters
 */
 
-const size_t&		Cgi::getContentLength(void)	const { return this->_contentLength; }
 const std::string&	Cgi::getExtension(void)		const { return this->_extension; }
 const std::string&	Cgi::getProgram(void)		const { return this->_program; }
 char**				Cgi::getEnv(void)			const { return this->_env; }
@@ -123,11 +122,9 @@ void    Cgi::clear() {
 
 /* Modify the status according to the header */
 void	Cgi::setStatus(void) {
-	int	status;
-	
-	std::stringstream(this->getHeaderData("Status")) >> status;
-	if (status)
-		this->_status = status;
+	std::string status = this->getHeaderData("Status");
+	if (!status.empty())
+		std::stringstream(status) >> this->_status;
 }
 
 /* Set the CGI environment variables.
@@ -181,15 +178,6 @@ std::string	Cgi::getOuput(int fd)
 		output += buffer;
 	}
 	return output;
-}
-
-void	Cgi::setContentLength(const std::string &output) {
-	this->_contentLength = output.size();
-	
-	// Subtract the size of the Cgi header
-	size_t pos = output.find(DELIMITER); // delimiter
-	if (pos != std::string::npos)
-		this->_contentLength -= pos + 4;
 }
 
 /* Check if the cgi failed or timeout */
@@ -262,7 +250,6 @@ std::string Cgi::execute(void)
 	this->handleProcess(pid, beginTime);
 
 	content = this->getOuput(fdOut[0]);
-	this->setContentLength(content);
 	close(fdOut[0]);
 
 	this->_header = content.substr(0, content.find(DELIMITER));
@@ -270,7 +257,7 @@ std::string Cgi::execute(void)
 	// remove cgi header
 	size_t pos = content.find(DELIMITER);
 	if (std::string::npos != pos)
-		content = content.substr(pos + 2);
+		content = content.substr(pos + 4);
 	
 	this->setStatus();
 		
