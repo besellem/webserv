@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 00:36:05 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 17:40:26 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/07 22:32:30 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ class Cgi
 		std::string			getHeaderData(const std::string &);
 		const int&			getStatus(void) const;
 
-		void				setStatus(const int &);
 	
 		std::string			execute(void);
 		void				clear(void);
@@ -45,7 +44,8 @@ class Cgi
 		std::string		getOuput(int);
 		void			setContentLength(const std::string &);
 		void			handleProcess(int, time_t);
-		void			setEnv();
+		void			setEnv(void);
+		void			setStatus(void);
 
 	public:
 		class CgiError : public std::exception

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/07 20:15:57 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/07 22:43:56 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,11 @@ const std::string	Cgi::getEnv(const std::string &varName)
 	}
 	switch (i)
 	{
-	case 0: return std::to_string(_request->getContent().size());
+	case 0:
+		if (_request->getHeader().request_method == "GET")
+			return std::to_string(_request->getHeader().queryString.size());
+		else
+			return std::to_string(_request->getContent().size());
 	case 1: return vectorJoin(_request->getHeader().data["Content-Type"], '\0');
 	case 2: return "CGI/1.1";
 	case 3: return _request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);
@@ -117,7 +121,14 @@ void    Cgi::clear() {
 	}
 }
 
-void	Cgi::setStatus(const int& status) { this->_status = status; }
+/* Modify the status according to the header */
+void	Cgi::setStatus(void) {
+	int	status;
+	
+	std::stringstream(this->getHeaderData("Status")) >> status;
+	if (status)
+		this->_status = status;
+}
 
 /* Set the CGI environment variables.
 CGI Environment variables contain data about the transaction
@@ -254,10 +265,21 @@ std::string Cgi::execute(void)
 	this->setContentLength(content);
 	close(fdOut[0]);
 
+	this->_header = content.substr(0, content.find(DELIMITER));
+	
+	// remove cgi header
+	size_t pos = content.find(DELIMITER);
+	if (std::string::npos != pos)
+		content = content.substr(pos + 2);
+	
+	this->setStatus();
+		
 	// ##################################################################
 	if (DEBUG)
 	{
 		std::cout << "request content :\n" << this->_request->getContent() << std::endl;
+		std::cout << "............ CGI HEADER ............." <<std::endl;
+		std::cout << this->_header << std::endl;
 		std::cout << "............ CGI ENVIRON ............." <<std::endl;
 		int i = -1;
 		while(this->_env && this->_env[++i])
@@ -265,13 +287,6 @@ std::string Cgi::execute(void)
 		std::cout << "......................................" <<std::endl;
 	}
 	// ##################################################################
-	
-	this->_header = content.substr(0, content.find(DELIMITER));
-	
-	// remove cgi header
-	size_t pos = content.find(DELIMITER);
-	if (std::string::npos != pos)
-		content = content.substr(content.find(DELIMITER));
 	
 	return content;
 }

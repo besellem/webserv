@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/07 22:19:08 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/07 22:39:31 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,14 +138,11 @@ void	Response::cgi(void) {
 	
 	 if (this->_status.first != 200)
 	 	return ;
-	
+		 
 	try
 	{
-		int status;
 		this->_content = this->_cgi->execute();
-		std::stringstream(this->_cgi->getHeaderData("Status")) >> status;
-		if (!status)
-			this->setStatus(status);
+		this->setStatus(this->_cgi->getStatus());
 		this->_contentLength = this->_cgi->getContentLength();
 	}
 	catch(const std::exception& e)
@@ -170,13 +167,8 @@ void    Response::setContent(const std::string &file_content)
 	this->isMethodAllowed(this->_request->getHeader().request_method);
 	
 	// CGI case
-	if (this->_cgi && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension()) {
+	if (this->_cgi && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension())
 		this->cgi();
-		// if (pthread_create(&_tid, NULL, handleThread, (void*)this) != 0) {
-		// 	std::cout << "response thread failed!" << std::endl;
-		// 	exit(1);
-		// }
-	}
 	// GET case
 	else if (this->_request->getHeader().request_method == "GET")
 		this->getMethod(file_content);
