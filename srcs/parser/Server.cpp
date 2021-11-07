@@ -123,9 +123,9 @@ void	Server::setAutoIndex(t_location  *loc, const tokens_type &tok) {
 }
 
 void	Server::setRedirection(t_location  *loc, const tokens_type &tok) {
-     if (tok.size() != 3)
+     if (tok.size() != 3 || !ft_isNumeric(tok[1]))
         throw WebServer::ParsingError();
-    loc->redirection.first = atoi(tok[1].c_str());
+    std::stringstream(tok[1]) >> loc->redirection.first;
     if (loc->redirection.first != 307 && loc->redirection.first != 308
         && (loc->redirection.first < 300 || loc->redirection.first > 304))
         throw WebServer::ParsingError();
