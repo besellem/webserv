@@ -194,6 +194,8 @@ std::string Cgi::execute(void)
 	if (pipe(fdIn) == SYSCALL_ERR || pipe(fdOut) == SYSCALL_ERR)
 		throw CgiError();
 
+	fcntl(fdOut[0], F_SETFL, O_NONBLOCK); 
+	fcntl(fdOut[1], F_SETFL, O_NONBLOCK); 
 
 	// Send variables to the standard input of the program
 	if (write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size()) < 0)
@@ -222,7 +224,11 @@ std::string Cgi::execute(void)
 	close(fdIn[0]);
 	close(fdIn[1]);
 	
-	waitpid(-1, &status, 0);
+	while (1)
+	{
+		std::cout << "test\n";
+		waitpid(pid, &status, 0);
+	}
 	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
 		throw CgiError();
 
