@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 14:27:23 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/04 18:58:03 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/07 15:18:48 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,9 @@
 _BEGIN_NS_WEBSERV
 
 class Epoll {
+	public:
+		typedef std::map<const int, Socket>	conn_type;
+
 	public:
 		explicit Epoll(Socket *, int const &);
 		~Epoll(void);
@@ -71,6 +74,8 @@ class Epoll {
 		*/
 		void	handleRequest(int const &, Socket &);
 
+		static void	*handleThread(void *arg);
+
 	private:
 		Socket				*_serverSocks;
 		int					_serverSize;
@@ -79,6 +84,12 @@ class Epoll {
 		static const int	_nEvents = 1024;	// max tigger event list
 		struct kevent		_chlist[_nEvents]; 			// listen event list
 		struct kevent		_evlist[_nEvents];	// tigger event list
+
+		struct kevent		_currEvt;
+		conn_type			_sockConn;
+		Socket				_tmp;
+
+		__unused pthread_t	_tid;
 };
 
 _END_NS_WEBSERV

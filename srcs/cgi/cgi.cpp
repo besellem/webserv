@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/05 14:29:49 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/07 14:24:36 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,7 +159,7 @@ std::string	Cgi::getOuput(int fd)
 	int			ret;
 	char		buffer[BUFFER_SIZE];
 	std::string	output;
-	
+
 	ret = 1;
 	while (ret > 0)
 	{
@@ -184,7 +184,7 @@ Returns the output in a string */
 std::string Cgi::execute(void)
 {
 	pid_t		pid;
-	int			status = 0;
+	__unused int			status = 0;
 	int			fdIn[2];
 	int			fdOut[2];
 	std::string	content;
@@ -217,11 +217,11 @@ std::string Cgi::execute(void)
 		execve(this->_program.c_str(), NULL, this->_env);
 		exit(EXIT_FAILURE);
 	}
-	
+
 	close(fdOut[1]);
 	close(fdIn[0]);
 	close(fdIn[1]);
-	
+
 	waitpid(-1, &status, 0);
 	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
 		throw CgiError();
