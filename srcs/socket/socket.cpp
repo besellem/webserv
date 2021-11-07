@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/06 21:49:53 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/07 17:11:05 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,6 +96,7 @@ void	Socket::readHttpRequest(Request *request, int socket_fd)
 		ret = recv(socket_fd, request->getHeader().buf, sizeof(request->getHeader().buf), 0);
 		if (SYSCALL_ERR == ret)
 		{
+			// return true;
 			break ;
 			// if (errno == EAGAIN || errno == EWOULDBLOCK)
 			// 	break;
@@ -105,13 +106,15 @@ void	Socket::readHttpRequest(Request *request, int socket_fd)
 		else if (0 == ret)
 		{
 			std::cout << "Client disconnected" << std::endl;
-			break;
+			// return false;
+			break ;
 		}
 		else
 		{
 			request->getHeader().buf[ret] = '\0';
 			request->getHeader().content += request->getHeader().buf;
 		}
+		// return true;
 	}
 
 	if (DEBUG)

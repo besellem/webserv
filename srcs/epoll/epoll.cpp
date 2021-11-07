@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/07 16:50:40 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/07 17:12:00 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,12 +96,12 @@ void	Epoll::serverLoop(void) {
 					continue ;
 				}
 
-				if (pthread_create(&_tid, NULL, handleThread, (void*)this) != 0) {
-					close(_currEvt.ident);
-					errorExit("thread failed!");
-				}
-				// handleRequest(_currEvt.ident, _tmp);
-				// clientDisconnect(_currEvt.ident, _sockConn);
+				// if (pthread_create(&_tid, NULL, handleThread, (void*)this) != 0) {
+				// 	close(_currEvt.ident);
+				// 	errorExit("thread failed!");
+				// }
+				handleRequest(_currEvt.ident, _tmp);
+				clientDisconnect(_currEvt.ident, _sockConn);
 			}
 		}
 	}
@@ -113,6 +113,7 @@ void	*Epoll::handleThread(void *arg) {
 	Socket	tmp = obj->_tmp;
 	int		currentFd = obj->_currEvt.ident;
 
+	// if (obj->handleRequest(currentFd, tmp) == true)
 	obj->handleRequest(currentFd, tmp);
 	obj->clientDisconnect(currentFd, obj->_sockConn);
 	pthread_exit(NULL);
@@ -199,6 +200,10 @@ void	Epoll::handleRequest(int const & fd, Socket & sock) {
 
 	Request	request(sock.getServer());
 
+	// if (sock.readHttpRequest(&request, fd) == false) {
+	// 	clientDisconnect(fd, _sockConn);
+	// 	return false;
+	// }
 	sock.readHttpRequest(&request, fd);
 	try {
 		sock.resolveHttpRequest(&request);
@@ -207,6 +212,7 @@ void	Epoll::handleRequest(int const & fd, Socket & sock) {
 	catch (std::exception &e) {
 		EXCEPT_WARNING(e);
 	}
+	// return true;
 }
 
 _END_NS_WEBSERV
