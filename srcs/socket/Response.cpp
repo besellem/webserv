@@ -147,7 +147,10 @@ void	Response::cgi(void) {
 	}
 	catch(const std::exception& e)
 	{
-		this->setStatus(500);
+		if (this->_cgi->timeout())
+			this->setStatus(408);
+		else
+			this->setStatus(500);
 		EXCEPT_WARNING(e);
 	}
 }

@@ -43,10 +43,12 @@ Cgi::~Cgi() {
 ** Getters
 */
 
-const size_t&		Cgi::getContentLength() const { return this->_contentLength; }
-const std::string&	Cgi::getExtension()     const { return this->_extension; }
-const std::string&	Cgi::getProgram()       const { return this->_program; }
-char**				Cgi::getEnv()           const { return this->_env; }
+const size_t&		Cgi::getContentLength(void) const { return this->_contentLength; }
+const std::string&	Cgi::getExtension(void)     const { return this->_extension; }
+const std::string&	Cgi::getProgram(void)       const { return this->_program; }
+char**				Cgi::getEnv(void)           const { return this->_env; }
+
+bool				Cgi::timeout(void)           const { return this->_timeout; }
 
 std::string	Cgi::getHeaderData(const std::string &data) {
 	std::vector<std::string> lines = split_string(this->_header, NEW_LINE);
@@ -160,10 +162,9 @@ std::string	Cgi::getOuput(int fd)
 	char		buffer[BUFFER_SIZE];
 	std::string	output;
 	
-	ret = 1;
-	while (ret > 0)
+	fcntl(fd, F_SETFL, O_NONBLOCK);
+	while ((ret = read(fd, buffer, sizeof(buffer) - 1)) > 0)
 	{
-		ret = read(fd, buffer, sizeof(buffer) - 1);
 		buffer[ret] = 0;
 		output += buffer;
 	}
@@ -179,12 +180,34 @@ void	Cgi::setContentLength(const std::string &output) {
 		this->_contentLength -= pos + 4;
 }
 
+void	Cgi::handleProcess(int pid, time_t beginTime) {
+
+	int		status = 0;
+	double	seconds;
+
+	while ((seconds = difftime(time(NULL), beginTime)) < TIME_MAX)
+	{
+		if (waitpid(-1, &status, WNOHANG) == pid)
+			break ;
+		usleep(100);
+	}
+
+	this->_timeout = seconds == TIME_MAX ? 1 : 0;
+
+	if (this->_timeout) {
+		kill(pid, SIGKILL);
+		throw CgiError();
+	}
+
+	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
+		throw CgiError();
+}
+
 /* Executes the CGI program on a file.
 Returns the output in a string */
 std::string Cgi::execute(void)
 {
 	pid_t		pid;
-	int			status = 0;
 	int			fdIn[2];
 	int			fdOut[2];
 	std::string	content;
@@ -194,13 +217,11 @@ std::string Cgi::execute(void)
 	if (pipe(fdIn) == SYSCALL_ERR || pipe(fdOut) == SYSCALL_ERR)
 		throw CgiError();
 
-	fcntl(fdOut[0], F_SETFL, O_NONBLOCK); 
-	fcntl(fdOut[1], F_SETFL, O_NONBLOCK); 
-
 	// Send variables to the standard input of the program
 	if (write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size()) < 0)
 		throw CgiError();
 
+	time_t beginTime = time(NULL);
 	if ((pid = fork()) == SYSCALL_ERR)
 		throw CgiError();
 	else if (pid == 0)
@@ -223,14 +244,8 @@ std::string Cgi::execute(void)
 	close(fdOut[1]);
 	close(fdIn[0]);
 	close(fdIn[1]);
-	
-	while (1)
-	{
-		std::cout << "test\n";
-		waitpid(pid, &status, 0);
-	}
-	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
-		throw CgiError();
+
+	this->handleProcess(pid, beginTime);
 
 	content = this->getOuput(fdOut[0]);
 	this->setContentLength(content);
@@ -251,7 +266,9 @@ std::string Cgi::execute(void)
 	this->_header = content.substr(0, content.find(DELIMITER));
 	
 	// remove cgi header
-	content = content.substr(content.find(DELIMITER));
+	size_t pos = content.find(DELIMITER);
+	if (std::string::npos != pos)
+		content = content.substr(content.find(DELIMITER));
 	
 	return content;
 }

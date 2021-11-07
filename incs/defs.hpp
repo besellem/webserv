@@ -44,6 +44,10 @@
 # define OFF          0
 # define ON           1
 
+/* timeout */
+# define TIME_MAX     3
+
+
 /** @brief epoll utils define */
 # define EP_EVENTS    2 // 2: read / write
 
@@ -105,6 +109,8 @@
 # include <vector>
 # include <list>
 # include <algorithm>
+
+#include <signal.h>
 
 # include "utils.hpp"
 
