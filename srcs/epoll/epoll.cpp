@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/07 15:25:38 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/07 16:50:40 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,8 +110,11 @@ void	Epoll::serverLoop(void) {
 void	*Epoll::handleThread(void *arg) {
 	Epoll *obj = static_cast<Epoll*>(arg);
 
-	obj->handleRequest(obj->_currEvt.ident, obj->_tmp);
-	obj->clientDisconnect(obj->_currEvt.ident, obj->_sockConn);
+	Socket	tmp = obj->_tmp;
+	int		currentFd = obj->_currEvt.ident;
+
+	obj->handleRequest(currentFd, tmp);
+	obj->clientDisconnect(currentFd, obj->_sockConn);
 	pthread_exit(NULL);
 }
 
@@ -170,7 +173,7 @@ bool	Epoll::clientConnect(int const & toConnect, std::map<const int, Socket> & _
 	EV_SET(&_chlist[i], newSock, EVFILT_READ, EV_ADD, 0, 0, 0);
 	int addEvts = kevent(_epollFd, _chlist + i, 1, NULL, 0, NULL);
 	if (addEvts < 0)
-		errorExit("kevent failed in loop");
+		errorExit("kevent failed in add");
 
 	return true;
 }
@@ -184,7 +187,7 @@ void	Epoll::clientDisconnect(int const & toClose, std::map<const int, Socket> & 
 	EV_SET(&_chlist[servI], toClose, EVFILT_READ, EV_DELETE, 0, 0, 0);
 	int delEvts = kevent(_epollFd, _chlist + servI, 1, NULL, 0, NULL);
 	if (delEvts < 0)
-		errorExit("kevent failed in loop");
+		errorExit("kevent failed in delete");
 
 	_sockConn.erase(toClose);
 	close(toClose);
