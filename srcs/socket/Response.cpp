@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/06 16:45:46 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/07 22:16:41 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,10 +141,11 @@ void	Response::cgi(void) {
 	
 	try
 	{
+		int status;
 		this->_content = this->_cgi->execute();
-		std::string status = this->_cgi->getHeaderData("Status").c_str();
-		if (!status.empty())
-			this->setStatus(atoi(status.c_str()));
+		std::stringstream(this->_cgi->getHeaderData("Status")) >> status;
+		if (!status)
+			this->setStatus(status);
 		this->_contentLength = this->_cgi->getContentLength();
 	}
 	catch(const std::exception& e)
