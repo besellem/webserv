@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/07 18:12:28 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/07 20:15:57 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ const char*	Cgi::CgiError::what() const throw() {
 	return "cgi failed";
 }
 
-Cgi::Cgi(Request *request) : _request(request), _header(""), _contentLength(0)
+Cgi::Cgi(Request *request) : _request(request), _header(""), _contentLength(0), _status(200)
 {
 	const t_location	*loc = request->getLocation();
 
@@ -43,10 +43,11 @@ Cgi::~Cgi() {
 ** Getters
 */
 
-const size_t&		Cgi::getContentLength() const { return this->_contentLength; }
-const std::string&	Cgi::getExtension()     const { return this->_extension; }
-const std::string&	Cgi::getProgram()       const { return this->_program; }
-char**				Cgi::getEnv()           const { return this->_env; }
+const size_t&		Cgi::getContentLength(void)	const { return this->_contentLength; }
+const std::string&	Cgi::getExtension(void)		const { return this->_extension; }
+const std::string&	Cgi::getProgram(void)		const { return this->_program; }
+char**				Cgi::getEnv(void)			const { return this->_env; }
+const int&			Cgi::getStatus(void)		const { return this->_status; }
 
 std::string	Cgi::getHeaderData(const std::string &data) {
 	std::vector<std::string> lines = split_string(this->_header, NEW_LINE);
@@ -116,6 +117,8 @@ void    Cgi::clear() {
 	}
 }
 
+void	Cgi::setStatus(const int& status) { this->_status = status; }
+
 /* Set the CGI environment variables.
 CGI Environment variables contain data about the transaction
 between the client and the server. */
@@ -159,11 +162,10 @@ std::string	Cgi::getOuput(int fd)
 	int			ret;
 	char		buffer[BUFFER_SIZE];
 	std::string	output;
-
-	ret = 1;
-	while (ret > 0)
+	
+	// fcntl(fd, F_SETFL, O_NONBLOCK);
+	while ((ret = read(fd, buffer, sizeof(buffer) - 1)) > 0)
 	{
-		ret = read(fd, buffer, sizeof(buffer) - 1);
 		buffer[ret] = 0;
 		output += buffer;
 	}
@@ -179,12 +181,36 @@ void	Cgi::setContentLength(const std::string &output) {
 		this->_contentLength -= pos + 4;
 }
 
+/* Check if the cgi failed or timeout */
+void	Cgi::handleProcess(int pid, time_t beginTime) {
+
+	int		status = 0;
+	double	seconds;
+
+	while ((seconds = difftime(time(NULL), beginTime)) < TIMEOUT)
+	{
+		if (waitpid(-1, &status, WNOHANG) == pid)
+			break ;
+		usleep(100);
+	}
+
+	if (seconds == TIMEOUT) {
+		this->_status = 408;
+		kill(pid, SIGKILL);
+	}
+	else if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
+		this->_status = 502;
+	else
+		return ;
+	
+	throw CgiError();
+}
+
 /* Executes the CGI program on a file.
 Returns the output in a string */
 std::string Cgi::execute(void)
 {
 	pid_t		pid;
-	__unused int			status = 0;
 	int			fdIn[2];
 	int			fdOut[2];
 	std::string	content;
@@ -198,6 +224,7 @@ std::string Cgi::execute(void)
 	if (write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size()) < 0)
 		throw CgiError();
 
+	time_t beginTime = time(NULL);
 	if ((pid = fork()) == SYSCALL_ERR)
 		throw CgiError();
 	else if (pid == 0)
@@ -221,9 +248,7 @@ std::string Cgi::execute(void)
 	close(fdIn[0]);
 	close(fdIn[1]);
 
-	waitpid(-1, &status, WNOHANG);
-	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
-		throw CgiError();
+	this->handleProcess(pid, beginTime);
 
 	content = this->getOuput(fdOut[0]);
 	this->setContentLength(content);
@@ -244,7 +269,9 @@ std::string Cgi::execute(void)
 	this->_header = content.substr(0, content.find(DELIMITER));
 	
 	// remove cgi header
-	content = content.substr(content.find(DELIMITER));
+	size_t pos = content.find(DELIMITER);
+	if (std::string::npos != pos)
+		content = content.substr(content.find(DELIMITER));
 	
 	return content;
 }

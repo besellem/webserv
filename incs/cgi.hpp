@@ -25,25 +25,28 @@ class Cgi
 		Cgi(Request *);
 		~Cgi();
 		
-		const size_t&		getContentLength() const;
-		const std::string&	getExtension() const;
-		const std::string&	getProgram() const;
-		char**				getEnv() const;
+		const size_t&		getContentLength(void) const;
+		const std::string&	getExtension(void) const;
+		const std::string&	getProgram(void) const;
+		char**				getEnv(void) const;
 		const std::string	getEnv(const std::string &);
 		std::string			getHeaderData(const std::string &);
+		const int&			getStatus(void) const;
+
+		void				setStatus(const int &);
 	
 		std::string			execute(void);
-		void				clear();
-		
+		void				clear(void);
+
 	private:
-		Cgi();
+		Cgi(void);
 		Cgi(const Cgi &);
 		Cgi& 			operator=(const Cgi &);
 		std::string		getOuput(int);
 		void			setContentLength(const std::string &);
-		int				setStatusCode();
+		void			handleProcess(int, time_t);
 		void			setEnv();
-		
+
 	public:
 		class CgiError : public std::exception
 		{
@@ -59,6 +62,7 @@ class Cgi
 		Request*			_request;
 		std::string			_header;
 		size_t				_contentLength;
+		int					_status;
 		
 };
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/07 18:16:13 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/07 20:16:34 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,16 +45,18 @@ void    Response::setStatus(const status_type& status) {
 }
 
 void    Response::setStatus(int code) {
-	int 		codeTab[] = {200, 202, 204 , 300, 301, 302, 303, 304, 308, 403, 404, 405, 408, 413, 500};
-	std::string actionTab[] = {"OK", "Accepted", "No Content", "Multiple Choice", "Moved Permanently",
-			"Found", "See Other", "Not Modified", "Temporary Redirect", "Forbidden", "Not Found",
-			"Method Not Allowed", "Request Timeout", "Request Entity Too Large", "Internal Server Error"};
+	int 		codeTab[] = {200, 202, 204, 300, 301, 302, 303, 304, 308, 403,
+			404, 405, 408, 413, 500, 502};
+	std::string actionTab[] = {"OK", "Accepted", "No Content", "Multiple Choice",
+			"Moved Permanently", "Found", "See Other", "Not Modified", "Temporary Redirect",
+			"Forbidden", "Not Found", "Method Not Allowed", "Request Timeout",
+			"Request Entity Too Large", "Internal Server Error", "Bad Gateway"};
 	int			i = 0;
 
 	if (this->_location && !this->_location->redirection.second.empty())
 		code = is_valid_path(ROOT_PATH + this->_location->redirection.second) ?
 			this->_location->redirection.first : 404;
-	while (i < 15 && codeTab[i] != code)
+	while (i < 16 && codeTab[i] != code)
 		++i;
 	this->_status = std::make_pair(codeTab[i], actionTab[i]);
 }
@@ -147,7 +149,10 @@ void	Response::cgi(void) {
 	}
 	catch(const std::exception& e)
 	{
-		this->setStatus(500);
+		if (this->_cgi->getStatus() == 200)
+			this->setStatus(500);
+		else
+			this->setStatus(this->_cgi->getStatus());
 		EXCEPT_WARNING(e);
 	}
 }
@@ -165,11 +170,11 @@ void    Response::setContent(const std::string &file_content)
 	
 	// CGI case
 	if (this->_cgi && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension()) {
-		// this->cgi();
-		if (pthread_create(&_tid, NULL, handleThread, (void*)this) != 0) {
-			std::cout << "response thread failed!" << std::endl;
-			exit(1);
-		}
+		this->cgi();
+		// if (pthread_create(&_tid, NULL, handleThread, (void*)this) != 0) {
+		// 	std::cout << "response thread failed!" << std::endl;
+		// 	exit(1);
+		// }
 	}
 	// GET case
 	else if (this->_request->getHeader().request_method == "GET")
