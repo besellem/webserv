@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/07 14:03:56 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/07 18:16:13 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,13 +152,25 @@ void	Response::cgi(void) {
 	}
 }
 
+void	*Response::handleThread(void *arg) {
+	Response *obj = static_cast<Response*>(arg);
+
+	obj->cgi();
+	pthread_exit(NULL);
+}
+
 void    Response::setContent(const std::string &file_content)
 {
 	this->isMethodAllowed(this->_request->getHeader().request_method);
 	
 	// CGI case
-	if (this->_cgi && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension())
-		this->cgi();
+	if (this->_cgi && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension()) {
+		// this->cgi();
+		if (pthread_create(&_tid, NULL, handleThread, (void*)this) != 0) {
+			std::cout << "response thread failed!" << std::endl;
+			exit(1);
+		}
+	}
 	// GET case
 	else if (this->_request->getHeader().request_method == "GET")
 		this->getMethod(file_content);

@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/07 14:24:36 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/07 18:12:28 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,7 +194,6 @@ std::string Cgi::execute(void)
 	if (pipe(fdIn) == SYSCALL_ERR || pipe(fdOut) == SYSCALL_ERR)
 		throw CgiError();
 
-
 	// Send variables to the standard input of the program
 	if (write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size()) < 0)
 		throw CgiError();
@@ -222,7 +221,7 @@ std::string Cgi::execute(void)
 	close(fdIn[0]);
 	close(fdIn[1]);
 
-	waitpid(-1, &status, 0);
+	waitpid(-1, &status, WNOHANG);
 	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
 		throw CgiError();
 
