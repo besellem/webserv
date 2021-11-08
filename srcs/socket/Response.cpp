@@ -120,8 +120,8 @@ void	Response::postMethod(void) {
 	if (this->_location && !this->_location->uploadStore.empty())
 		if (uploadFile() == true)
 			return ;
-	
-	this->_content = this->_request->getContent();
+	if (this->_status.first == 200)
+		this->_content = this->_request->getContent();
 }
 
 void	Response::deleteMethod(void) {
@@ -130,6 +130,12 @@ void	Response::deleteMethod(void) {
 	
 	if (std::remove(this->_request->getConstructPath().c_str()) != 0)
 		this->setStatus(403);
+	
+	this->_content = "<html>" NEW_LINE;
+	this->_content += "<body>" NEW_LINE;
+	this->_content += "<h1>File deleted.</h1>" NEW_LINE;
+	this->_content += "</body>" NEW_LINE;
+	this->_content += "</html>" NEW_LINE;
 }
 
 void	Response::cgi(void) {
@@ -194,16 +200,16 @@ void Response::setErrorContent(void)
 	}
 	
 	// Default case
-	std::string content = "<!DOCTYPE html>\n";
-	content += "<html lang=\"en\">\n";
-	content += "<head>\n";
+	std::string content = "<!DOCTYPE html>" NEW_LINE;
+	content += "<html lang=\"en\">" NEW_LINE;
+	content += "<head>" NEW_LINE;
 	content += "<meta charset=\"utf-8\" /><meta http-equiv=\"X-UA-Compatible\" ";
-	content += "content=\"IE=edge\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n";
+	content += "content=\"IE=edge\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />" NEW_LINE;
 	content += "<title>";
 	content += this->_status.second;
 	content += " | ";
 	content += std::to_string(this->_status.first);
-	content += "</title>\n";
+	content += "</title>" NEW_LINE;
 	content += "<style type=\"text/css\">";
     content += "body{margin:0}sub{bottom:-.25em}sup{top:-.5em}body,";
 	content += "html{width:100%;height:100%;background-color:#21232a}";
@@ -215,16 +221,16 @@ void Response::setErrorContent(void)
 	content += "a{text-decoration:none;color:#fff;font-size:inherit;border-bottom:dotted 1px #707070}";
 	content += ".lead{color:silver;font-size:21px;line-height:1.4}";
 	content += ".cover{display:table-cell;vertical-align:middle;padding:0 20px}";
-	content += "</style>\n";
-	content += "</head>\n";
-	content += "<body>\n";
-	content += "<body>\n";
+	content += "</style>" NEW_LINE;
+	content += "</head>" NEW_LINE;
+	content += "<body>" NEW_LINE;
+	content += "<body>" NEW_LINE;
 	content += "<div class=\"cover\"><h1>";
 	content += this->_status.second;
 	content += " <small>";
 	content += std::to_string(this->_status.first);
-	content += "</small></h1></div>\n";
-	content += "</body>\n";
+	content += "</small></h1></div>" NEW_LINE;
+	content += "</body>" NEW_LINE;
 	
 	this->_content = content;
 }
@@ -336,6 +342,7 @@ const std::string	Response::generateAutoindexPage(std::string const &path) const
 }
 
 bool	Response::uploadFile(void) {
+	LOG;
 	if (_request->parseFile() == true) {
 		std::map<std::string, std::string> fileInfo = _request->getFileInfo();
 		std::string const absolutePath = ROOT_PATH + this->_location->uploadStore;
@@ -343,18 +350,23 @@ bool	Response::uploadFile(void) {
 			std::string toUploadPath = absolutePath + it->first;
 			if (this->_request->getServer()->clientMaxBodySize() && getFileLength(toUploadPath) > this->_request->getServer()->clientMaxBodySize()) {
 				this->setStatus(413);
+				LOG;
 				return false;
 			}
 			std::ofstream ofs(toUploadPath, std::ofstream::out);
 			if (!ofs.is_open()) {
 				this->setStatus(403);
+				LOG;
 				return false;
 			}
 			ofs << it->second;
-			ofs.close();
+			// ofs.close();
+			LOG;
 		}
+		LOG;
 		return true;
 	}
+	LOG;
 	return false;
 }
 
