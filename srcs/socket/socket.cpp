@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/07 17:11:05 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/10 15:34:41 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,16 +24,16 @@ Socket::Socket(void) :
 Socket::~Socket(void)
 {}
 
-Socket::Socket(const Server *serv) :
-	_server_block(serv),
-	_port(serv->port()),
+Socket::Socket(const std::vector<Server *> serv) :
+	_server_blocks(serv),
+	_port(serv[0]->port()),
 	_addrLen(sizeof(sockaddr_in))
 {
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (SYSCALL_ERR == _serverFd)
 		errorExit("socket init");
 	_addr.sin_family = AF_INET;
-	if ((_addr.sin_addr.s_addr = inet_addr(serv->ip().c_str())) == (in_addr_t)SYSCALL_ERR)
+	if ((_addr.sin_addr.s_addr = inet_addr(serv[0]->ip().c_str())) == (in_addr_t)SYSCALL_ERR)
 		errorExit("socket address");
 	_addr.sin_port = htons(_port);
 	memset(_addr.sin_zero, 0, sizeof(_addr.sin_zero));
@@ -54,7 +54,7 @@ Socket&		Socket::operator=(const Socket &x)
 {
 	if (this == &x)
 		return *this;
-	_server_block = x._server_block;
+	_server_blocks = x._server_blocks;
 	_port = x._port;
 	_serverFd = x._serverFd;
 	_addrLen = x._addrLen;
@@ -66,9 +66,21 @@ Socket&		Socket::operator=(const Socket &x)
 
 short			Socket::getPort(void)     const { return _port; }
 int				Socket::getServerFd(void) const { return _serverFd; }
-const Server*	Socket::getServer(void)   const { return _server_block; }
 sockaddr_in		Socket::getAddr(void)     const { return _addr; }
 size_t			Socket::getAddrLen(void)  const { return _addrLen; }
+
+const Server*	Socket::getServer(void)	const { return _server_blocks[0]; }
+
+const Server*	Socket::getServer(const std::string &name) const {
+	for (size_t i = 0; i < _server_blocks.size(); i++)
+	{
+		for (size_t j = 0; j < _server_blocks[i]->name().size(); j++)
+			if (_server_blocks[i]->name()[j] == name)
+				return _server_blocks[i];
+	}
+
+	return _server_blocks[0];
+}
 
 void	Socket::startSocket(void)
 {

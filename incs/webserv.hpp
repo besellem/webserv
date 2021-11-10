@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/06 17:07:19 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/10 15:22:29 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,10 @@ class WebServer {
 
 		void				createServers(void);
 
+	private:
+		size_t					countSocket() const;
+		std::vector<Server *>	getSocketConfigs(size_t& index);
+
 	public:
 		class ParsingError : public std::exception
 		{
@@ -49,7 +53,7 @@ class WebServer {
                 ParsingError();
 				virtual const char*	what() const throw();
 		};
-
+		
 	private:
 		ServerGenerator		_servers;
 		Socket				*_socks;
