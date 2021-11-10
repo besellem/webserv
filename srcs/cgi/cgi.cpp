@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/10 16:42:16 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/10 17:27:01 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,12 +170,9 @@ std::string	Cgi::getOuput(int fd)
 	int			ret;
 	char		buffer[BUFFER_SIZE];
 	std::string	output;
-
-	if (SYSCALL_ERR == fcntl(fd, F_SETFL, O_NONBLOCK))
-		exit(1);
-
-	ret = 1;
-	while (ret > 0)
+	
+	// fcntl(fd, F_SETFL, O_NONBLOCK);
+	while ((ret = read(fd, buffer, sizeof(buffer) - 1)) > 0)
 	{
 		buffer[ret] = 0;
 		output += buffer;
@@ -184,29 +181,29 @@ std::string	Cgi::getOuput(int fd)
 }
 
 /* Check if the cgi failed or timeout */
-void	Cgi::handleProcess(int pid, time_t beginTime) {
+// void	Cgi::handleProcess(int pid, time_t beginTime) {
 
-	int		status = 0;
-	double	seconds;
+// 	int		status = 0;
+// 	double	seconds;
 
-	while ((seconds = difftime(time(NULL), beginTime)) < TIMEOUT)
-	{
-		if (waitpid(-1, &status, WNOHANG) == pid)
-			break ;
-		usleep(100);
-	}
+// 	while ((seconds = difftime(time(NULL), beginTime)) < TIMEOUT)
+// 	{
+// 		if (waitpid(-1, &status, WNOHANG) == pid)
+// 			break ;
+// 		usleep(100);
+// 	}
 
-	if (seconds == TIMEOUT) {
-		this->_status = 408;
-		kill(pid, SIGKILL);
-	}
-	else if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
-		this->_status = 502;
-	else
-		return ;
+// 	if (seconds == TIMEOUT) {
+// 		this->_status = 408;
+// 		kill(pid, SIGKILL);
+// 	}
+// 	else if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
+// 		this->_status = 502;
+// 	else
+// 		return ;
 	
-	throw CgiError();
-}
+// 	throw CgiError();
+// }
 
 /* Executes the CGI program on a file.
 Returns the output in a string */
@@ -227,7 +224,7 @@ std::string Cgi::execute(void)
 	if (write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size()) < 0)
 		throw CgiError();
 
-	time_t beginTime = time(NULL);
+	// time_t beginTime = time(NULL);
 	if ((pid = fork()) == SYSCALL_ERR)
 		throw CgiError();
 	else if (pid == 0)

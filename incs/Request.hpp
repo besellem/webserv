@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/04 15:20:42 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/10 18:44:34 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,10 +41,11 @@ class Request
 		Request(const Server *);
 		~Request();
 
-	private:
-		Request();
+		Request() {}
 		Request(const Request &);
 		Request&			operator=(const Request &);
+
+	private:
 
 	public:
 		HttpHeader&			getHeader(void);

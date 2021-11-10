@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 14:27:23 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/10 16:25:35 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/10 18:59:14 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ class Epoll {
 		 * @brief handling events, receive and send request
 		 * coming soon ...
 		*/
-		void	_handleRequest(int const &, Socket &);
+		void	_handleRequest(struct kevent const &, Socket &);
 
 	private:
 		Socket				*_serverSocks;

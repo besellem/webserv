@@ -3,14 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2021/11/07 18:52:15 by kaye             ###   ########.fr       */
-=======
-/*   Updated: 2021/11/07 22:58:12 by adbenoit         ###   ########.fr       */
->>>>>>> dcb919312f2130d1bec2e7a1fd1df44e9328f57f
+/*   Updated: 2021/11/10 17:25:30 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,18 +170,8 @@ void    Response::setContent(const std::string &file_content)
 	this->isMethodAllowed(this->_request->getHeader().request_method);
 	
 	// CGI case
-<<<<<<< HEAD
-	if (this->_cgi && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension()) {
-		this->cgi();
-		// if (pthread_create(&_tid, NULL, handleThread, (void*)this) != 0) {
-		// 	std::cout << "response thread failed!" << std::endl;
-		// 	exit(1);
-		// }
-	}
-=======
 	if (this->_cgi && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension())
 		this->cgi();
->>>>>>> dcb919312f2130d1bec2e7a1fd1df44e9328f57f
 	// GET case
 	else if (this->_request->getHeader().request_method == "GET")
 		this->getMethod(file_content);

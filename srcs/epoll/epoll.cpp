@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/10 16:27:15 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/10 19:02:46 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ void	Epoll::startEpoll(void) {
 		int sockFd = _serverSocks[i].getServerFd();
 
 		std::cout << "Add sock: [" << sockFd << "]" << std::endl;
-		_updateEvt(sockFd, EVFILT_READ, EV_ADD, 0, 0, NULL, "failed in init add!");
+		_updateEvt(sockFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL, "failed in init add!");
 	}
 
 	_serverLoop();
@@ -82,17 +82,17 @@ void	Epoll::_serverLoop(void) {
 					_warnMsg("Error: could not find client fd!");
 
 					_updateEvt(currEvt.ident, EVFILT_READ, EV_DELETE, 0, 0, NULL, "failed in delete write!");
-					_updateEvt(currEvt.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL, "failed in delete write!");
+					// _updateEvt(currEvt.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL, "failed in delete write!");
 
 					close(currEvt.ident);
 					continue ;
 				}
 
-				if (currEvt.flags & EV_EOF) {
-					_updateMsg("Client quit (EOF case)");
-					_clientDisconnect(currEvt.ident, _connList);
-					continue ;
-				}
+				// if (currEvt.flags & EV_EOF) {
+				// 	_updateMsg("Client quit (EOF case)");
+				// 	_clientDisconnect(currEvt.ident, _connList);
+				// 	continue ;
+				// }
 
 				Socket tmp = _checkServ(currEvt.ident, _connList);
 				if (tmp.getServerFd() == SYSCALL_ERR) {
@@ -101,7 +101,7 @@ void	Epoll::_serverLoop(void) {
 					continue ;
 				}
 				
-				_handleRequest(currEvt.ident, tmp);
+				_handleRequest(currEvt, tmp);
 				_clientDisconnect(currEvt.ident, _connList);
 			}
 		}
@@ -168,7 +168,7 @@ bool	Epoll::_clientConnect(int const & toConnect, std::map<const int, Socket> & 
 	_connList[newSock] = _serverSocks[i];
 
 	_updateEvt(newSock, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL, "failed in add read!");
-	_updateEvt(newSock, EVFILT_WRITE, EV_ADD | EV_DISABLE, 0, 0, NULL, "failed in add write!");
+	// _updateEvt(newSock, EVFILT_WRITE, EV_ADD | EV_DISABLE, 0, 0, NULL, "failed in add write!");
 
 	return true;
 }
@@ -176,23 +176,42 @@ bool	Epoll::_clientConnect(int const & toConnect, std::map<const int, Socket> & 
 void	Epoll::_clientDisconnect(int const & toClose, std::map<const int, Socket> & _connList) {
 	std::cout << "closing: [" S_RED << toClose << S_NONE "] ..."<< "\n" << std::endl;
 	_updateEvt(toClose, EVFILT_READ, EV_DELETE, 0, 0, NULL, "failed in delete!");
+	// _updateEvt(toClose, EVFILT_WRITE, EV_DELETE, 0, 0, NULL, "failed in delete!");
 
 	_connList.erase(toClose);
 	close(toClose);
 }
 
-void	Epoll::_handleRequest(int const & fd, Socket & sock) {
-	std::cout << "Reading: [" S_RED << fd << S_NONE "] ..."<< "\n" << std::endl;
+void	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
+	std::cout << "Reading: [" S_RED << currEvt.ident << S_NONE "] ..."<< "\n" << std::endl;
 	Request	request(sock.getServer());
 
-	sock.readHttpRequest(&request, fd);
+	sock.readHttpRequest(&request, currEvt.ident);
 	try {
 		sock.resolveHttpRequest(&request);
-		sock.sendHttpResponse(&request, fd);
+		sock.sendHttpResponse(&request, currEvt.ident);
 	}
 	catch (std::exception &e) {
 		EXCEPT_WARNING(e);
 	}
+
+	// if (currEvt.filter == EVFILT_READ) {
+	// 	_updateMsg("receive request (READ case)");
+
+	// 	sock.readHttpRequest(&request, currEvt.ident);
+
+	// 	_updateEvt(currEvt.ident, EVFILT_READ, EV_DISABLE, 0, 0, NULL, "failed in read disable");
+	// 	_updateEvt(currEvt.ident, EVFILT_WRITE, EV_ENABLE, 0, 0, NULL, "failed in write enable");
+	// }
+	// else if (currEvt.filter == EVFILT_WRITE) {
+	// 	_updateMsg("send reponse (WRITE case)");
+
+	// 	sock.resolveHttpRequest(&request);
+	// 	sock.sendHttpResponse(&request, currEvt.ident);
+
+	// 	_updateEvt(currEvt.ident, EVFILT_READ, EV_ENABLE, 0, 0, NULL, "failed in read enable");
+	// 	_updateEvt(currEvt.ident, EVFILT_WRITE, EV_DISABLE, 0, 0, NULL, "failed in write disable");
+	// }
 }
 
 _END_NS_WEBSERV
