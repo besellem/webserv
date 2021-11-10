@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/10 19:02:46 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/10 19:08:46 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,13 +187,8 @@ void	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 	Request	request(sock.getServer());
 
 	sock.readHttpRequest(&request, currEvt.ident);
-	try {
-		sock.resolveHttpRequest(&request);
-		sock.sendHttpResponse(&request, currEvt.ident);
-	}
-	catch (std::exception &e) {
-		EXCEPT_WARNING(e);
-	}
+	sock.resolveHttpRequest(&request);
+	sock.sendHttpResponse(&request, currEvt.ident);
 
 	// if (currEvt.filter == EVFILT_READ) {
 	// 	_updateMsg("receive request (READ case)");

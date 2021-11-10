@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/10 18:44:34 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/10 19:08:00 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,11 +37,13 @@ class Request
 	public:
 		typedef std::map<std::string, std::string>             info_type;
 		typedef std::vector<std::string>                       vector_type;
+		typedef std::vector<t_location *>                      location_type;
+		typedef std::pair<std::string, std::string>            pair_type;
 	
 		Request(const Server *);
 		~Request();
 
-		Request() {}
+	private:
 		Request(const Request &);
 		Request&			operator=(const Request &);
 
@@ -56,11 +58,13 @@ class Request
 		const t_location*	getLocation(void) const;
 		
 		
+		bool				setRequestFirstLine(const std::string &);
 		void				setConstructPath(void);
 		void				setConstructPath(const std::string &);
 		void				setContent(void);
 		void				setHeaderData(const std::string &);
 		void				setChunked(void);
+		void				setServer(const Server *);
 
 		const info_type&	getFileInfo(void) const;
 		bool				checkIsUploadCase(void);

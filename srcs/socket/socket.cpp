@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/07 18:52:36 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/10 19:07:33 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,24 +19,23 @@ Socket::Socket(void) :
 	_port(0),
 	_serverFd(SYSCALL_ERR),
 	_addrLen(sizeof(sockaddr_in))
-{}
+{
+	std::memset(&_addr, 0, sizeof(_addr));
+}
 
-Socket::~Socket(void)
-{}
-
-Socket::Socket(const Server *serv) :
-	_server_block(serv),
-	_port(serv->port()),
+Socket::Socket(const std::vector<Server *> serv) :
+	_server_blocks(serv),
+	_port(serv[0]->port()),
 	_addrLen(sizeof(sockaddr_in))
 {
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (SYSCALL_ERR == _serverFd)
 		errorExit("socket init");
 	_addr.sin_family = AF_INET;
-	if ((_addr.sin_addr.s_addr = inet_addr(serv->ip().c_str())) == (in_addr_t)SYSCALL_ERR)
+	if ((_addr.sin_addr.s_addr = inet_addr(serv[0]->ip().c_str())) == (in_addr_t)SYSCALL_ERR)
 		errorExit("socket address");
 	_addr.sin_port = htons(_port);
-	memset(_addr.sin_zero, 0, sizeof(_addr.sin_zero));
+	std::memset(_addr.sin_zero, 0, sizeof(_addr.sin_zero));
 
 	int	optval = 1;
 	if (SYSCALL_ERR == setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int))) // can rebind
@@ -50,15 +49,18 @@ Socket::Socket(const Server *serv) :
 Socket::Socket(const Socket &x)
 { *this = x; }
 
+Socket::~Socket(void)
+{}
+
 Socket&		Socket::operator=(const Socket &x)
 {
 	if (this == &x)
 		return *this;
-	_server_block = x._server_block;
+	_server_blocks = x._server_blocks;
 	_port = x._port;
 	_serverFd = x._serverFd;
 	_addrLen = x._addrLen;
-	memcpy(&_addr, &x._addr, sizeof(sockaddr_in));
+	std::memcpy(&_addr, &x._addr, sizeof(sockaddr_in));
 	return *this;
 }
 
@@ -66,9 +68,21 @@ Socket&		Socket::operator=(const Socket &x)
 
 short			Socket::getPort(void)     const { return _port; }
 int				Socket::getServerFd(void) const { return _serverFd; }
-const Server*	Socket::getServer(void)   const { return _server_block; }
 sockaddr_in		Socket::getAddr(void)     const { return _addr; }
 size_t			Socket::getAddrLen(void)  const { return _addrLen; }
+
+const Server*	Socket::getServer(void)	const { return _server_blocks[0]; }
+
+const Server*	Socket::getServer(const std::string &name) const {
+	for (size_t i = 0; i < _server_blocks.size(); i++)
+	{
+		for (size_t j = 0; j < _server_blocks[i]->name().size(); j++)
+			if (_server_blocks[i]->name()[j] == name)
+				return _server_blocks[i];
+	}
+
+	return _server_blocks[0];
+}
 
 void	Socket::startSocket(void)
 {
@@ -85,8 +99,12 @@ void	Socket::setNonBlock(int & fd)
 	}
 }
 
-/* Read the socket's http request */
-void	Socket::readHttpRequest(Request *request, int socket_fd)
+/*
+** Read the socket's http request
+**
+** @return a `enum e_read' value
+*/
+int		Socket::readHttpRequest(Request *request, int socket_fd)
 {
 	int	ret;
 
@@ -96,17 +114,12 @@ void	Socket::readHttpRequest(Request *request, int socket_fd)
 		ret = recv(socket_fd, request->getHeader().buf, sizeof(request->getHeader().buf), 0);
 		if (SYSCALL_ERR == ret)
 		{
-			// return true;
+			// return READ_FAIL; // false
 			break ;
-			// if (errno == EAGAIN || errno == EWOULDBLOCK)
-			// 	break;
-			// else
-			// 	errorExit("read http request");
 		}
 		else if (0 == ret)
 		{
 			std::cout << "Client disconnected" << std::endl;
-			// return false;
 			break ;
 		}
 		else
@@ -114,24 +127,31 @@ void	Socket::readHttpRequest(Request *request, int socket_fd)
 			request->getHeader().buf[ret] = '\0';
 			request->getHeader().content += request->getHeader().buf;
 		}
-		// return true;
 	}
 
 	if (DEBUG)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
 		std::cout << request->getHeader().content << std::endl;
-		// write(STDOUT_FILENO, request->getHeader().content.c_str(), request->getHeader().content.length());
 		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
 	}
+
+	if (0 == ret)
+		return READ_DISCONNECT;
+	else
+		return READ_OK;
 }
 
-/* Parse the http request */
-void	Socket::resolveHttpRequest(Request *request)
+/*
+** Parse the http request
+**
+** @return a `enum e_resolve' value
+*/
+int		Socket::resolveHttpRequest(Request *request)
 {
 	/* the buffer is empty, therefore the header was also empty */
 	if (request->getHeader().content.empty())
-		return ;
+		return RESOLVE_EMPTY;
 	
 	vector_type				buffer = split_string(request->getHeader().content, NEW_LINE);
 	vector_type::iterator	line = buffer.begin();
@@ -140,18 +160,12 @@ void	Socket::resolveHttpRequest(Request *request)
 	** Parse first line of request. Must be formatted like so:
 	**   GET /index.html HTTP/1.1
 	*/
-	vector_type				first_line = split_string(*line, " ");
-	if (first_line.size() != 3)
-		throw HttpHeader::HttpBadRequestError();
-	
-	request->getHeader().request_method = first_line[0];
-	request->getHeader().uri = first_line[1];
-	request->setConstructPath();
-	++line;
+	if (request->setRequestFirstLine(*line++) == false)
+		return RESOLVE_FAIL;
 
 	if (DEBUG)
 	{
-		std::cout << "Path            : [" S_CYAN << request->getHeader().uri << S_NONE "]\n";
+		std::cout << "Path            : [" S_CYAN << request->getHeader().uri    << S_NONE "]\n";
 		std::cout << "Contructed Path : [" S_CYAN << request->getConstructPath() << S_NONE "]\n";
 	}
 
@@ -165,44 +179,28 @@ void	Socket::resolveHttpRequest(Request *request)
 	{
 		request->setHeaderData(*line);
 	}
-
+	std::string name = request->getHeader().data["Host"][0];
+	// request->setServer(getServer(name));
+	
 	request->setChunked();
 	request->setContent();
 
-	/* there's some more info to parse */
-	// if (line != buffer.end() && (*line).empty())
-	// {
-	// 	++line; // first line is always empty
-		
-	// 	std::cout << S_RED "-> afterward" S_NONE << std::endl;
-
-	// 	if (request->getHeader().chunked)
-	// 	{
-	// 		for ( ; line != buffer.end(); ++line)
-	// 		{
-	// 			// std::cout << "[" << std::stoul(*line, NULL, 16) << "]" << std::endl;
-	// 			PRINT(*line);
-	// 		}
-	// 	}
-	// 	else
-	// 	{
-	// 		for ( ; line != buffer.end(); ++line)
-	// 		{
-	// 			PRINT(*line);
-	// 		}
-	// 	}
-	// 	std::cout << S_RED "-> end" S_NONE << std::endl;
-	// }
+	return RESOLVE_OK;
 }
 
-/* Construct the htttp response and send it to the server */
-void		Socket::sendHttpResponse(Request* request, int socket_fd)
+/*
+** Construct the htttp response and send it to the server
+**
+** @return a `enum e_send' value
+*/
+int		Socket::sendHttpResponse(Request* request, int socket_fd)
 {
 	Response		response(request);
 	std::string		toSend;
 	
 	if (!is_valid_path(request->getConstructPath()))
 		response.setStatus(404);
+	
 	response.setContent(getFileContent(request->getConstructPath()));
 	response.setHeader();
 	
@@ -211,7 +209,8 @@ void		Socket::sendHttpResponse(Request* request, int socket_fd)
 	toSend += response.getContent();
 
 	// -- Send to server --
-	send(socket_fd, toSend.c_str(), toSend.length(), 0);
+	if (SYSCALL_ERR == send(socket_fd, toSend.c_str(), toSend.length(), 0))
+		return SEND_FAIL;
 
 	if (DEBUG)
 	{
@@ -219,6 +218,8 @@ void		Socket::sendHttpResponse(Request* request, int socket_fd)
 		std::cout << toSend.c_str() << std::endl;
 		std::cout << "--------------------------------------" << std::endl << std::endl;
 	}
+
+	return SEND_OK;
 }
 
 /** @brief private function */
@@ -240,6 +241,5 @@ void	Socket::listenStep(const int& serverFd)
 	if (SYSCALL_ERR == listen(serverFd, SOMAXCONN))
 		errorExit("listen step");
 }
-
 
 _END_NS_WEBSERV

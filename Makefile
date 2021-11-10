@@ -3,27 +3,25 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+         #
+#    By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/18 14:30:22 by besellem          #+#    #+#              #
-#    Updated: 2021/11/07 17:04:37 by adbenoit         ###   ########.fr        #
+#    Updated: 2021/11/10 19:10:00 by kaye             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-# COMPILATION
 
+# COMPILATION
 CC		= clang++
-CFLAGS 	= -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3
+CFLAGS 	= -Wall -Wextra -Werror -std=c++98#-O3 # -fsanitize=address -g3
 IFLAGS 	= -I./incs
 
-# DIRECTORIES
 
+# DIRECTORIES
 BUILD 			:= .build
 SRC_DIR 		:= srcs
 SUB_DIR 		:= parser
 OBJ_DIR 		:= $(BUILD)/obj
-## all sub folder add here: (check exemple)
-# SUB_DIR 		:= exemple
 SUB_DIR			:= epoll \
 				   socket \
 				   parser \
@@ -31,16 +29,11 @@ SUB_DIR			:= epoll \
 				   cgi
 DIRS			:= $(OBJ_DIR) $(addprefix $(OBJ_DIR)/, $(SUB_DIR))
 
-# FILES
 
+# FILES
 NAME			:= webserv
 SRC				:= main.cpp \
 				   webserv.cpp
-## all sub file add here: (check exemple)
-# SUB_SRC			:= exemple.cpp
-# SUB_SRC			:= epoll.cpp
-# SRC				+= $(addprefix exemple/, $(SUB_SRC))
-# SRC				+= $(addprefix epoll/, $(SUB_SRC))
 SUB_SRC			:= parser.cpp \
 				   Server.cpp \
 				   ServerGenerator.cpp
@@ -60,8 +53,8 @@ SRC				+= $(addprefix cgi/, $(SUB_SRC))
 
 OBJ				:= $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 
-# COLORS
 
+# COLORS
 NONE			= \033[0m
 CL_LINE			= \033[2K
 B_BLACK			= \033[1;30m
@@ -72,8 +65,8 @@ B_BLUE			= \033[1;34m
 B_MAGENTA 		= \033[1;35m
 B_CYAN 			= \033[1;36m
 
-# MAKEFILE
 
+# MAKEFILE
 $(NAME): $(OBJ)
 	@printf "$(CL_LINE)"
 	@echo "[1 / 1] - $(B_MAGENTA)$@$(NONE)"

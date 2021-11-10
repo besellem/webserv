@@ -31,10 +31,10 @@ Response::~Response() {
 ** Getters
 */
 
-const std::string&  			Response::getHeader(void) const { return this->_header; }
-const std::string&  			Response::getContent(void) const { return this->_content; }
-size_t       					Response::getContentLength(void) const { return this->_content.size(); }
-const Response::status_type&	Response::getStatus(void) const {return this->_status; }
+const std::string&				Response::getHeader(void)        const { return this->_header; }
+const std::string&				Response::getContent(void)       const { return this->_content; }
+size_t							Response::getContentLength(void) const { return this->_content.size(); }
+const Response::status_type&	Response::getStatus(void)        const {return this->_status; }
 
 /*
 ** Setters
@@ -45,25 +45,59 @@ void    Response::setStatus(const status_type& status) {
 }
 
 void    Response::setStatus(int code) {
-	int 		codeTab[] = {200, 202, 204, 300, 301, 302, 303, 304, 308, 403,
-			404, 405, 408, 413, 500, 502};
-	std::string actionTab[] = {"OK", "Accepted", "No Content", "Multiple Choice",
-			"Moved Permanently", "Found", "See Other", "Not Modified", "Temporary Redirect",
-			"Forbidden", "Not Found", "Method Not Allowed", "Request Timeout",
-			"Request Entity Too Large", "Internal Server Error", "Bad Gateway"};
-	int			i = 0;
+	static int			codeTab[] = {
+		200,
+		202,
+		204,
+		300,
+		301,
+		302,
+		303,
+		304,
+		308,
+		403,
+		404,
+		405,
+		408,
+		413,
+		500,
+		502
+	};
+	static std::string	actionTab[] = {
+		"OK",
+		"Accepted",
+		"No Content",
+		"Multiple Choice",
+		"Moved Permanently",
+		"Found",
+		"See Other",
+		"Not Modified",
+		"Temporary Redirect",
+		"Forbidden",
+		"Not Found",
+		"Method Not Allowed",
+		"Request Timeout",
+		"Request Entity Too Large",
+		"Internal Server Error",
+		"Bad Gateway",
+		""
+	};
+	size_t				i = 0;
 
 	if (this->_location && !this->_location->redirection.second.empty())
-		code = is_valid_path(ROOT_PATH + this->_location->redirection.second) ?
-			this->_location->redirection.first : 404;
-	while (i < 16 && codeTab[i] != code)
-		++i;
+	{
+		if (is_valid_path(ROOT_PATH + this->_location->redirection.second))
+			code = this->_location->redirection.first;
+		else
+			code = 404;
+	}
+	for ( ; !actionTab[i].empty() && codeTab[i] != code; ++i);
 	this->_status = std::make_pair(codeTab[i], actionTab[i]);
 }
 
 void    Response::setHeader(void)
 {
-    this->_header = HTTP_PROTOCOL_VERSION " ";
+    this->_header =  HTTP_PROTOCOL_VERSION " ";
 	this->_header += std::to_string(this->_status.first) + " ";
 	this->_header += this->_status.second + NEW_LINE;
 	this->_header += "Content-Length: " + std::to_string(this->_content.size()) + NEW_LINE;
@@ -86,7 +120,7 @@ bool	Response::isMethodAllowed(const std::string &method)
 
 	if (this->_location)
 	{
-		for (size_t i = 0; i < this->_location->methods.size(); i++)
+		for (size_t i = 0; i < this->_location->methods.size(); ++i)
 		{
 			if (method == this->_location->methods[i])
 				return true;
@@ -103,7 +137,7 @@ void	Response::getMethod(const std::string &file_content) {
 	// Autoindex
 	if (ft_isDirectory(this->_request->getConstructPath()))
 	{
-		if (this->_location && this->_location->autoindex == ON)
+		if (this->_location && this->_location->autoindex == AUTOINDEX_ON)
 			this->_content  = generateAutoindexPage(this->_request->getConstructPath());
 		else
 			this->setStatus(403);

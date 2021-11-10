@@ -14,7 +14,7 @@
 
 int	main(int ac, char **av, __unused char **env)
 {
-	_INLINE_NAMESPACE::WebServer	serv;
+	INLINE_NAMESPACE::WebServer	serv;
 	
 	try
 	{
