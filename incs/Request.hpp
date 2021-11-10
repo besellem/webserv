@@ -37,6 +37,8 @@ class Request
 	public:
 		typedef std::map<std::string, std::string>             info_type;
 		typedef std::vector<std::string>                       vector_type;
+		typedef std::vector<t_location *>                      location_type;
+		typedef std::pair<std::string, std::string>            pair_type;
 	
 		Request(const Server *);
 		~Request();
@@ -55,6 +57,7 @@ class Request
 		const t_location*	getLocation(void) const;
 		
 		
+		bool				setRequestFirstLine(const std::string &);
 		void				setConstructPath(void);
 		void				setConstructPath(const std::string &);
 		void				setContent(void);

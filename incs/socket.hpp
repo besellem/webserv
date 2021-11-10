@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   socket.hpp                                         :+:      :+:    :+:   */
+/*   Socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/07 17:11:03 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/10 14:51:46 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,20 +50,20 @@ class Socket
 		/** @brief init socket */
 		void			startSocket(void);
 		
-		void		readHttpRequest(Request *, int);
-		void		resolveHttpRequest(Request *);
-		void		sendHttpResponse(Request *, int);
+		int				readHttpRequest(Request *, int);
+		int				resolveHttpRequest(Request *);
+		int				sendHttpResponse(Request *, int);
 
-		void		setNonBlock(int & fd);
-		int			socketAccept(void);
+		void			setNonBlock(int & fd);
+		int				socketAccept(void);
 
 	private:
-		void		errorExit(const std::string &) const;
-		void		bindStep(const int &, const sockaddr_in &);
-		void		listenStep(const int &);
+		void			errorExit(const std::string &) const;
+		void			bindStep(const int &, const sockaddr_in &);
+		void			listenStep(const int &);
 		
-		void		setHeaderData(const std::string &);
-		std::string	constructPath(void);
+		void			setHeaderData(const std::string &);
+		std::string		constructPath(void);
 
 	private:
 		const Server	*_server_block; // which was parsed

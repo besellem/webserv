@@ -14,7 +14,7 @@
 # define EPOLL_HPP
 
 # include "defs.hpp"
-# include "socket.hpp"
+# include "Socket.hpp"
 
 _BEGIN_NS_WEBSERV
 

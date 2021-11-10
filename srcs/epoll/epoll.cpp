@@ -56,7 +56,7 @@ void	Epoll::serverLoop(void) {
 	// std::map<const int, Socket> _sockConn;
 	// struct timespec tmout = {5, 0};
 
-	for(;;) {
+	while (true) {
 		int readyEvts = kevent(_epollFd, NULL, 0, _evlist, _nEvents, NULL);
 		if (readyEvts < 0)
 			errorExit("kevent failed in loop");
@@ -204,13 +204,20 @@ void	Epoll::handleRequest(int const & fd, Socket & sock) {
 	// 	clientDisconnect(fd, _sockConn);
 	// 	return false;
 	// }
-	sock.readHttpRequest(&request, fd);
-	try {
-		sock.resolveHttpRequest(&request);
-		sock.sendHttpResponse(&request, fd);
+	if (READ_FAIL == sock.readHttpRequest(&request, fd))
+	{
+		PRINT("read failed");
+		return ;
 	}
-	catch (std::exception &e) {
-		EXCEPT_WARNING(e);
+	if (RESOLVE_FAIL == sock.resolveHttpRequest(&request))
+	{
+		PRINT("resolve failed");
+		return ;
+	}
+	if (SEND_FAIL == sock.sendHttpResponse(&request, fd))
+	{
+		PRINT("send failed");
+		return ;
 	}
 	// return true;
 }
