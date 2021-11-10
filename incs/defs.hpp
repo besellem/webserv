@@ -13,7 +13,7 @@
 #ifndef DEFS_HPP
 # define DEFS_HPP
 
-# define DEBUG     true // print some logs
+# define DEBUG     true // print some logs / warnings
 
 /** @brief Anscii code */
 # define S_NONE    "\e[0m"
@@ -27,9 +27,9 @@
 # define S_CLRLINE "\e[K\r"
 
 /** @brief namespace define */
-# define _INLINE_NAMESPACE  webserv
-# define _BEGIN_NS_WEBSERV  namespace _INLINE_NAMESPACE {
-# define _END_NS_WEBSERV    }
+# define INLINE_NAMESPACE     webserv
+# define _BEGIN_NS_WEBSERV    namespace INLINE_NAMESPACE {
+# define _END_NS_WEBSERV      }
 
 
 # define CONFIG_DEFAULT_PATH  "./config_files"
@@ -39,27 +39,34 @@
 
 # define ROOT_PATH            "./www"
 
-# define BUFFER_SIZE  4096
-
-# define OFF          0
-# define ON           1
-
-/* Timeout in seconds */
-# define TIMEOUT     3
-
-
-/** @brief epoll utils define */
-# define EP_EVENTS    2 // 2: read / write
 
 /* Logs & messages to print */
 # define LOG \
 	std::cout << S_RED << __FILE__ << ":" << __LINE__ << S_NONE ": Here\n" << std::endl
-# define EXCEPT_WARNING(exception) std::cerr << S_BLUE "Warning: " S_NONE << exception.what() << std::endl
-# define EXCEPT_ERROR(exception)   std::cerr << S_RED  "Error: "   S_NONE << exception.what() << std::endl
 
+/* Warnings are not printed if the debug mode is not activated */
+# if defined(DEBUG) && DEBUG == true
+#  define EXCEPT_WARNING(exception) std::cerr << S_BLUE "Warning: " S_NONE << exception.what() << std::endl
+# else
+#  define EXCEPT_WARNING(exception)
+# endif
+
+/* Errors are always printed */
+# define EXCEPT_ERROR(exception)    std::cerr << S_RED  "Error: "   S_NONE << exception.what() << std::endl
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// TO REMOVE - DEBUG
+////////////////////////////////////////////////////////////////////////////////
 # define STRINGIFY(x)   #x
 # define TOSTRING(x)    STRINGIFY(x)
 # define PRINT(x)       std::cout << TOSTRING(x) << ": [" << (x) << "]" << std::endl;
+////////////////////////////////////////////////////////////////////////////////
+// TO REMOVE - DEBUG
+////////////////////////////////////////////////////////////////////////////////
+
+
 
 /* Http response new lines (may change based on the sytem -- to check) */
 # define NEW_LINE               "\r\n"
@@ -68,12 +75,45 @@
 # define HTTP_PROTOCOL_VERSION  "HTTP/1.1"
 
 /* Most syscalls return -1 */
-# define SYSCALL_ERR (-1)
+# define SYSCALL_ERR    (-1)
 
 /* Listen Backlog */
 #ifndef SOMAXCONN
-# define SOMAXCONN 128
+# define SOMAXCONN      128
 #endif
+
+/* Timeout in seconds */
+# define TIMEOUT        3
+
+# define BUFFER_SIZE    4096
+
+# define AUTOINDEX_OFF  false
+# define AUTOINDEX_ON   true
+
+
+/*
+** -- GENERAL DATA-TYPES --
+*/
+enum	e_read
+{
+	READ_OK,
+	READ_FAIL,
+	READ_DISCONNECT
+};
+
+enum	e_resolve
+{
+	RESOLVE_OK,
+	RESOLVE_FAIL,
+	RESOLVE_EMPTY
+};
+
+enum	e_send
+{
+	SEND_OK,
+	SEND_FAIL
+};
+
 
 /*
 ** -- Includes --

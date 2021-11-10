@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   socket.hpp                                         :+:      :+:    :+:   */
+/*   Socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -51,20 +51,20 @@ class Socket
 		/** @brief init socket */
 		void			startSocket(void);
 		
-		void		readHttpRequest(Request *, int);
-		void		resolveHttpRequest(Request *);
-		void		sendHttpResponse(Request *, int);
+		int				readHttpRequest(Request *, int);
+		int				resolveHttpRequest(Request *);
+		int				sendHttpResponse(Request *, int);
 
-		void		setNonBlock(int & fd);
-		int			socketAccept(void);
+		void			setNonBlock(int & fd);
+		int				socketAccept(void);
 
 	private:
-		void		errorExit(const std::string &) const;
-		void		bindStep(const int &, const sockaddr_in &);
-		void		listenStep(const int &);
+		void			errorExit(const std::string &) const;
+		void			bindStep(const int &, const sockaddr_in &);
+		void			listenStep(const int &);
 		
-		void		setHeaderData(const std::string &);
-		std::string	constructPath(void);
+		void			setHeaderData(const std::string &);
+		std::string		constructPath(void);
 
 	private:
 		std::vector<Server *>	_server_blocks; // which was parsed for this socket

@@ -117,7 +117,7 @@ void	Server::setAutoIndex(t_location  *loc, const tokens_type &tok) {
     if (tok.size() != 2)
         throw WebServer::ParsingError();
     if (tok[1] == "on")
-        loc->autoindex = ON;
+        loc->autoindex = AUTOINDEX_ON;
     else if (tok[1] != "off")
         throw WebServer::ParsingError();
 }
@@ -185,7 +185,7 @@ void	Server::newLocation(const tokens_type &tok) {
 	t_location* loc = new t_location;
 	loc->path = tok[1];
 	loc->methods.push_back("GET");
-	loc->autoindex = OFF;
+	loc->autoindex = AUTOINDEX_OFF;
     loc->redirection = std::make_pair(0, "");
     loc->cgi = std::make_pair("", "");
 	this->_locations.push_back(loc);
@@ -241,7 +241,7 @@ void	Server::newDirective(const tokens_type &tokens)
 std::ostream& operator<<(std::ostream& os, const t_location& loc)
 {
     os << "\tlocation " << loc.path << std::endl << "\t{" << std::endl;
-    if (loc.autoindex == ON)
+    if (loc.autoindex == AUTOINDEX_ON)
         os << "\t\tautoindex on" << std::endl;
     if (!loc.methods.empty())
     {

@@ -16,7 +16,7 @@
 # include "defs.hpp"
 # include "ServerGenerator.hpp"
 # include "cgi.hpp"
-# include "socket.hpp"
+# include "Socket.hpp"
 # include "epoll.hpp"
 
 _BEGIN_NS_WEBSERV

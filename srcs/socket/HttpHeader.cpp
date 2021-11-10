@@ -40,7 +40,7 @@ HttpHeader&			HttpHeader::operator=(const HttpHeader &x)
 	queryString = x.queryString;
 	content = x.content;
 	chunked = x.chunked;
-	memcpy(buf, x.buf, sizeof(buf));
+	std::memcpy(buf, x.buf, sizeof(buf));
 	return *this;
 }
 
@@ -53,6 +53,5 @@ const char*			HttpHeader::HttpHeaderParsingError::what() const throw()
 
 const char*			HttpHeader::HttpBadRequestError::what() const throw()
 { return "bad http request"; }
-
 
 _END_NS_WEBSERV
