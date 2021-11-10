@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   epoll.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/07 18:11:16 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/10 15:58:39 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,7 +198,7 @@ void	Epoll::handleRequest(int const & fd, Socket & sock) {
 	// debug msg
 	std::cout << "Reading: [" S_RED << fd << S_NONE "] ..."<< "\n" << std::endl;
 
-	Request	request(sock.getServer());
+	Request	request;
 
 	// if (sock.readHttpRequest(&request, fd) == false) {
 	// 	clientDisconnect(fd, _sockConn);

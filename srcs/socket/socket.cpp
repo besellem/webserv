@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/10 15:34:41 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/10 15:57:43 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,7 +158,6 @@ void	Socket::resolveHttpRequest(Request *request)
 	
 	request->getHeader().request_method = first_line[0];
 	request->getHeader().uri = first_line[1];
-	request->setConstructPath();
 	++line;
 
 	if (DEBUG)
@@ -177,7 +176,9 @@ void	Socket::resolveHttpRequest(Request *request)
 	{
 		request->setHeaderData(*line);
 	}
-
+	std::string name = request->getHeader().data["Host"][0];
+	request->setServer(getServer(name));
+	request->setConstructPath();
 	request->setChunked();
 	request->setContent();
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/04 15:20:42 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/10 15:51:55 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,11 +38,10 @@ class Request
 		typedef std::map<std::string, std::string>             info_type;
 		typedef std::vector<std::string>                       vector_type;
 	
-		Request(const Server *);
+		Request();
 		~Request();
 
 	private:
-		Request();
 		Request(const Request &);
 		Request&			operator=(const Request &);
 
@@ -60,6 +59,7 @@ class Request
 		void				setContent(void);
 		void				setHeaderData(const std::string &);
 		void				setChunked(void);
+		void				setServer(const Server *);
 
 		const info_type&	getFileInfo(void) const;
 		bool				checkIsUploadCase(void);

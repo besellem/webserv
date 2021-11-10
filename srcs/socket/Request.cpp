@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/05 17:55:52 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/10 15:53:41 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 _BEGIN_NS_WEBSERV
 
-Request::Request(const Server *server) : _server(server), _isChunked(false) {}
+Request::Request() : _isChunked(false) {}
 
 Request::~Request() {}
 
@@ -23,7 +23,7 @@ Request::~Request() {}
 ** Getters
 */
 
-HttpHeader&			Request::getHeader(void)              { return this->_header ; }
+HttpHeader&			Request::getHeader(void)              { return this->_header; }
 const std::string&	Request::getContent(void)       const { return this->_content; }
 const std::string&	Request::getConstructPath(void) const { return this->_constructPath; }
 size_t				Request::getContentLength(void) const { return this->_content.size(); }
@@ -70,6 +70,8 @@ const t_location*	Request::getLocation(void) const
 /*
 ** Setters
 */
+
+void	Request::setServer(const Server *server) { this->_server = server; }
 
 void	Request::setContent(void)
 {
