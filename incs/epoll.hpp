@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 14:27:23 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/07 17:11:14 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/10 16:25:35 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,12 @@ _BEGIN_NS_WEBSERV
 
 class Epoll {
 	public:
+		/**
+		 * @brief connexion map
+		 *
+		 * @param 1st: communication socket fd
+		 * @param 2nd: server socket
+		 */
 		typedef std::map<const int, Socket>	conn_type;
 
 	public:
@@ -33,48 +39,51 @@ class Epoll {
 		Epoll(void);
 
 		/** @brief tigger server events */
-		void	serverLoop(void);
+		void	_serverLoop(void);
 		
 		/** @brief exit prog and show error message */
-		void	errorExit(const std::string &) const;
+		void	_errorExit(const std::string &) const;
+
+		/** @brief show debug message */
+		void	_warnMsg(const std::string &) const;
+
+		/** @brief show update message */
+		void	_updateMsg(const std::string &) const;
 		
 		/** 
 		 * @brief checker which server is 
 		 * 
-		 * @param 1: a socket (current) fd to communicate with client
-		 * @param 2: list of server socket bind with communication fd
+		 * @param 1st: a socket (current) fd to communicate with client
+		 * @param 2nd: list of server socket bind with communication fd
 		 * 
 		 * @return the server socket */
-		Socket	checkServ(int const &, std::map<const int, Socket> &) const;
+		Socket	_checkServ(int const &, std::map<const int, Socket> &) const;
+
+		bool	_checkClient(int const &) const;
 
 		/** 
-		 * @brief checker which server is 
-		 * 
-		 * @param 1: a socket (to find) fd to communicate with client
-		 * @param 2: list of server socket bind with communication fd
-		 * 
-		 * @return the server socket fd */
-		int		servIndex(int const &, std::map<const int, Socket> &) const;
+		 * @brief coming soon ...
+		 * coming soon ...
+		 */
+		void	_updateEvt(int ident, short filter, u_short flags, u_int fflags, int data, void *udata, std::string debugMsg);
 
 		/** 
 		 * @brief start of connexion, create a new socket fd to communicate with client
 		 * coming soon ...
 		 */
-		bool	clientConnect(int const &, std::map<const int, Socket> &);
+		bool	_clientConnect(int const &, std::map<const int, Socket> &);
 
 		/** 
 		 * @brief end of connexion, close and delete the communication fd (event) 
 		 * coming soon ...
 		 */
-		void	clientDisconnect(int const &, std::map<const int, Socket> &);
+		void	_clientDisconnect(int const &, std::map<const int, Socket> &);
 
 		/** 
 		 * @brief handling events, receive and send request
 		 * coming soon ...
 		*/
-		void	handleRequest(int const &, Socket &);
-
-		static void	*handleThread(void *arg);
+		void	_handleRequest(int const &, Socket &);
 
 	private:
 		Socket				*_serverSocks;
@@ -82,14 +91,9 @@ class Epoll {
 		int					_epollFd;
 
 		static const int	_nEvents = 1024;	// max tigger event list
-		struct kevent		_chlist[_nEvents]; 			// listen event list
 		struct kevent		_evlist[_nEvents];	// tigger event list
 
-		struct kevent		_currEvt;
-		conn_type			_sockConn;
-		Socket				_tmp;
-
-		__unused pthread_t	_tid;
+		conn_type			_connList;
 };
 
 _END_NS_WEBSERV

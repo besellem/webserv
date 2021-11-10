@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/07 18:11:16 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/10 16:27:15 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,122 +27,118 @@ _epollFd(-1) {}
 void	Epoll::startEpoll(void) {
 	_epollFd = kqueue();
 	if (_epollFd < 0)
-		errorExit("epoll create");
+		_errorExit("epoll create");
 	
 	for (int i = 0; i < _serverSize; ++i) {
 		int sockFd = _serverSocks[i].getServerFd();
 
-		// debug msg
 		std::cout << "Add sock: [" << sockFd << "]" << std::endl;
-
-		EV_SET(&_chlist[i], sockFd, EVFILT_READ, EV_ADD, 0, 0, 0);
+		_updateEvt(sockFd, EVFILT_READ, EV_ADD, 0, 0, NULL, "failed in init add!");
 	}
-	int kevt = kevent(_epollFd, _chlist, _serverSize, NULL, 0, NULL);
-	if (kevt < 0)
-		errorExit("epoll start failed!");
 
-	serverLoop();
+	_serverLoop();
 }
 
 /** @brief private function */
 
-void	Epoll::errorExit(const std::string &str) const {
-	std::cout << "Exit: " << str << std::endl;
+void	Epoll::_errorExit(const std::string &str) const {
+	std::cerr << "Exiting: " S_RED << str << S_NONE << std::endl;
 	exit(EXIT_FAILURE);
 }
 
-void	Epoll::serverLoop(void) {
+void	Epoll::_warnMsg(const std::string &str) const {
+	std::cerr << "Warning: " S_YELLOW << str << S_NONE <<std::endl;
+}
 
-	// std::map<const int, Socket> _sockConn;
-	// struct timespec tmout = {5, 0};
+void	Epoll::_updateMsg(const std::string &str) const {
+	std::cout << "Updating: " S_PURPLE << str << S_NONE << std::endl;
+}
+
+void	Epoll::_serverLoop(void) {
+	struct timespec tmout = {5, 0};
 
 	for(;;) {
-		int readyEvts = kevent(_epollFd, NULL, 0, _evlist, _nEvents, NULL);
-		if (readyEvts < 0)
-			errorExit("kevent failed in loop");
-		// else if (readyEvts == 0) {
-		// 	if (_sockConn.empty() == true)
-		// 		continue ;
-		// 	else {
-		// 		int i = 0;
-		// 		for (std::map<const int, Socket>::iterator it = _sockConn.begin(); it != _sockConn.end(); it++, i++) {
-		// 			close(it->first);
-		// 			EV_SET(&_chlist[i], it->first, EVFILT_READ, EV_DELETE, 0, 0, 0);
-		// 		}
-		// 		int delEvts = kevent(_epollFd, _chlist, i, NULL, 0, NULL);
-		// 		if (delEvts < 0)
-		// 			errorExit("kevent failed in loop");
-		// 		_sockConn.clear();
-		// 		std::cout << "time out!" << std::endl;
-		// 		// set time out here ... ?
-		// 		continue ;
-		// 	}
-		// }
+		// get ready event
+		int readyEvts = kevent(_epollFd, NULL, 0, _evlist, _nEvents, &tmout);
+		if (readyEvts <= 0) {
+			if (readyEvts == 0)
+				_warnMsg("time out, no event actives during 5 sec ...");
+			else if (readyEvts < 0)
+				_warnMsg("get event failed, kevent failed!");
+			continue ;
+		}
 
 		if (readyEvts > 0)
-			// debug msg
 			std::cout << "---\nStar: Num of request: [" S_GREEN << readyEvts << S_NONE "]" << "\n---\n" << std::endl;
 
+		// handle ready event
 		for (int i = 0; i < readyEvts; i++) {
-			 _currEvt = _evlist[i];
+			struct kevent currEvt = _evlist[i];
 
-			if (clientConnect(_currEvt.ident, _sockConn))
+			if (true == _clientConnect(currEvt.ident, _connList))
 				continue ;
 			else {
-				_tmp = checkServ(_currEvt.ident, _sockConn);
-				if (_tmp.getServerFd() == SYSCALL_ERR) {
-					std::cout << "connexion not found!" << std::endl;
-					close(_currEvt.ident);
+				if (false == _checkClient(currEvt.ident)) {
+					_warnMsg("Error: could not find client fd!");
+
+					_updateEvt(currEvt.ident, EVFILT_READ, EV_DELETE, 0, 0, NULL, "failed in delete write!");
+					_updateEvt(currEvt.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL, "failed in delete write!");
+
+					close(currEvt.ident);
 					continue ;
 				}
 
-				// if (pthread_create(&_tid, NULL, handleThread, (void*)this) != 0) {
-				// 	close(_currEvt.ident);
-				// 	errorExit("thread failed!");
-				// }
-				handleRequest(_currEvt.ident, _tmp);
-				clientDisconnect(_currEvt.ident, _sockConn);
+				if (currEvt.flags & EV_EOF) {
+					_updateMsg("Client quit (EOF case)");
+					_clientDisconnect(currEvt.ident, _connList);
+					continue ;
+				}
+
+				Socket tmp = _checkServ(currEvt.ident, _connList);
+				if (tmp.getServerFd() == SYSCALL_ERR) {
+					std::cout << "connexion not found!" << std::endl;
+					close(currEvt.ident);
+					continue ;
+				}
+				
+				_handleRequest(currEvt.ident, tmp);
+				_clientDisconnect(currEvt.ident, _connList);
 			}
 		}
 	}
 }
 
-void	*Epoll::handleThread(void *arg) {
-	Epoll *obj = static_cast<Epoll*>(arg);
-
-	Socket	tmp = obj->_tmp;
-	int		currentFd = obj->_currEvt.ident;
-
-	// if (obj->handleRequest(currentFd, tmp) == true)
-	obj->handleRequest(currentFd, tmp);
-	obj->clientDisconnect(currentFd, obj->_sockConn);
-	pthread_exit(NULL);
+void	Epoll::_updateEvt(int ident, short filter, u_short flags, u_int fflags, int data, void *udata, std::string msg) {
+	struct kevent chlist;
+	
+	EV_SET(&chlist, ident, filter, flags, fflags, data, udata);
+	int ret = kevent(_epollFd, &chlist, 1, NULL, 0, NULL);
+	if (ret < 0)
+		_warnMsg(msg);
 }
 
-Socket	Epoll::checkServ(int const & currConn, std::map<const int, Socket> & _sockConn) const {
+Socket	Epoll::_checkServ(int const & currConn, std::map<const int, Socket> & _connList) const {
 	Socket sock;
 
-	if (_sockConn.empty() == true)
+	if (_connList.empty() == true)
 		return sock;
 
-	for (std::map<const int, Socket>::iterator it = _sockConn.begin(); it != _sockConn.end(); it++) {
+	for (std::map<const int, Socket>::iterator it = _connList.begin(); it != _connList.end(); it++) {
 		if (currConn == it->first)
 			return it->second;
 	}
 	return sock;
 }
 
-int		Epoll::servIndex(int const & toFind, std::map<const int, Socket> & _sockConn) const {
-	int i = 0;
+bool	Epoll::_checkClient(int const & clientFd) const {
+	conn_type::const_iterator it = _connList.find(clientFd);
 
-	for (; i < _serverSize; i++) {
-		if (_sockConn[toFind].getServerFd() == _serverSocks[i].getServerFd())
-			return i;
-	}
-	return i;
+	if (it == _connList.end())
+		return false;
+	return true;
 }
 
-bool	Epoll::clientConnect(int const & toConnect, std::map<const int, Socket> & _sockConn) {
+bool	Epoll::_clientConnect(int const & toConnect, std::map<const int, Socket> & _connList) {
 	bool isClient = false;
 
 	int i = 0;
@@ -153,7 +149,7 @@ bool	Epoll::clientConnect(int const & toConnect, std::map<const int, Socket> & _
 		}
 	}
 
-	if (isClient == false)
+	if (false == isClient)
 		return false;
 
 	sockaddr_in clientAddr;
@@ -164,46 +160,31 @@ bool	Epoll::clientConnect(int const & toConnect, std::map<const int, Socket> & _
 		return false;
 
 	if (SYSCALL_ERR == fcntl(newSock, F_SETFL, O_NONBLOCK))
-		errorExit("Non-blocking failed");
+		_warnMsg("non-blocking failed at client connect!");
 
 	std::cout << "Client Connected form: [" S_GREEN << inet_ntoa(clientAddr.sin_addr)
 		<< S_NONE "]:[" S_GREEN << ntohs(clientAddr.sin_port) << S_NONE "] with socket: [" << toConnect << "]\n" << std::endl;
 
-	_sockConn[newSock] = _serverSocks[i];
+	_connList[newSock] = _serverSocks[i];
 
-	EV_SET(&_chlist[i], newSock, EVFILT_READ, EV_ADD, 0, 0, 0);
-	int addEvts = kevent(_epollFd, _chlist + i, 1, NULL, 0, NULL);
-	if (addEvts < 0)
-		errorExit("kevent failed in add");
+	_updateEvt(newSock, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL, "failed in add read!");
+	_updateEvt(newSock, EVFILT_WRITE, EV_ADD | EV_DISABLE, 0, 0, NULL, "failed in add write!");
 
 	return true;
 }
 
-void	Epoll::clientDisconnect(int const & toClose, std::map<const int, Socket> & _sockConn) {
-	// debug msg
+void	Epoll::_clientDisconnect(int const & toClose, std::map<const int, Socket> & _connList) {
 	std::cout << "closing: [" S_RED << toClose << S_NONE "] ..."<< "\n" << std::endl;
+	_updateEvt(toClose, EVFILT_READ, EV_DELETE, 0, 0, NULL, "failed in delete!");
 
-	int servI = servIndex(toClose, _sockConn);
-
-	EV_SET(&_chlist[servI], toClose, EVFILT_READ, EV_DELETE, 0, 0, 0);
-	int delEvts = kevent(_epollFd, _chlist + servI, 1, NULL, 0, NULL);
-	if (delEvts < 0)
-		errorExit("kevent failed in delete");
-
-	_sockConn.erase(toClose);
+	_connList.erase(toClose);
 	close(toClose);
 }
 
-void	Epoll::handleRequest(int const & fd, Socket & sock) {
-	// debug msg
+void	Epoll::_handleRequest(int const & fd, Socket & sock) {
 	std::cout << "Reading: [" S_RED << fd << S_NONE "] ..."<< "\n" << std::endl;
-
 	Request	request(sock.getServer());
 
-	// if (sock.readHttpRequest(&request, fd) == false) {
-	// 	clientDisconnect(fd, _sockConn);
-	// 	return false;
-	// }
 	sock.readHttpRequest(&request, fd);
 	try {
 		sock.resolveHttpRequest(&request);
@@ -212,7 +193,6 @@ void	Epoll::handleRequest(int const & fd, Socket & sock) {
 	catch (std::exception &e) {
 		EXCEPT_WARNING(e);
 	}
-	// return true;
 }
 
 _END_NS_WEBSERV

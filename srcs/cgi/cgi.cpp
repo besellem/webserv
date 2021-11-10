@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/07 18:12:28 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/07 18:59:42 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,6 +160,9 @@ std::string	Cgi::getOuput(int fd)
 	char		buffer[BUFFER_SIZE];
 	std::string	output;
 
+	if (SYSCALL_ERR == fcntl(fd, F_SETFL, O_NONBLOCK))
+		exit(1);
+
 	ret = 1;
 	while (ret > 0)
 	{
@@ -221,7 +224,7 @@ std::string Cgi::execute(void)
 	close(fdIn[0]);
 	close(fdIn[1]);
 
-	waitpid(-1, &status, WNOHANG);
+	waitpid(-1, &status, 0);
 	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
 		throw CgiError();
 
