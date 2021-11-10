@@ -133,14 +133,18 @@ void	Request::setConstructPath(void)
 	{
 		std::cout << "location        : [" S_GREEN << loc->path << S_NONE "]" << std::endl;
 		// add the root to the path
-		if (!loc->root.empty() )
+		if (!loc->root.empty())
 		{
 			std::cout << "location root   : [" S_GREEN << loc->root << S_NONE "]" << std::endl;
 			ret += loc->root;
-			if (ret[ret.size() - 1] == '/')
-				ret += uriPath.substr(uriPath.find_last_of('/') + 1);
+			if (ret[ret.size() - 1] != '/')
+				ret += uriPath.substr(loc->path.size() - 1);
 			else
-				ret += uriPath.substr(uriPath.find_last_of('/'));
+				ret += uriPath.substr(loc->path.size());
+			// if (ret[ret.size() - 1] == '/')
+			// 	ret += uriPath.substr(uriPath.find_last_of('/') + 1);
+			// else
+			// 	ret += uriPath.substr(uriPath.find_last_of('/'));
 		}
 		else
 			ret += uriPath;

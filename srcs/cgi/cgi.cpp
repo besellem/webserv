@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/07 18:59:42 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/10 16:42:16 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ const char*	Cgi::CgiError::what() const throw() {
 	return "cgi failed";
 }
 
-Cgi::Cgi(Request *request) : _request(request), _header(""), _contentLength(0)
+Cgi::Cgi(Request *request) : _request(request), _header(""), _status(200)
 {
 	const t_location	*loc = request->getLocation();
 
@@ -43,10 +43,10 @@ Cgi::~Cgi() {
 ** Getters
 */
 
-const size_t&		Cgi::getContentLength() const { return this->_contentLength; }
-const std::string&	Cgi::getExtension()     const { return this->_extension; }
-const std::string&	Cgi::getProgram()       const { return this->_program; }
-char**				Cgi::getEnv()           const { return this->_env; }
+const std::string&	Cgi::getExtension(void)		const { return this->_extension; }
+const std::string&	Cgi::getProgram(void)		const { return this->_program; }
+char**				Cgi::getEnv(void)			const { return this->_env; }
+const int&			Cgi::getStatus(void)		const { return this->_status; }
 
 std::string	Cgi::getHeaderData(const std::string &data) {
 	std::vector<std::string> lines = split_string(this->_header, NEW_LINE);
@@ -86,7 +86,11 @@ const std::string	Cgi::getEnv(const std::string &varName)
 	}
 	switch (i)
 	{
-	case 0: return std::to_string(_request->getContent().size());
+	case 0:
+		if (_request->getHeader().request_method == "GET")
+			return std::to_string(_request->getHeader().queryString.size());
+		else
+			return std::to_string(_request->getContent().size());
 	case 1: return vectorJoin(_request->getHeader().data["Content-Type"], '\0');
 	case 2: return "CGI/1.1";
 	case 3: return _request->getConstructPath().substr(sizeof(ROOT_PATH) - 1);
@@ -114,6 +118,13 @@ void    Cgi::clear() {
 		free(this->_env);
 		this->_env = 0;
 	}
+}
+
+/* Modify the status according to the header */
+void	Cgi::setStatus(void) {
+	std::string status = this->getHeaderData("Status");
+	if (!status.empty())
+		std::stringstream(status) >> this->_status;
 }
 
 /* Set the CGI environment variables.
@@ -166,20 +177,35 @@ std::string	Cgi::getOuput(int fd)
 	ret = 1;
 	while (ret > 0)
 	{
-		ret = read(fd, buffer, sizeof(buffer) - 1);
 		buffer[ret] = 0;
 		output += buffer;
 	}
 	return output;
 }
 
-void	Cgi::setContentLength(const std::string &output) {
-	this->_contentLength = output.size();
+/* Check if the cgi failed or timeout */
+void	Cgi::handleProcess(int pid, time_t beginTime) {
+
+	int		status = 0;
+	double	seconds;
+
+	while ((seconds = difftime(time(NULL), beginTime)) < TIMEOUT)
+	{
+		if (waitpid(-1, &status, WNOHANG) == pid)
+			break ;
+		usleep(100);
+	}
+
+	if (seconds == TIMEOUT) {
+		this->_status = 408;
+		kill(pid, SIGKILL);
+	}
+	else if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
+		this->_status = 502;
+	else
+		return ;
 	
-	// Subtract the size of the Cgi header
-	size_t pos = output.find(DELIMITER); // delimiter
-	if (pos != std::string::npos)
-		this->_contentLength -= pos + 4;
+	throw CgiError();
 }
 
 /* Executes the CGI program on a file.
@@ -187,7 +213,7 @@ Returns the output in a string */
 std::string Cgi::execute(void)
 {
 	pid_t		pid;
-	__unused int			status = 0;
+	int			status = 0;
 	int			fdIn[2];
 	int			fdOut[2];
 	std::string	content;
@@ -201,6 +227,7 @@ std::string Cgi::execute(void)
 	if (write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size()) < 0)
 		throw CgiError();
 
+	time_t beginTime = time(NULL);
 	if ((pid = fork()) == SYSCALL_ERR)
 		throw CgiError();
 	else if (pid == 0)
@@ -229,13 +256,23 @@ std::string Cgi::execute(void)
 		throw CgiError();
 
 	content = this->getOuput(fdOut[0]);
-	this->setContentLength(content);
 	close(fdOut[0]);
 
+	this->_header = content.substr(0, content.find(DELIMITER));
+	
+	// remove cgi header
+	size_t pos = content.find(DELIMITER);
+	if (std::string::npos != pos)
+		content = content.substr(pos + 4);
+	
+	this->setStatus();
+		
 	// ##################################################################
 	if (DEBUG)
 	{
 		std::cout << "request content :\n" << this->_request->getContent() << std::endl;
+		std::cout << "............ CGI HEADER ............." <<std::endl;
+		std::cout << this->_header << std::endl;
 		std::cout << "............ CGI ENVIRON ............." <<std::endl;
 		int i = -1;
 		while(this->_env && this->_env[++i])
@@ -243,11 +280,6 @@ std::string Cgi::execute(void)
 		std::cout << "......................................" <<std::endl;
 	}
 	// ##################################################################
-	
-	this->_header = content.substr(0, content.find(DELIMITER));
-	
-	// remove cgi header
-	content = content.substr(content.find(DELIMITER));
 	
 	return content;
 }

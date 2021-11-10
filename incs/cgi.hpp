@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 00:36:05 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/03 17:40:26 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/07 22:52:33 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,25 +25,26 @@ class Cgi
 		Cgi(Request *);
 		~Cgi();
 		
-		const size_t&		getContentLength() const;
-		const std::string&	getExtension() const;
-		const std::string&	getProgram() const;
-		char**				getEnv() const;
+		const std::string&	getExtension(void) const;
+		const std::string&	getProgram(void) const;
+		char**				getEnv(void) const;
 		const std::string	getEnv(const std::string &);
 		std::string			getHeaderData(const std::string &);
+		const int&			getStatus(void) const;
+
 	
 		std::string			execute(void);
-		void				clear();
-		
+		void				clear(void);
+
 	private:
-		Cgi();
+		Cgi(void);
 		Cgi(const Cgi &);
 		Cgi& 			operator=(const Cgi &);
 		std::string		getOuput(int);
-		void			setContentLength(const std::string &);
-		int				setStatusCode();
-		void			setEnv();
-		
+		void			handleProcess(int, time_t);
+		void			setEnv(void);
+		void			setStatus(void);
+
 	public:
 		class CgiError : public std::exception
 		{
@@ -58,7 +59,7 @@ class Cgi
 		std::string			_extension;
 		Request*			_request;
 		std::string			_header;
-		size_t				_contentLength;
+		int					_status;
 		
 };
 

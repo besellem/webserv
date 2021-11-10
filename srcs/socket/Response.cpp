@@ -3,10 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2021/11/07 18:52:15 by kaye             ###   ########.fr       */
+=======
+/*   Updated: 2021/11/07 22:58:12 by adbenoit         ###   ########.fr       */
+>>>>>>> dcb919312f2130d1bec2e7a1fd1df44e9328f57f
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +18,7 @@
 
 _BEGIN_NS_WEBSERV
 
-Response::Response(Request *req) : _contentLength(0), _request(req), _location(req->getLocation()) {
+Response::Response(Request *req) : _request(req), _location(req->getLocation()) {
     if (_location && !_location->cgi.first.empty())
         _cgi = new Cgi(req);
 		
@@ -33,7 +37,7 @@ Response::~Response() {
 
 const std::string&  			Response::getHeader(void) const { return this->_header; }
 const std::string&  			Response::getContent(void) const { return this->_content; }
-const size_t&       			Response::getContentLength(void) const { return this->_contentLength; }
+size_t       					Response::getContentLength(void) const { return this->_content.size(); }
 const Response::status_type&	Response::getStatus(void) const {return this->_status; }
 
 /*
@@ -45,16 +49,18 @@ void    Response::setStatus(const status_type& status) {
 }
 
 void    Response::setStatus(int code) {
-	int 		codeTab[] = {200, 202, 204 , 300, 301, 302, 303, 304, 308, 403, 404, 405, 408, 413, 500};
-	std::string actionTab[] = {"OK", "Accepted", "No Content", "Multiple Choice", "Moved Permanently",
-			"Found", "See Other", "Not Modified", "Temporary Redirect", "Forbidden", "Not Found",
-			"Method Not Allowed", "Request Timeout", "Request Entity Too Large", "Internal Server Error"};
+	int 		codeTab[] = {200, 202, 204, 300, 301, 302, 303, 304, 308, 403,
+			404, 405, 408, 413, 500, 502};
+	std::string actionTab[] = {"OK", "Accepted", "No Content", "Multiple Choice",
+			"Moved Permanently", "Found", "See Other", "Not Modified", "Temporary Redirect",
+			"Forbidden", "Not Found", "Method Not Allowed", "Request Timeout",
+			"Request Entity Too Large", "Internal Server Error", "Bad Gateway"};
 	int			i = 0;
 
 	if (this->_location && !this->_location->redirection.second.empty())
 		code = is_valid_path(ROOT_PATH + this->_location->redirection.second) ?
 			this->_location->redirection.first : 404;
-	while (i < 15 && codeTab[i] != code)
+	while (i < 16 && codeTab[i] != code)
 		++i;
 	this->_status = std::make_pair(codeTab[i], actionTab[i]);
 }
@@ -64,15 +70,15 @@ void    Response::setHeader(void)
     this->_header = HTTP_PROTOCOL_VERSION " ";
 	this->_header += std::to_string(this->_status.first) + " ";
 	this->_header += this->_status.second + NEW_LINE;
-	this->_header += "Content-Length: " + std::to_string(this->_contentLength);
+	this->_header += "Content-Length: " + std::to_string(this->_content.size()) + NEW_LINE;
 	if (this->_status.first >= 300 && this->_status.first <= 400)
 	{
-		this->_header += NEW_LINE;
 		this->_header += "Location: ";
 		if (this->_cgi && !this->_cgi->getHeaderData("Location").empty())
 			this->_header += this->_cgi->getHeaderData("Location");
 		else
 			this->_header += this->_location->redirection.second;
+		this->_header += NEW_LINE;
 	}
 }
 
@@ -109,8 +115,6 @@ void	Response::getMethod(const std::string &file_content) {
 	// Default case
 	else
 		this->_content = file_content;
-	this->_contentLength = this->_content.size();
-	this->_content = NEW_LINE + this->_content;
 }
 
 void	Response::postMethod(void) {
@@ -120,8 +124,8 @@ void	Response::postMethod(void) {
 	if (this->_location && !this->_location->uploadStore.empty())
 		if (uploadFile() == true)
 			return ;
-	
-	this->_content = NEW_LINE + this->_request->getContent();
+	if (this->_status.first == 200)
+		this->_content = this->_request->getContent();
 }
 
 void	Response::deleteMethod(void) {
@@ -130,24 +134,30 @@ void	Response::deleteMethod(void) {
 	
 	if (std::remove(this->_request->getConstructPath().c_str()) != 0)
 		this->setStatus(403);
+	
+	this->_content = "<html>" NEW_LINE;
+	this->_content += "<body>" NEW_LINE;
+	this->_content += "<h1>File deleted.</h1>" NEW_LINE;
+	this->_content += "</body>" NEW_LINE;
+	this->_content += "</html>" NEW_LINE;
 }
 
 void	Response::cgi(void) {
 	
 	 if (this->_status.first != 200)
 	 	return ;
-	
+		 
 	try
 	{
 		this->_content = this->_cgi->execute();
-		std::string status = this->_cgi->getHeaderData("Status").c_str();
-		if (!status.empty())
-			this->setStatus(atoi(status.c_str()));
-		this->_contentLength = this->_cgi->getContentLength();
+		this->setStatus(this->_cgi->getStatus());
 	}
 	catch(const std::exception& e)
 	{
-		this->setStatus(500);
+		if (this->_cgi->getStatus() == 200)
+			this->setStatus(500);
+		else
+			this->setStatus(this->_cgi->getStatus());
 		EXCEPT_WARNING(e);
 	}
 }
@@ -164,6 +174,7 @@ void    Response::setContent(const std::string &file_content)
 	this->isMethodAllowed(this->_request->getHeader().request_method);
 	
 	// CGI case
+<<<<<<< HEAD
 	if (this->_cgi && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension()) {
 		this->cgi();
 		// if (pthread_create(&_tid, NULL, handleThread, (void*)this) != 0) {
@@ -171,6 +182,10 @@ void    Response::setContent(const std::string &file_content)
 		// 	exit(1);
 		// }
 	}
+=======
+	if (this->_cgi && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension())
+		this->cgi();
+>>>>>>> dcb919312f2130d1bec2e7a1fd1df44e9328f57f
 	// GET case
 	else if (this->_request->getHeader().request_method == "GET")
 		this->getMethod(file_content);
@@ -194,22 +209,21 @@ void Response::setErrorContent(void)
 	// Default error page setup case
 	if (it != this->_request->getServer()->errorPages().end() && is_valid_path(it->second))
 	{
-		this->_content = NEW_LINE + getFileContent(it->second);
-		this->_contentLength = this->_content.size() - 2;
+		this->_content = getFileContent(it->second);
 		return ;
 	}
 	
 	// Default case
-	std::string content = "<!DOCTYPE html>\n";
-	content += "<html lang=\"en\">\n";
-	content += "<head>\n";
+	std::string content = "<!DOCTYPE html>" NEW_LINE;
+	content += "<html lang=\"en\">" NEW_LINE;
+	content += "<head>" NEW_LINE;
 	content += "<meta charset=\"utf-8\" /><meta http-equiv=\"X-UA-Compatible\" ";
-	content += "content=\"IE=edge\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n";
+	content += "content=\"IE=edge\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />" NEW_LINE;
 	content += "<title>";
 	content += this->_status.second;
 	content += " | ";
 	content += std::to_string(this->_status.first);
-	content += "</title>\n";
+	content += "</title>" NEW_LINE;
 	content += "<style type=\"text/css\">";
     content += "body{margin:0}sub{bottom:-.25em}sup{top:-.5em}body,";
 	content += "html{width:100%;height:100%;background-color:#21232a}";
@@ -221,19 +235,18 @@ void Response::setErrorContent(void)
 	content += "a{text-decoration:none;color:#fff;font-size:inherit;border-bottom:dotted 1px #707070}";
 	content += ".lead{color:silver;font-size:21px;line-height:1.4}";
 	content += ".cover{display:table-cell;vertical-align:middle;padding:0 20px}";
-	content += "</style>\n";
-	content += "</head>\n";
-	content += "<body>\n";
-	content += "<body>\n";
+	content += "</style>" NEW_LINE;
+	content += "</head>" NEW_LINE;
+	content += "<body>" NEW_LINE;
+	content += "<body>" NEW_LINE;
 	content += "<div class=\"cover\"><h1>";
 	content += this->_status.second;
 	content += " <small>";
 	content += std::to_string(this->_status.first);
-	content += "</small></h1></div>\n";
-	content += "</body>\n";
+	content += "</small></h1></div>" NEW_LINE;
+	content += "</body>" NEW_LINE;
 	
-	this->_content = NEW_LINE + content;
-	this->_contentLength = content.size();
+	this->_content = content;
 }
 
 const std::string	Response::generateAutoindexPage(std::string const &path) const
@@ -343,6 +356,7 @@ const std::string	Response::generateAutoindexPage(std::string const &path) const
 }
 
 bool	Response::uploadFile(void) {
+	LOG;
 	if (_request->parseFile() == true) {
 		std::map<std::string, std::string> fileInfo = _request->getFileInfo();
 		std::string const absolutePath = ROOT_PATH + this->_location->uploadStore;
@@ -350,18 +364,23 @@ bool	Response::uploadFile(void) {
 			std::string toUploadPath = absolutePath + it->first;
 			if (this->_request->getServer()->clientMaxBodySize() && getFileLength(toUploadPath) > this->_request->getServer()->clientMaxBodySize()) {
 				this->setStatus(413);
+				LOG;
 				return false;
 			}
 			std::ofstream ofs(toUploadPath, std::ofstream::out);
 			if (!ofs.is_open()) {
 				this->setStatus(403);
+				LOG;
 				return false;
 			}
 			ofs << it->second;
-			ofs.close();
+			// ofs.close();
+			LOG;
 		}
+		LOG;
 		return true;
 	}
+	LOG;
 	return false;
 }
 
