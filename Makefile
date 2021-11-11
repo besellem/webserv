@@ -38,8 +38,7 @@ SUB_SRC			:= parser.cpp \
 				   Server.cpp \
 				   ServerGenerator.cpp
 SRC				+= $(addprefix parser/, $(SUB_SRC))
-SUB_SRC			:= accept.cpp \
-				   socket.cpp \
+SUB_SRC			:= socket.cpp \
 				   HttpHeader.cpp \
 				   Request.cpp \
 				   Response.cpp

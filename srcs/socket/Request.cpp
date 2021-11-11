@@ -19,8 +19,25 @@ Request::Request(const Server *server) :
 	_isChunked(false)
 {}
 
+Request::Request(const Request &x)
+{ *this = x; }
+
 Request::~Request()
 {}
+
+Request&			Request::operator=(const Request &x)
+{
+	if (this == &x)
+		return *this;
+	_header = x._header;
+	_constructPath = x._constructPath;
+	_content = x._content;
+	_server = x._server;
+	_isChunked = x._isChunked;
+	_fileInfo = x._fileInfo;
+	_boundary = x._boundary;
+	return *this;
+}
 
 /*
 ** Getters
@@ -90,7 +107,7 @@ void	Request::setContent(void)
 	const std::string			delim(DELIMITER);
 	const size_t				pos = buf.find(delim);
 	
-	vector_type					content__;
+	vector_type					content_;
 	vector_type::const_iterator	it;
 	std::string					tmp_string = "";
 
@@ -101,14 +118,14 @@ void	Request::setContent(void)
 		buf = buf.substr(pos + delim.length());
 		if (this->_header.chunked)
 		{
-			content__ = split_string(buf, NEW_LINE);
-			it = content__.begin();
-			if (it != content__.end() && (it + 1) != content__.end())
+			content_ = split_string(buf, NEW_LINE);
+			it = content_.begin();
+			if (it != content_.end() && (it + 1) != content_.end())
 			{
 				++it;
-				for ( ; it != content__.end(); it += 2)
+				for ( ; it != content_.end(); it += 2)
 				{
-					if ((it + 1) == content__.end())
+					if ((it + 1) == content_.end())
 						break ;
 					tmp_string += *it;
 				}
@@ -125,7 +142,6 @@ void	Request::setContent(void)
 	std::cout << "[" << this->_content << "]" << std::endl;
 	std::cout << S_GREEN "< END CONTENT" S_NONE << std::endl;
 }
-
 
 void	Request::setConstructPath(void)
 {
@@ -236,7 +252,10 @@ void	Request::setChunked(void)
 	{
 		if (*it == "chunked")
 		{
-			std::cout << S_GREEN "Chunked request found" S_NONE << std::endl;
+			if (DEBUG)
+			{
+				std::cout << S_GREEN "Chunked request found" S_NONE << std::endl;
+			}
 			_header.chunked = true;
 			break ;
 		}

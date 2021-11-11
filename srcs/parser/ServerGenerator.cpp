@@ -35,25 +35,15 @@ ServerGenerator&	ServerGenerator::operator=(const ServerGenerator &x) {
 	return *this;
 }
 
-int	ServerGenerator::state() const {
-	return this->_state;
-}
-
-size_t  ServerGenerator::size() const {
-	return this->_servers.size();
-}
+int		ServerGenerator::state() const { return this->_state; }
+size_t	ServerGenerator::size()  const { return this->_servers.size(); }
 
 /*
 **  Element access
 */
 
-Server*	ServerGenerator::operator[](int i) const {
-	return this->_servers[i];
-}
-
-Server* ServerGenerator::last() const {
-	return this->_servers.back();
-}
+Server*	ServerGenerator::operator[](int i) const { return this->_servers[i]; }
+Server*	ServerGenerator::last()            const { return this->_servers.back(); }
 
 /*
 **  Modifiers / Checkers
@@ -112,7 +102,7 @@ void	ServerGenerator::closeBlock(const tokens_type &tokens)
 }
 
 /* Display server blocks like the config file */
-std::ostream& operator<<(std::ostream& os, const ServerGenerator& servers)
+std::ostream&	operator<<(std::ostream& os, const ServerGenerator& servers)
 {
 	for (size_t i = 0; i < servers.size(); i++)
 		os << *(servers[i]);

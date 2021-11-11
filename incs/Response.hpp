@@ -23,22 +23,24 @@ _BEGIN_NS_WEBSERV
 class Response
 {
 	public:
-		typedef std::pair<int, std::string> status_type;
-		typedef std::map<std::string, std::string> info_type;
+		typedef std::map<std::string, std::string>             info_type;
+		typedef std::pair<int, std::string>                    status_type;
 
+	public:
 		Response(Request *);
 		~Response();
 
 	private:
-		Response();
+		Response(void);
 		Response(const Response &);
-		Response& operator=(const Response &);
+		Response&			operator=(const Response &);
 
 	public:
 		const std::string&  getHeader(void) const;
 		const std::string&  getContent(void) const;
 		size_t				getContentLength(void) const;
 		const status_type&  getStatus(void) const;
+		bool				getCgiStatus(void) const;
 		
 		const std::string   generateAutoindexPage(std::string const &) const;
 		bool				uploadFile(void);
@@ -49,14 +51,13 @@ class Response
 		void		        setStatus(int);
 		void                setErrorContent(void);
 		
-
-		void				getMethod(const std::string &);
-		void				postMethod(void);
-		void				deleteMethod(void);
+		/* various http methods (eg: GET, POST or DELETE) */
+		void				methodGet(const std::string &);
+		void				methodPost(void);
+		void				methodDelete(void);
 		bool                isMethodAllowed(const std::string &);
 		void				cgi(void);
 
-		int					getCgiStatus(void) { return _cgiStatus; }
 
 	private:
 		std::string						_header;
@@ -65,8 +66,7 @@ class Response
 		Request*						_request;
 		Cgi*							_cgi;
 		const t_location*				_location;
-
-		int	_cgiStatus;
+		bool							_cgiStatus;
 };
 
 

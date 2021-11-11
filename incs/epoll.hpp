@@ -28,6 +28,7 @@ class Epoll {
 		 */
 		typedef std::map<const int, Socket>		conn_type;
 		typedef std::map<const int, Request*>	req_type;
+		// typedef std::list<Request>            request_list;
 
 	public:
 		explicit Epoll(Socket *, int const &);

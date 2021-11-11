@@ -40,12 +40,15 @@ class Request
 		typedef std::vector<t_location *>                      location_type;
 		typedef std::pair<std::string, std::string>            pair_type;
 	
+	public:
 		Request(const Server *);
+		Request(const Request &);
 		~Request();
+		
+		Request&			operator=(const Request &);
 
 	private:
-		Request(const Request &);
-		Request&			operator=(const Request &);
+		Request(void);
 
 	public:
 		HttpHeader&			getHeader(void);

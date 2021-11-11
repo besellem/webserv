@@ -20,9 +20,10 @@ Epoll::Epoll(void) {}
 Epoll::~Epoll(void) {}
 
 Epoll::Epoll(Socket *multiSock, int const & serverSize) :
-_serverSocks(multiSock),
-_serverSize(serverSize),
-_epollFd(-1) {}
+	_serverSocks(multiSock),
+	_serverSize(serverSize),
+	_epollFd(-1)
+{}
 
 void	Epoll::startEpoll(void) {
 	_epollFd = kqueue();
@@ -134,9 +135,7 @@ Socket	Epoll::_checkServ(int const & currConn, std::map<const int, Socket> & _co
 bool	Epoll::_checkClient(int const & clientFd) const {
 	conn_type::const_iterator it = _connMap.find(clientFd);
 
-	if (it == _connMap.end())
-		return false;
-	return true;
+	return (it != _connMap.end());
 }
 
 bool	Epoll::_clientConnect(int const & toConnect, std::map<const int, Socket> & _connMap) {
@@ -187,9 +186,12 @@ bool	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 	std::cout << "Reading: [" S_RED << currEvt.ident << S_NONE "] ..."<< "\n" << std::endl;
 	Request	request(sock.getServer());
 
-	if (READ_OK == sock.readHttpRequest(&request, currEvt.ident)) {
-		if (RESOLVE_OK == sock.resolveHttpRequest(&request)) {
-			if (SEND_OK == sock.sendHttpResponse(&request, currEvt.ident)) {
+	if (READ_OK == sock.readHttpRequest(&request, currEvt.ident))
+	{
+		if (RESOLVE_OK == sock.resolveHttpRequest(&request))
+		{
+			if (SEND_OK == sock.sendHttpResponse(&request, currEvt.ident))
+			{
 				return true;
 			}
 			else
@@ -215,7 +217,7 @@ bool	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 
 	// 	sock.readHttpRequest(&(*(it->second)), currEvt.ident);
 
-	// 	_updateEvt(currEvt.ident, EVFILT_READ, EV_DISABLE, 0, 0, NULL, "failed in read disable");
+		// _updateEvt(currEvt.ident, EVFILT_READ, EV_DISABLE, 0, 0, NULL, "failed in read disable");
 		// _updateEvt(currEvt.ident, EVFILT_WRITE, EV_ENABLE, 0, 0, NULL, "failed in write enable");
 	// }
 	// else if (currEvt.filter == EVFILT_WRITE) {
@@ -232,14 +234,14 @@ bool	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 	// 	sock.resolveHttpRequest(&(*(it->second)));
 
 	// 	LOG;
-	// 	std::cout << it->second-> << std::endl;
+	// 	std::cout << it->second << std::endl;
 
 	// 	sock.sendHttpResponse(&(*(it->second)), currEvt.ident);
 
 	// 	LOG;
 
 	// 	_updateEvt(currEvt.ident, EVFILT_READ, EV_ENABLE, 0, 0, NULL, "failed in read enable");
-		// _updateEvt(currEvt.ident, EVFILT_WRITE, EV_DISABLE, 0, 0, NULL, "failed in write disable");
+	// 	_updateEvt(currEvt.ident, EVFILT_WRITE, EV_DISABLE, 0, 0, NULL, "failed in write disable");
 	// }
 	// return false;
 }

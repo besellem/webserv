@@ -14,17 +14,24 @@
 
 _BEGIN_NS_WEBSERV
 
-Response::Response(Request *req) : _request(req), _location(req->getLocation()) {
-    if (_location && !_location->cgi.first.empty())
-        _cgi = new Cgi(req);
-		
-    else
-        _cgi = NULL;
+Response::Response(Request *req) :
+	_request(req),
+	_location(req->getLocation())
+{
+	if (_location && !_location->cgi.first.empty())
+		_cgi = new Cgi(req);
+	else
+		_cgi = NULL;
 	setStatus(200);
 }
 
-Response::~Response() {
-    delete _cgi;
+Response::~Response()
+{
+	if (_cgi != NULL)
+	{
+		delete _cgi;
+		_cgi = NULL;
+	}
 }
 
 /*
@@ -35,16 +42,19 @@ const std::string&				Response::getHeader(void)        const { return this->_hea
 const std::string&				Response::getContent(void)       const { return this->_content; }
 size_t							Response::getContentLength(void) const { return this->_content.size(); }
 const Response::status_type&	Response::getStatus(void)        const {return this->_status; }
+bool							Response::getCgiStatus(void)     const { return this->_cgiStatus; }
 
 /*
 ** Setters
 */
 
-void    Response::setStatus(const status_type& status) {
+void    Response::setStatus(const status_type &status)
+{
 	this->_status = status;
 }
 
-void    Response::setStatus(int code) {
+void    Response::setStatus(int code)
+{
 	static int			codeTab[] = {
 		200,
 		202,
@@ -91,7 +101,8 @@ void    Response::setStatus(int code) {
 		else
 			code = 404;
 	}
-	for ( ; !actionTab[i].empty() && codeTab[i] != code; ++i);
+	while (!actionTab[i].empty() && codeTab[i] != code)
+		++i;
 	this->_status = std::make_pair(codeTab[i], actionTab[i]);
 }
 
@@ -130,37 +141,42 @@ bool	Response::isMethodAllowed(const std::string &method)
 	return false;
 }
 
-void	Response::getMethod(const std::string &file_content) {
+void	Response::methodGet(const std::string &file_content)
+{
 	 if (this->_status.first != 200)
 	 	return ;
 		 
-	// Autoindex
+	/* autoindex case */
 	if (ft_isDirectory(this->_request->getConstructPath()))
 	{
 		if (this->_location && this->_location->autoindex == AUTOINDEX_ON)
-			this->_content  = generateAutoindexPage(this->_request->getConstructPath());
+			this->_content = generateAutoindexPage(this->_request->getConstructPath());
 		else
 			this->setStatus(403);
 	}
-	// Default case
 	else
 		this->_content = file_content;
 }
 
-void	Response::postMethod(void) {
-	 if (this->_status.first != 200)
-	 	return ;
+void	Response::methodPost(void)
+{
+	if (this->_status.first != 200)
+		return ;
+	
 	// upload case
 	if (this->_location && !this->_location->uploadStore.empty())
+	{
 		if (uploadFile() == true)
 			return ;
+	}
 	if (this->_status.first == 200)
 		this->_content = this->_request->getContent();
 }
 
-void	Response::deleteMethod(void) {
-	 if (this->_status.first != 200)
-	 	return ;
+void	Response::methodDelete(void)
+{
+	if (this->_status.first != 200)
+		return ;
 	
 	if (std::remove(this->_request->getConstructPath().c_str()) != 0)
 		this->setStatus(403);
@@ -174,19 +190,23 @@ void	Response::deleteMethod(void) {
 
 void	Response::cgi(void) {
 	
-	 if (this->_status.first != 200)
-	 	return ;
-		 
+	if (this->_status.first != 200)
+		return ;
+
 	try
 	{
 		this->_content = this->_cgi->execute();
 		this->setStatus(this->_cgi->getStatus());
-		_cgiStatus = 1;
+		_cgiStatus = true;
 	}
-	catch(const std::exception& e)
+	catch (const std::exception& e)
 	{
-		_cgiStatus = 0;
+		_cgiStatus = false;
+		///////////////////////////////////////////////////////////////
+		// WHAT'S THIS ?
 		return ;
+		///////////////////////////////////////////////////////////////
+
 		if (this->_cgi->getStatus() == 200)
 			this->setStatus(500);
 		else
@@ -198,39 +218,43 @@ void	Response::cgi(void) {
 void    Response::setContent(const std::string &file_content)
 {
 	this->isMethodAllowed(this->_request->getHeader().request_method);
-	_cgiStatus = 1;
+	_cgiStatus = true;
 	
-	// CGI case
-	if (this->_cgi && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension())
+	/* CGI case */
+	if (this->_cgi != NULL && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension())
 		this->cgi();
-	// GET case
+	
+	/* GET case */
 	else if (this->_request->getHeader().request_method == "GET")
-		this->getMethod(file_content);
-	// POST case
+		this->methodGet(file_content);
+	
+	/* POST case */
 	else if (this->_request->getHeader().request_method == "POST")
-		this->postMethod();
-	// DELETE case
+		this->methodPost();
+	
+	/* DELETE case */
 	else if (this->_request->getHeader().request_method == "DELETE")
-		this->deleteMethod();
-		
-	// Error case
+		this->methodDelete();
+	
+	/* Error case */
 	if (this->_status.first >= 400)
 		this->setErrorContent();
 }
 
-void Response::setErrorContent(void)
+void	Response::setErrorContent(void)
 {
 	std::map<int, std::string>::const_iterator	it;
 	it = this->_request->getServer()->errorPages().find(this->_status.first);
 	
-	// Default error page setup case
-	if (it != this->_request->getServer()->errorPages().end() && is_valid_path(it->second))
+	/* Default error page setup case */
+	if (it != this->_request->getServer()->errorPages().end() &&
+		is_valid_path(it->second))
 	{
 		this->_content = getFileContent(it->second);
 		return ;
 	}
 	
-	// Default case
+	/* Default case */
 	std::string content = "<!DOCTYPE html>" NEW_LINE;
 	content += "<html lang=\"en\">" NEW_LINE;
 	content += "<head>" NEW_LINE;
@@ -372,33 +396,34 @@ const std::string	Response::generateAutoindexPage(std::string const &path) const
 	return content;
 }
 
-bool	Response::uploadFile(void) {
-	LOG;
-	if (_request->parseFile() == true) {
-		std::map<std::string, std::string> fileInfo = _request->getFileInfo();
-		std::string const absolutePath = ROOT_PATH + this->_location->uploadStore;
-		for (info_type::iterator it = fileInfo.begin(); it != fileInfo.end(); it++) {
-			std::string toUploadPath = absolutePath + it->first;
-			if (this->_request->getServer()->clientMaxBodySize() && getFileLength(toUploadPath) > this->_request->getServer()->clientMaxBodySize()) {
-				this->setStatus(413);
-				LOG;
-				return false;
-			}
-			std::ofstream ofs(toUploadPath, std::ofstream::out);
-			if (!ofs.is_open()) {
-				this->setStatus(403);
-				LOG;
-				return false;
-			}
-			ofs << it->second;
-			// ofs.close();
-			LOG;
+bool	Response::uploadFile(void)
+{
+	if (_request->parseFile() == false)
+		return false;
+	
+	const std::string	absolutePath = ROOT_PATH + _location->uploadStore;
+	info_type			fileInfo = _request->getFileInfo();
+	info_type::iterator	it = fileInfo.begin();
+
+	for ( ; it != fileInfo.end(); ++it)
+	{
+		std::string	toUploadPath = absolutePath + it->first;
+		if (_request->getServer()->clientMaxBodySize() &&
+			getFileLength(toUploadPath) > _request->getServer()->clientMaxBodySize())
+		{
+			setStatus(413);
+			return false;
 		}
-		LOG;
-		return true;
+		std::ofstream	ofs(toUploadPath, std::ofstream::out);
+		if (!ofs.is_open())
+		{
+			setStatus(403);
+			return false;
+		}
+		ofs << it->second;
+		// ofs.close();
 	}
-	LOG;
-	return false;
+	return true;
 }
 
 _END_NS_WEBSERV

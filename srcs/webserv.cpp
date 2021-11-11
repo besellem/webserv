@@ -74,20 +74,21 @@ size_t			WebServer::countSocket() const
 	return count;
 }
 
-std::vector<Server *> WebServer::getSocketConfigs(size_t& index)
+std::vector<Server *>	WebServer::getSocketConfigs(size_t& index)
 {
-	std::vector<Server *> configs;
-	bool firstOccur = 0;
+	std::vector<Server *>	configs;
+	bool					firstOccur = false;
 
-	// is index the first config of this socket config
-	while(!firstOccur)	
+	/* is index the first config of this socket config */
+	while (false == firstOccur)
 	{
-		firstOccur = 1;
+		firstOccur = true;
 		for (size_t j = 0; j < index; j++)
 		{
-			if (_servers[index]->ip() == _servers[j]->ip() && _servers[index]->port() == _servers[j]->port())
+			if (_servers[index]->ip() == _servers[j]->ip() &&
+				_servers[index]->port() == _servers[j]->port())
 			{
-				firstOccur = 0;
+				firstOccur = false;
 				++index;
 				break ;
 			}
@@ -96,13 +97,15 @@ std::vector<Server *> WebServer::getSocketConfigs(size_t& index)
 	
 	configs.push_back(_servers[index]);
 	
-	// get the others configs for this socket
+	/* get the others configs for this socket */
 	for (size_t i = index + 1; i < _servers.size(); i++)
 	{
-		if (_servers[index]->ip() == _servers[i]->ip() && _servers[index]->port() == _servers[i]->port())
+		if (_servers[index]->ip() == _servers[i]->ip() &&
+			_servers[index]->port() == _servers[i]->port())
+		{
 			configs.push_back(_servers[i]);
+		}
 	}
-	
 	return configs;
 }
 
@@ -126,8 +129,6 @@ void			WebServer::createServers(void)
 	Epoll	_epoll(_socks, n);
 	_epoll.startEpoll();
 }
-
-WebServer::ParsingError::ParsingError() {}
 
 const char*		WebServer::ParsingError::what() const throw()
 { return "file not served by webserv"; }

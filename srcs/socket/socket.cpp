@@ -73,14 +73,16 @@ size_t			Socket::getAddrLen(void)  const { return _addrLen; }
 
 const Server*	Socket::getServer(void)	const { return _server_blocks[0]; }
 
-const Server*	Socket::getServer(const std::string &name) const {
-	for (size_t i = 0; i < _server_blocks.size(); i++)
+const Server*	Socket::getServer(const std::string &name) const
+{
+	for (size_t i = 0; i < _server_blocks.size(); ++i)
 	{
-		for (size_t j = 0; j < _server_blocks[i]->name().size(); j++)
+		for (size_t j = 0; j < _server_blocks[i]->name().size(); ++j)
+		{
 			if (_server_blocks[i]->name()[j] == name)
 				return _server_blocks[i];
+		}
 	}
-
 	return _server_blocks[0];
 }
 
@@ -197,12 +199,12 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 {
 	Response		response(request);
 	std::string		toSend;
-	
+
 	if (!is_valid_path(request->getConstructPath()))
 		response.setStatus(404);
 
 	response.setContent(getFileContent(request->getConstructPath()));
-	if (response.getCgiStatus() == 0)
+	if (response.getCgiStatus() == false)
 		return SEND_FAIL;
 	response.setHeader();
 
@@ -210,7 +212,7 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 	toSend += NEW_LINE;
 	toSend += response.getContent();
 
-	// -- Send to server --
+	/* -- Send to server -- */
 	if (SYSCALL_ERR == send(socket_fd, toSend.c_str(), toSend.length(), 0))
 		return SEND_FAIL;
 
@@ -220,7 +222,6 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 		std::cout << toSend.c_str() << std::endl;
 		std::cout << "--------------------------------------" << std::endl << std::endl;
 	}
-
 	return SEND_OK;
 }
 

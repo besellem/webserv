@@ -15,8 +15,6 @@
 
 _BEGIN_NS_WEBSERV
 
-Cgi::CgiError::CgiError() {}
-
 const char*	Cgi::CgiError::what() const throw() {
 	return "cgi failed";
 }
@@ -111,12 +109,12 @@ const std::string	Cgi::getEnv(const std::string &varName)
 
 /* Free _env */
 void    Cgi::clear() {
-	if (this->_env)
+	if (this->_env != NULL)
 	{
 		for (int i = 0; this->_env[i]; ++i)
 			free(this->_env[i]);
 		free(this->_env);
-		this->_env = 0;
+		this->_env = NULL;
 	}
 }
 
@@ -130,7 +128,7 @@ void	Cgi::setStatus(void) {
 /* Set the CGI environment variables.
 CGI Environment variables contain data about the transaction
 between the client and the server. */
-void Cgi::setEnv()
+void	Cgi::setEnv()
 {
 	std::string	envVar[] = {
 		"CONTENT_LENGTH",
@@ -146,8 +144,8 @@ void Cgi::setEnv()
 		"SERVER_PORT",
 		""
 	};
-	size_t	size = 0;
-	size_t	i = 0;
+	size_t		size = 0;
+	size_t		i = 0;
 	
 	while (!envVar[size].empty())
 		++size;

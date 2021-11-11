@@ -13,7 +13,7 @@
 #ifndef DEFS_HPP
 # define DEFS_HPP
 
-# define DEBUG     true // print some logs / warnings
+# define DEBUG     true // print some logs/warnings
 
 /** @brief Anscii code */
 # define S_NONE    "\e[0m"
@@ -45,7 +45,7 @@
 	std::cout << S_RED << __FILE__ << ":" << __LINE__ << S_NONE ": Here\n" << std::endl
 
 /* Warnings are not printed if the debug mode is not activated */
-# if defined(DEBUG) && DEBUG == true
+# if defined(DEBUG) && (DEBUG == true)
 #  define EXCEPT_WARNING(exception) std::cerr << S_BLUE "Warning: " S_NONE << exception.what() << std::endl
 # else
 #  define EXCEPT_WARNING(exception)

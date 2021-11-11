@@ -19,16 +19,17 @@
 # include "socket.hpp"
 # include "epoll.hpp"
 
+
 _BEGIN_NS_WEBSERV
-
-
 
 class ServerGenerator;
 class cgi;
 class Socket;
 class Epoll;
 
-class WebServer {
+class WebServer
+{
+	
 	public:
 		WebServer(void);
 		WebServer(const WebServer &);
@@ -50,7 +51,6 @@ class WebServer {
 		class ParsingError : public std::exception
 		{
 			public:
-                ParsingError();
 				virtual const char*	what() const throw();
 		};
 		
@@ -59,10 +59,6 @@ class WebServer {
 		Socket				*_socks;
 	
 }; /* class WebServer */
-
-/** @brief function declare */
-int		socketAccept(int fd, sockaddr *addr, socklen_t *addrLen);
-int		socketAccept(const Socket &);
 
 
 _END_NS_WEBSERV

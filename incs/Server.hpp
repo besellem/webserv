@@ -76,10 +76,10 @@ class Server
 		void	newDirective(const std::vector<std::string> &);
 		
 	private:
-		int					        _port;				// listen port
+		int							_port;				// listen port
 		std::string					_ip;				// ip address
 		std::vector<std::string>	_name;				// server names
-		std::map<int, std::string>  _errorPages;		// default error pages
+		std::map<int, std::string>	_errorPages;		// default error pages
 		int							_clientMaxBodySize;	// client max body size (byte)
 		std::vector<t_location *>	_locations;			// routes with rules
 
@@ -88,10 +88,10 @@ class Server
 		
 }; /* class Server */
 
-std::ostream& operator<<(std::ostream &, const Server &);
+std::ostream&	operator<<(std::ostream &, const Server &);
 
 typedef void (Server::*method_function)(const Server::tokens_type &);
-typedef void (Server::*method_function1)(t_location  *, const Server::tokens_type &);
+typedef void (Server::*method_function1)(t_location *, const Server::tokens_type &);
 
 _END_NS_WEBSERV
 

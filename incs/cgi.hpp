@@ -25,6 +25,12 @@ class Cgi
 		Cgi(Request *);
 		~Cgi();
 		
+	private:
+		Cgi(void);
+		Cgi(const Cgi &);
+		Cgi& 			operator=(const Cgi &);
+	
+	public:
 		const std::string&	getExtension(void) const;
 		const std::string&	getProgram(void) const;
 		char**				getEnv(void) const;
@@ -37,9 +43,6 @@ class Cgi
 		void				clear(void);
 
 	private:
-		Cgi(void);
-		Cgi(const Cgi &);
-		Cgi& 			operator=(const Cgi &);
 		std::string		getOuput(int);
 		void			handleProcess(int, time_t);
 		void			setEnv(void);
@@ -49,7 +52,6 @@ class Cgi
 		class CgiError : public std::exception
 		{
 			public:
-				CgiError();
 				virtual const char*	what() const throw();
 		};
 		
