@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/10 19:08:46 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/11 16:28:13 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ void	Epoll::_serverLoop(void) {
 		for (int i = 0; i < readyEvts; i++) {
 			struct kevent currEvt = _evlist[i];
 
-			if (true == _clientConnect(currEvt.ident, _connList))
+			if (true == _clientConnect(currEvt.ident, _connMap))
 				continue ;
 			else {
 				if (false == _checkClient(currEvt.ident)) {
@@ -90,19 +90,19 @@ void	Epoll::_serverLoop(void) {
 
 				// if (currEvt.flags & EV_EOF) {
 				// 	_updateMsg("Client quit (EOF case)");
-				// 	_clientDisconnect(currEvt.ident, _connList);
+				// 	_clientDisconnect(currEvt.ident, _connMap);
 				// 	continue ;
 				// }
 
-				Socket tmp = _checkServ(currEvt.ident, _connList);
+				Socket tmp = _checkServ(currEvt.ident, _connMap);
 				if (tmp.getServerFd() == SYSCALL_ERR) {
-					std::cout << "connexion not found!" << std::endl;
+					_warnMsg("connexion not found!");
 					close(currEvt.ident);
 					continue ;
 				}
 				
-				_handleRequest(currEvt, tmp);
-				_clientDisconnect(currEvt.ident, _connList);
+				if (true == _handleRequest(currEvt, tmp))
+					_clientDisconnect(currEvt.ident, _connMap);
 			}
 		}
 	}
@@ -117,13 +117,13 @@ void	Epoll::_updateEvt(int ident, short filter, u_short flags, u_int fflags, int
 		_warnMsg(msg);
 }
 
-Socket	Epoll::_checkServ(int const & currConn, std::map<const int, Socket> & _connList) const {
+Socket	Epoll::_checkServ(int const & currConn, std::map<const int, Socket> & _connMap) const {
 	Socket sock;
 
-	if (_connList.empty() == true)
+	if (_connMap.empty() == true)
 		return sock;
 
-	for (std::map<const int, Socket>::iterator it = _connList.begin(); it != _connList.end(); it++) {
+	for (std::map<const int, Socket>::iterator it = _connMap.begin(); it != _connMap.end(); it++) {
 		if (currConn == it->first)
 			return it->second;
 	}
@@ -131,14 +131,14 @@ Socket	Epoll::_checkServ(int const & currConn, std::map<const int, Socket> & _co
 }
 
 bool	Epoll::_checkClient(int const & clientFd) const {
-	conn_type::const_iterator it = _connList.find(clientFd);
+	conn_type::const_iterator it = _connMap.find(clientFd);
 
-	if (it == _connList.end())
+	if (it == _connMap.end())
 		return false;
 	return true;
 }
 
-bool	Epoll::_clientConnect(int const & toConnect, std::map<const int, Socket> & _connList) {
+bool	Epoll::_clientConnect(int const & toConnect, std::map<const int, Socket> & _connMap) {
 	bool isClient = false;
 
 	int i = 0;
@@ -165,7 +165,7 @@ bool	Epoll::_clientConnect(int const & toConnect, std::map<const int, Socket> & 
 	std::cout << "Client Connected form: [" S_GREEN << inet_ntoa(clientAddr.sin_addr)
 		<< S_NONE "]:[" S_GREEN << ntohs(clientAddr.sin_port) << S_NONE "] with socket: [" << toConnect << "]\n" << std::endl;
 
-	_connList[newSock] = _serverSocks[i];
+	_connMap[newSock] = _serverSocks[i];
 
 	_updateEvt(newSock, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL, "failed in add read!");
 	// _updateEvt(newSock, EVFILT_WRITE, EV_ADD | EV_DISABLE, 0, 0, NULL, "failed in add write!");
@@ -173,23 +173,33 @@ bool	Epoll::_clientConnect(int const & toConnect, std::map<const int, Socket> & 
 	return true;
 }
 
-void	Epoll::_clientDisconnect(int const & toClose, std::map<const int, Socket> & _connList) {
+void	Epoll::_clientDisconnect(int const & toClose, std::map<const int, Socket> & _connMap) {
 	std::cout << "closing: [" S_RED << toClose << S_NONE "] ..."<< "\n" << std::endl;
 	_updateEvt(toClose, EVFILT_READ, EV_DELETE, 0, 0, NULL, "failed in delete!");
 	// _updateEvt(toClose, EVFILT_WRITE, EV_DELETE, 0, 0, NULL, "failed in delete!");
 
-	_connList.erase(toClose);
+	_connMap.erase(toClose);
 	close(toClose);
 }
 
-void	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
+bool	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 	std::cout << "Reading: [" S_RED << currEvt.ident << S_NONE "] ..."<< "\n" << std::endl;
 	Request	request(sock.getServer());
 
-	sock.readHttpRequest(&request, currEvt.ident);
-	sock.resolveHttpRequest(&request);
-	sock.sendHttpResponse(&request, currEvt.ident);
-
+	if (READ_OK == sock.readHttpRequest(&request, currEvt.ident)) {
+		if (RESOLVE_OK == sock.resolveHttpRequest(&request)) {
+			if (SEND_OK == sock.sendHttpResponse(&request, currEvt.ident)) {
+				return true;
+			}
+			else
+				_warnMsg("SEND FAILED");
+		}
+		else
+			_warnMsg("RESOLVE FAILED");
+	}
+	else
+		_warnMsg("READ FAILED");
+	return false;
 	// if (currEvt.filter == EVFILT_READ) {
 	// 	_updateMsg("receive request (READ case)");
 

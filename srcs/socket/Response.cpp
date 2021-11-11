@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/10 17:25:30 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/11 16:17:58 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,9 +181,12 @@ void	Response::cgi(void) {
 	{
 		this->_content = this->_cgi->execute();
 		this->setStatus(this->_cgi->getStatus());
+		_cgiStatus = 1;
 	}
 	catch(const std::exception& e)
 	{
+		_cgiStatus = 0;
+		return ;
 		if (this->_cgi->getStatus() == 200)
 			this->setStatus(500);
 		else
@@ -192,16 +195,10 @@ void	Response::cgi(void) {
 	}
 }
 
-void	*Response::handleThread(void *arg) {
-	Response *obj = static_cast<Response*>(arg);
-
-	obj->cgi();
-	pthread_exit(NULL);
-}
-
 void    Response::setContent(const std::string &file_content)
 {
 	this->isMethodAllowed(this->_request->getHeader().request_method);
+	_cgiStatus = 1;
 	
 	// CGI case
 	if (this->_cgi && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension())

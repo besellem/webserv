@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/07 22:53:48 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/11 16:17:18 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ class Response
 		bool                isMethodAllowed(const std::string &);
 		void				cgi(void);
 
-		static void	*handleThread(void *arg);
+		int					getCgiStatus(void) { return _cgiStatus; }
 
 	private:
 		std::string						_header;
@@ -66,7 +66,7 @@ class Response
 		Cgi*							_cgi;
 		const t_location*				_location;
 
-		__unused pthread_t	_tid;
+		int	_cgiStatus;
 };
 
 
