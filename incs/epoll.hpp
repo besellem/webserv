@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 14:27:23 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/11 16:06:03 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/11 18:18:01 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ class Epoll {
 		 * @param 2nd: server socket
 		 */
 		typedef std::map<const int, Socket>		conn_type;
-		typedef std::map<const int, Request>	req_type;
+		typedef std::map<const int, Request*>	req_type;
 
 	public:
 		explicit Epoll(Socket *, int const &);

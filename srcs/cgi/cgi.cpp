@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/11 16:12:14 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/11 17:34:05 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,13 +235,14 @@ std::string Cgi::execute(void)
 	else if (pid == 0)
 	{
 		// Modify standard input and output
+		close(fdIn[1]);
 		if (dup2(fdIn[0], STDIN_FILENO) == SYSCALL_ERR)
 			exit(EXIT_FAILURE);
 		close(fdIn[0]); 
-		close(fdIn[1]);
+
+		close(fdOut[0]);
 		if (dup2(fdOut[1], STDOUT_FILENO) == SYSCALL_ERR)
 			exit(EXIT_FAILURE);
-		close(fdOut[0]);
 		close(fdOut[1]);
 		
 		// Execute the cgi program on the file

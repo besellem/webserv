@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/10 19:08:00 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/11 18:16:08 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,6 @@ class Request
 	private:
 		Request(const Request &);
 		Request&			operator=(const Request &);
-
-	private:
 
 	public:
 		HttpHeader&			getHeader(void);

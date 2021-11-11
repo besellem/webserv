@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/11 16:18:20 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/11 18:11:51 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,12 +200,12 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 	
 	if (!is_valid_path(request->getConstructPath()))
 		response.setStatus(404);
-	
+
 	response.setContent(getFileContent(request->getConstructPath()));
 	if (response.getCgiStatus() == 0)
 		return SEND_FAIL;
 	response.setHeader();
-	
+
 	toSend =  response.getHeader();
 	toSend += NEW_LINE;
 	toSend += response.getContent();

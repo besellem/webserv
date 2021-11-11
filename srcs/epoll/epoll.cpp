@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/11 16:28:13 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/11 18:29:56 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,8 +101,9 @@ void	Epoll::_serverLoop(void) {
 					continue ;
 				}
 				
-				if (true == _handleRequest(currEvt, tmp))
-					_clientDisconnect(currEvt.ident, _connMap);
+				_handleRequest(currEvt, tmp);
+				// if (true == _handleRequest(currEvt, tmp))
+					// _clientDisconnect(currEvt.ident, _connMap);
 			}
 		}
 	}
@@ -200,23 +201,47 @@ bool	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 	else
 		_warnMsg("READ FAILED");
 	return false;
+
 	// if (currEvt.filter == EVFILT_READ) {
 	// 	_updateMsg("receive request (READ case)");
 
-	// 	sock.readHttpRequest(&request, currEvt.ident);
+	// 	Request	request(sock.getServer());
+	// 	_reqMap[currEvt.ident] = &request;
+
+	// 	req_type::iterator it = _reqMap.find(currEvt.ident);
+	// 	if (it != _reqMap.end()) {
+	// 		std::cout << "found!" << std::endl;
+	// 	}
+
+	// 	sock.readHttpRequest(&(*(it->second)), currEvt.ident);
 
 	// 	_updateEvt(currEvt.ident, EVFILT_READ, EV_DISABLE, 0, 0, NULL, "failed in read disable");
-	// 	_updateEvt(currEvt.ident, EVFILT_WRITE, EV_ENABLE, 0, 0, NULL, "failed in write enable");
+		// _updateEvt(currEvt.ident, EVFILT_WRITE, EV_ENABLE, 0, 0, NULL, "failed in write enable");
 	// }
 	// else if (currEvt.filter == EVFILT_WRITE) {
 	// 	_updateMsg("send reponse (WRITE case)");
 
-	// 	sock.resolveHttpRequest(&request);
-	// 	sock.sendHttpResponse(&request, currEvt.ident);
+	// 	req_type::iterator it = _reqMap.find(currEvt.ident);
+	// 	if (it != _reqMap.end()) {
+	// 		std::cout << "found!" << std::endl;
+	// 	}
+
+
+	// 	LOG;
+
+	// 	sock.resolveHttpRequest(&(*(it->second)));
+
+	// 	LOG;
+	// 	std::cout << it->second-> << std::endl;
+
+	// 	sock.sendHttpResponse(&(*(it->second)), currEvt.ident);
+
+	// 	LOG;
 
 	// 	_updateEvt(currEvt.ident, EVFILT_READ, EV_ENABLE, 0, 0, NULL, "failed in read enable");
-	// 	_updateEvt(currEvt.ident, EVFILT_WRITE, EV_DISABLE, 0, 0, NULL, "failed in write disable");
+		// _updateEvt(currEvt.ident, EVFILT_WRITE, EV_DISABLE, 0, 0, NULL, "failed in write disable");
 	// }
+	// return false;
 }
 
 _END_NS_WEBSERV
