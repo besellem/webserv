@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   epoll.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/12 17:18:37 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/12 18:03:06 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 _BEGIN_NS_WEBSERV
 
-#define WRITING false
+#define WRITING true
 
 /** @brief public function */
 
@@ -176,9 +176,9 @@ void	Epoll::_clientDisconnect(int const & toClose, std::map<const int, Socket> &
 
 bool	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 	std::cout << "Reading: [" S_RED << currEvt.ident << S_NONE "] ..."<< "\n" << std::endl;
-	Request	request;
 
 	if (WRITING == false) {
+		Request	request;
 		if (READ_OK == sock.readHttpRequest(&request, currEvt))
 		{
 			if (SEND_OK == sock.sendHttpResponse(&request, currEvt.ident))
@@ -197,16 +197,16 @@ bool	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 			updateMsg("receive request (READ case)");
 
 			// Request	request(sock.getServer());
-			Request request;
+			Request *request = new Request();
 
-			int readStatus = sock.readHttpRequest(&request, currEvt);
+			int readStatus = sock.readHttpRequest(request, currEvt);
 
 			if (readStatus == READ_FAIL || readStatus == READ_DISCONNECT) {
 				LOG;
 				_clientDisconnect(currEvt.ident, _connMap);
 			}
 
-			_reqMap[currEvt.ident] = &request;
+			_reqMap[currEvt.ident] = request;
 
 			_updateEvt(currEvt.ident, EVFILT_READ, EV_DISABLE, 0, 0, NULL, "failed in read disable");
 			_updateEvt(currEvt.ident, EVFILT_WRITE, EV_ENABLE, 0, 0, NULL, "failed in write enable");
@@ -220,6 +220,7 @@ bool	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 				sendStatus = sock.sendHttpResponse(it->second, currEvt.ident);
 
 			if (it == _reqMap.end() || sendStatus == SEND_OK) {
+				delete it->second;
 				_reqMap.erase(currEvt.ident);
 				_updateEvt(currEvt.ident, EVFILT_READ, EV_ENABLE, 0, 0, NULL, "failed in read enable");
 				_updateEvt(currEvt.ident, EVFILT_WRITE, EV_DISABLE, 0, 0, NULL, "failed in write disable");
