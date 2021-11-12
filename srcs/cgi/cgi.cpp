@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/12 16:32:21 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/12 18:07:50 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,26 +164,6 @@ void	Cgi::setEnv()
 }
 
 /* Read the standard output of the program */
-// std::string	Cgi::getOuput(int fd)
-// {
-// 	int			ret;
-// 	char		buffer[BUFFER_SIZE];
-// 	std::string	output;
-	
-// 	if (fcntl(fd, F_SETFL, O_NONBLOCK))
-// 		std::cout << "set get output non blocking failed" << std::endl;
-// 	while ((ret = read(fd, buffer, sizeof(buffer) - 1)) > 0)
-// 	{
-// 		buffer[ret] = 0;
-// 		output += buffer;
-// 	}
-// 	if (ret < 0) {
-// 		std::cout << "CGI FAILED" << std::endl;
-// 		throw CgiError();
-// 	}
-// 	return output;
-// }
-
 std::pair<bool, std::string>	Cgi::getOuput(int fd)
 {
 	int			ret;
