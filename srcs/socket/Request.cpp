@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/12 17:22:44 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/12 17:40:11 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,11 @@ const Server*		Request::getServer(void)        const { return this->_server; }
 
 /* Find the location of the request */
 const t_location*	Request::getLocation(void) const
-{
-	const location_type		loc = this->_server->locations();
+{		
+	
+	location_type		loc;
+	if (this->_server != NULL)
+		loc = this->_server->locations();
 	std::string				path = ft_strcut(this->_header.uri, '?');
 	size_t					pos;
 

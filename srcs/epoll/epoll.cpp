@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/12 17:18:37 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/12 17:42:06 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 _BEGIN_NS_WEBSERV
 
-#define WRITING false
+#define WRITING true
 
 /** @brief public function */
 
@@ -175,34 +175,33 @@ void	Epoll::_clientDisconnect(int const & toClose, std::map<const int, Socket> &
 }
 
 bool	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
-	std::cout << "Reading: [" S_RED << currEvt.ident << S_NONE "] ..."<< "\n" << std::endl;
-	Request	request;
+	// std::cout << "Reading: [" S_RED << currEvt.ident << S_NONE "] ..."<< "\n" << std::endl;
 
-	if (WRITING == false) {
-		if (READ_OK == sock.readHttpRequest(&request, currEvt))
-		{
-			if (SEND_OK == sock.sendHttpResponse(&request, currEvt.ident))
-			{
-				return true;
-			}
-			else
-				warnMsg("SEND FAILED");
-		}
-		else
-			warnMsg("READ FAILED");
-	}
+	// if (WRITING == false) {
+	// 	Request	request;
 
-	if (WRITING == true) {
+	// 	if (READ_OK == sock.readHttpRequest(&request, currEvt))
+	// 	{
+	// 		if (SEND_OK == sock.sendHttpResponse(&request, currEvt.ident))
+	// 		{
+	// 			return true;
+	// 		}
+	// 		else
+	// 			warnMsg("SEND FAILED");
+	// 	}
+	// 	else
+	// 		warnMsg("READ FAILED");
+	// }
+
+	// if (WRITING == true) {
 		if (currEvt.filter == EVFILT_READ) {
 			updateMsg("receive request (READ case)");
 
-			// Request	request(sock.getServer());
 			Request request;
 
 			int readStatus = sock.readHttpRequest(&request, currEvt);
 
 			if (readStatus == READ_FAIL || readStatus == READ_DISCONNECT) {
-				LOG;
 				_clientDisconnect(currEvt.ident, _connMap);
 			}
 
@@ -225,7 +224,7 @@ bool	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 				_updateEvt(currEvt.ident, EVFILT_WRITE, EV_DISABLE, 0, 0, NULL, "failed in write disable");
 			}
 		}
-	}
+	// }
 	
 	return false;
 }
