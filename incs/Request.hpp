@@ -41,13 +41,12 @@ class Request
 		typedef std::pair<std::string, std::string>            pair_type;
 	
 	public:
-		Request(const Server *);
 		Request(const Request &);
+		Request(void);
 		~Request();
 		Request&			operator=(const Request &);
 
 	private:
-		Request(void);
 
 	public:
 		HttpHeader&			getHeader(void);

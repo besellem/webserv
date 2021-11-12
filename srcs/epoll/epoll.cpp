@@ -184,7 +184,7 @@ void	Epoll::_clientDisconnect(int const & toClose, std::map<const int, Socket> &
 
 bool	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 	std::cout << "Reading: [" S_RED << currEvt.ident << S_NONE "] ..."<< "\n" << std::endl;
-	Request	request(sock.getServer());
+	Request	request;
 
 	if (READ_OK == sock.readHttpRequest(&request, currEvt.ident))
 	{

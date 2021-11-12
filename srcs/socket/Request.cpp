@@ -14,8 +14,7 @@
 
 _BEGIN_NS_WEBSERV
 
-Request::Request(const Server *server) :
-	_server(server),
+Request::Request(void) :
 	_isChunked(false)
 {}
 
@@ -94,7 +93,6 @@ bool	Request::setRequestFirstLine(const std::string &first_line)
 	
 	this->getHeader().request_method = line[0];
 	this->getHeader().uri = line[1];
-	this->setConstructPath();
 	return true;
 }
 

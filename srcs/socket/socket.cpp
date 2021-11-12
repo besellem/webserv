@@ -165,12 +165,6 @@ int		Socket::resolveHttpRequest(Request *request)
 	if (request->setRequestFirstLine(*line++) == false)
 		return RESOLVE_FAIL;
 
-	if (DEBUG)
-	{
-		std::cout << "Path            : [" S_CYAN << request->getHeader().uri    << S_NONE "]\n";
-		std::cout << "Contructed Path : [" S_CYAN << request->getConstructPath() << S_NONE "]\n";
-	}
-
 	// set query string
 	size_t pos = request->getHeader().uri.find("?");
 	if (pos != std::string::npos)
@@ -181,8 +175,16 @@ int		Socket::resolveHttpRequest(Request *request)
 	{
 		request->setHeaderData(*line);
 	}
+
+	request->setConstructPath();
 	std::string name = request->getHeader().data["Host"][0];
-	// request->setServer(getServer(name));
+	request->setServer(getServer(name));
+
+	if (DEBUG)
+	{
+		std::cout << "Path            : [" S_CYAN << request->getHeader().uri    << S_NONE "]\n";
+		std::cout << "Contructed Path : [" S_CYAN << request->getConstructPath() << S_NONE "]\n";
+	}
 	
 	request->setChunked();
 	request->setContent();
