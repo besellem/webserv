@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/12 16:51:33 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/12 17:31:30 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,10 +171,13 @@ void	Response::methodPost(void)
 	// upload case
 	if (this->_location && !this->_location->uploadStore.empty())
 	{
-		if (uploadFile() == true)
+		if (uploadFile() == true || this->_status.first != 200)
 			return ;
 	}
-	if (this->_status.first == 200)
+	
+	if (this->_request->getContent().size() > (size_t)this->_request->getServer()->clientMaxBodySize())
+		this->setStatus(413);
+	else
 		this->_content = this->_request->getContent();
 }
 

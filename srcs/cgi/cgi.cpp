@@ -248,7 +248,10 @@ void	Cgi::execute(void)
 
 	waitpid(-1, &status, WNOHANG);
 	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
+	{
+		this->_status = 502;
 		throw CgiError();
+	}
 
 	_cgiFd = fdOut[0];
 

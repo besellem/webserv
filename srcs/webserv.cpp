@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/10 15:42:37 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/12 17:41:25 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ std::vector<Server *>	WebServer::getSocketConfigs(size_t& index)
 
 void			WebServer::createServers(void)
 {
-	const size_t	n = countSocket();
+	const size_t	n = _servers.size();
 	Socket			cur;
 
 	// create a socket for each server declared in the config file
@@ -120,7 +120,7 @@ void			WebServer::createServers(void)
 	for (size_t i = 0; i < n; ++i)
 	{
 		/** @brief init server */
-		// _socks[i] = Socket(_servers[i]);
+		// std::vector<Server *> tmp = getSocketConfigs(i);
 		_socks[i] = Socket(getSocketConfigs(i));
 		_socks[i].startSocket();
 	}
