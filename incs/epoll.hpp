@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 14:27:23 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/12 14:03:56 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/12 18:19:29 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ class Epoll {
 		void	_clientDisconnect(int const &, std::map<const int, Socket> &);
 
 		/** @brief handling events, receive and send request */
-		bool	_handleRequest(struct kevent const &, Socket &);
+		void	_handleRequest(struct kevent const &, Socket &);
 
 	private:
 		Socket				*_serverSocks;
