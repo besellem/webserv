@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/12 16:55:55 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/12 17:22:44 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,7 @@ void	Request::setConstructPath(void)
 	Server::tokens_type::const_iterator	idx; // iterator on indexes
 	
 	ret = ROOT_PATH;
-	if (loc)
+	if (loc != NULL)
 	{
 		std::cout << "location        : [" S_GREEN << loc->path << S_NONE "]" << std::endl;
 		// add the root to the path
