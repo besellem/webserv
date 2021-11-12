@@ -254,7 +254,10 @@ std::string	Cgi::execute(void)
 
 	waitpid(-1, &status, WNOHANG);
 	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
+	{
+		this->_status = 502;
 		throw CgiError();
+	}
 
 	content = this->getOuput(fdOut[0]);
 	close(fdOut[0]);

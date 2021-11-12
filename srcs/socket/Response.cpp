@@ -166,10 +166,13 @@ void	Response::methodPost(void)
 	// upload case
 	if (this->_location && !this->_location->uploadStore.empty())
 	{
-		if (uploadFile() == true)
+		if (uploadFile() == true || this->_status.first != 200)
 			return ;
 	}
-	if (this->_status.first == 200)
+	
+	if (this->_request->getContent().size() > this->_request->getServer()->clientMaxBodySize())
+		this->setStatus(413);
+	else
 		this->_content = this->_request->getContent();
 }
 
