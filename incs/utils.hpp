@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 17:49:10 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/06 21:41:21 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/12 14:03:33 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,9 @@ std::string	                getFileContent(const std::string &);
 ssize_t		                getFileLength(const std::string &);
 bool						ft_isNumeric(const std::string &);
 bool	                    ft_isIpAddress(const std::string &);
+void	                    errorExit(const std::string &);
+void	                    warnMsg(const std::string &);
+void	                    updateMsg(const std::string &);
 
 
 _END_NS_WEBSERV

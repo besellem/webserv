@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   defs.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/04 18:04:07 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/12 16:31:28 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,9 +111,20 @@ enum	e_resolve
 enum	e_send
 {
 	SEND_OK,
+	SEND_CGI_FAIL,
 	SEND_FAIL
 };
 
+/*
+** -- CGI-STATUS --
+*/
+enum	e_cgi
+{
+	CGI_INIT_STATUS,
+	CGI_EXECUTE_STATUS,
+	CGI_READ_STATUS,
+	CGI_DONE_STATUS
+};
 
 /*
 ** -- Includes --

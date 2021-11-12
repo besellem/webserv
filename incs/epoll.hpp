@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 14:27:23 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/11 18:18:01 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/12 14:03:56 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,15 +42,6 @@ class Epoll {
 
 		/** @brief tigger server events */
 		void	_serverLoop(void);
-		
-		/** @brief exit prog and show error message */
-		void	_errorExit(const std::string &) const;
-
-		/** @brief show debug message */
-		void	_warnMsg(const std::string &) const;
-
-		/** @brief show update message */
-		void	_updateMsg(const std::string &) const;
 		
 		/** @brief checker which server is */
 		Socket	_checkServ(int const &, std::map<const int, Socket> &) const;
