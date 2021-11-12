@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/11 17:34:05 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/12 16:32:21 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ const std::string&	Cgi::getExtension(void)		const { return this->_extension; }
 const std::string&	Cgi::getProgram(void)		const { return this->_program; }
 char**				Cgi::getEnv(void)			const { return this->_env; }
 const int&			Cgi::getStatus(void)		const { return this->_status; }
+const int&			Cgi::getCgiStatus(void)		const { return this->_cgiStatus; }
 
 std::string	Cgi::getHeaderData(const std::string &data) {
 	std::vector<std::string> lines = split_string(this->_header, NEW_LINE);
@@ -163,54 +164,45 @@ void	Cgi::setEnv()
 }
 
 /* Read the standard output of the program */
-std::string	Cgi::getOuput(int fd)
+// std::string	Cgi::getOuput(int fd)
+// {
+// 	int			ret;
+// 	char		buffer[BUFFER_SIZE];
+// 	std::string	output;
+	
+// 	if (fcntl(fd, F_SETFL, O_NONBLOCK))
+// 		std::cout << "set get output non blocking failed" << std::endl;
+// 	while ((ret = read(fd, buffer, sizeof(buffer) - 1)) > 0)
+// 	{
+// 		buffer[ret] = 0;
+// 		output += buffer;
+// 	}
+// 	if (ret < 0) {
+// 		std::cout << "CGI FAILED" << std::endl;
+// 		throw CgiError();
+// 	}
+// 	return output;
+// }
+
+std::pair<bool, std::string>	Cgi::getOuput(int fd)
 {
 	int			ret;
 	char		buffer[BUFFER_SIZE];
 	std::string	output;
-	
-	if (fcntl(fd, F_SETFL, O_NONBLOCK))
-		std::cout << "set get output non blocking failed" << std::endl;
+
 	while ((ret = read(fd, buffer, sizeof(buffer) - 1)) > 0)
 	{
 		buffer[ret] = 0;
 		output += buffer;
 	}
-	if (ret < 0) {
-		std::cout << "CGI FAILED" << std::endl;
-		throw CgiError();
-	}
-	return output;
+	if (ret < 0)
+		return std::make_pair(false, output);
+	return std::make_pair(true, output);
 }
-
-/* Check if the cgi failed or timeout */
-// void	Cgi::handleProcess(int pid, time_t beginTime) {
-
-// 	int		status = 0;
-// 	double	seconds;
-
-// 	while ((seconds = difftime(time(NULL), beginTime)) < TIMEOUT)
-// 	{
-// 		if (waitpid(-1, &status, WNOHANG) == pid)
-// 			break ;
-// 		usleep(100);
-// 	}
-
-// 	if (seconds == TIMEOUT) {
-// 		this->_status = 408;
-// 		kill(pid, SIGKILL);
-// 	}
-// 	else if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
-// 		this->_status = 502;
-// 	else
-// 		return ;
-	
-// 	throw CgiError();
-// }
 
 /* Executes the CGI program on a file.
 Returns the output in a string */
-std::string	Cgi::execute(void)
+void	Cgi::execute(void)
 {
 	pid_t		pid;
 	int			status = 0;
@@ -226,6 +218,8 @@ std::string	Cgi::execute(void)
 	// Send variables to the standard input of the program
 	if (write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size()) < 0)
 		throw CgiError();
+
+	_cgiStatus = CGI_EXECUTE_STATUS;
 
 	// time_t beginTime = time(NULL);
 	if ((pid = fork()) == SYSCALL_ERR)
@@ -256,33 +250,76 @@ std::string	Cgi::execute(void)
 	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
 		throw CgiError();
 
-	content = this->getOuput(fdOut[0]);
-	close(fdOut[0]);
+	_cgiFd = fdOut[0];
 
-	this->_header = content.substr(0, content.find(DELIMITER));
+	if (fcntl(_cgiFd, F_SETFL, O_NONBLOCK))
+		warnMsg("set get output non blocking failed");
+
+	///////////////////
+
+	// content = this->getOuput(fdOut[0]);
+	// close(fdOut[0]);
+
+	// this->_header = content.substr(0, content.find(DELIMITER));
 	
-	// remove cgi header
-	size_t pos = content.find(DELIMITER);
-	if (std::string::npos != pos)
-		content = content.substr(pos + 4);
+	// // remove cgi header
+	// size_t pos = content.find(DELIMITER);
+	// if (std::string::npos != pos)
+	// 	content = content.substr(pos + 4);
 	
-	this->setStatus();
+	// this->setStatus();
 		
-	// ##################################################################
-	if (DEBUG)
-	{
-		std::cout << "request content :\n" << this->_request->getContent() << std::endl;
-		std::cout << "............ CGI HEADER ............." <<std::endl;
-		std::cout << this->_header << std::endl;
-		std::cout << "............ CGI ENVIRON ............." <<std::endl;
-		int i = -1;
-		while(this->_env && this->_env[++i])
-			std::cout << this->_env[i] << std::endl;
-		std::cout << "......................................" <<std::endl;
-	}
-	// ##################################################################
+	// // ##################################################################
+	// if (DEBUG)
+	// {
+	// 	std::cout << "request content :\n" << this->_request->getContent() << std::endl;
+	// 	std::cout << "............ CGI HEADER ............." <<std::endl;
+	// 	std::cout << this->_header << std::endl;
+	// 	std::cout << "............ CGI ENVIRON ............." <<std::endl;
+	// 	int i = -1;
+	// 	while(this->_env && this->_env[++i])
+	// 		std::cout << this->_env[i] << std::endl;
+	// 	std::cout << "......................................" <<std::endl;
+	// }
+	// // ##################################################################
 	
-	return content;
+	// return content;
+}
+
+std::pair<bool, std::string>	Cgi::parseCgiContent(void) {
+	_cgiStatus = CGI_READ_STATUS;
+
+	std::pair<bool, std::string> contentStatus = this->getOuput(_cgiFd);
+
+	if (true == contentStatus.first) {
+		_cgiStatus = CGI_DONE_STATUS;
+
+		close(_cgiFd);
+
+		this->_header = contentStatus.second.substr(0, contentStatus.second.find(DELIMITER));
+
+		// remove cgi header
+		size_t pos = contentStatus.second.find(DELIMITER);
+		if (std::string::npos != pos)
+			contentStatus.second = contentStatus.second.substr(pos + 4);
+		
+		this->setStatus();
+			
+		// ##################################################################
+		if (DEBUG)
+		{
+			std::cout << "request content :\n" << this->_request->getContent() << std::endl;
+			std::cout << "............ CGI HEADER ............." <<std::endl;
+			std::cout << this->_header << std::endl;
+			std::cout << "............ CGI ENVIRON ............." <<std::endl;
+			int i = -1;
+			while(this->_env && this->_env[++i])
+				std::cout << this->_env[i] << std::endl;
+			std::cout << "......................................" <<std::endl;
+		}
+	}
+
+	return contentStatus;
 }
 
 _END_NS_WEBSERV

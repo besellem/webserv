@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/11 18:16:24 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/12 16:55:55 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,6 @@ const t_location*	Request::getLocation(void) const
 	}
 	return NULL;
 }
-
 
 /*
 ** Setters

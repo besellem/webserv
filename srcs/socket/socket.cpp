@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/11 18:11:51 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/12 16:48:27 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,11 @@ int		Socket::readHttpRequest(Request *request, int socket_fd)
 	while (true)
 	{
 		request->getHeader().resetBuffer();
+		std::cout << "buffer content: " << request->getHeader().content << std::endl;
+		std::cout << "buffer buf: " << request->getHeader().buf << std::endl;
+		std::cout << "buffer size: " << sizeof(request->getHeader().buf) << std::endl;
 		ret = recv(socket_fd, request->getHeader().buf, sizeof(request->getHeader().buf), 0);
+		std::cout << "ret: " << ret << std::endl;
 		if (SYSCALL_ERR == ret)
 		{
 			// return READ_FAIL; // false
@@ -140,10 +144,49 @@ int		Socket::readHttpRequest(Request *request, int socket_fd)
 
 	if (0 == ret)
 		return READ_DISCONNECT;
+	// else if (SYSCALL_ERR == ret)
+	// 	return READ_FAIL;
 	else
 		return READ_OK;
 }
 
+
+int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
+	request->getHeader().resetBuffer();
+	
+	int ret = recv(currEvt.ident, request->getHeader().buf, currEvt.data, 0);
+	
+	if (ret == 0) {
+		std::cout << "Current client: [" << currEvt.ident << "]: ";
+		updateMsg("has opted to close the connection");
+		return READ_DISCONNECT;
+	}
+	else if (ret == SYSCALL_ERR) {
+		std::cout << "Current client: [" << currEvt.ident << "]: ";
+		warnMsg("recv request failed!");
+		return READ_FAIL;
+	}
+	
+	request->getHeader().content += request->getHeader().buf;
+
+	std::cout << "receive data len: " << currEvt.data << std::endl;
+	std::cout << "content data len: " << request->getHeader().content.length() << std::endl;
+
+	if (DEBUG)
+	{
+		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
+		std::cout << request->getHeader().content << std::endl;
+		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
+	}
+
+	if (resolveHttpRequest(request) == RESOLVE_FAIL) {
+		std::cout << "Current client: [" << currEvt.ident << "]: ";
+		warnMsg("resolve request failed!");
+		return READ_FAIL;
+	}
+
+	return READ_OK;
+}
 /*
 ** Parse the http request
 **
@@ -152,8 +195,8 @@ int		Socket::readHttpRequest(Request *request, int socket_fd)
 int		Socket::resolveHttpRequest(Request *request)
 {
 	/* the buffer is empty, therefore the header was also empty */
-	if (request->getHeader().content.empty())
-		return RESOLVE_EMPTY;
+	// if (request->getHeader().content.empty())
+	// 	return RESOLVE_EMPTY;
 	
 	vector_type				buffer = split_string(request->getHeader().content, NEW_LINE);
 	vector_type::iterator	line = buffer.begin();
@@ -215,8 +258,10 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 	toSend += response.getContent();
 
 	/* -- Send to server -- */
-	if (SYSCALL_ERR == send(socket_fd, toSend.c_str(), toSend.length(), 0))
-		return SEND_FAIL;
+	if (SYSCALL_ERR == send(socket_fd, toSend.c_str(), toSend.length(), 0)) {
+		warnMsg("send reponse failed!");
+		return SEND_OK;
+	}
 
 	if (DEBUG)
 	{

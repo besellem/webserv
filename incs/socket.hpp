@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Socket.hpp                                         :+:      :+:    :+:   */
+/*   socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/10 15:32:27 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/12 13:54:04 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ class Socket
 		void			startSocket(void);
 		
 		int				readHttpRequest(Request *, int);
+		int				readHttpRequest(Request *, struct kevent currEvt);
 		int				resolveHttpRequest(Request *);
 		int				sendHttpResponse(Request *, int);
 
