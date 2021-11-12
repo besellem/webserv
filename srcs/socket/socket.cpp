@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/12 17:04:14 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/12 17:42:03 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,9 +219,9 @@ int		Socket::resolveHttpRequest(Request *request)
 		request->setHeaderData(*line);
 	}
 
-	request->setConstructPath();
 	std::string name = request->getHeader().data["Host"][0];
 	request->setServer(getServer(name));
+	request->setConstructPath();
 
 	if (DEBUG)
 	{
