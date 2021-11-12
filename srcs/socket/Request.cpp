@@ -95,7 +95,6 @@ bool	Request::setRequestFirstLine(const std::string &first_line)
 	this->getHeader().request_method = line[0];
 	this->getHeader().uri = line[1];
 	this->setConstructPath();
-	
 	return true;
 }
 
@@ -297,7 +296,7 @@ bool	Request::parseFile(void) {
 	}
 
 	std::string toParse = this->getContent();
-	std::string key[] = {"filename=\"", "\"", "Content-Type", NEW_LINE, DELIMITER, this->getBoundary() + "--\r\n"};
+	std::string key[] = {"filename=\"", "\"", "Content-Type", NEW_LINE, DELIMITER, this->getBoundary() + "--" NEW_LINE};
 
 	std::string fileName;
 	std::string fileContent;

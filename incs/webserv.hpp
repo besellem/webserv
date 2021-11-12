@@ -29,19 +29,17 @@ class Epoll;
 
 class WebServer
 {
-	
 	public:
 		WebServer(void);
 		WebServer(const WebServer &);
 		~WebServer();
-		
-		WebServer&	operator=(const WebServer &);
-
-		void				parse(const std::string &);
-		size_t				serverSize(void) const;
-		const Server&		getServer(int) const ;
-
-		void				createServers(void);
+		WebServer&				operator=(const WebServer &);
+	
+	public:
+		void					parse(const std::string &);
+		size_t					serverSize(void) const;
+		const Server&			getServer(int) const;
+		void					createServers(void);
 
 	private:
 		size_t					countSocket() const;

@@ -26,9 +26,9 @@ class Epoll {
 		 * @param 1st: communication socket fd
 		 * @param 2nd: server socket
 		 */
-		typedef std::map<const int, Socket>		conn_type;
-		typedef std::map<const int, Request*>	req_type;
-		// typedef std::list<Request>            request_list;
+		typedef std::map<const int, Socket>                    conn_type;
+		typedef std::map<const int, Request*>                  req_type;
+		// typedef std::list<Request>                             request_list;
 
 	public:
 		explicit Epoll(Socket *, int const &);
@@ -75,13 +75,13 @@ class Epoll {
 		int					_serverSize;
 		int					_epollFd;
 
-		static const int	_nEvents = 1024;	// max tigger event list
-		struct kevent		_evlist[_nEvents];	// tigger event list
+		static const int	_nEvents = 1024;   // max tigger event list
+		struct kevent		_evlist[_nEvents]; // tigger event list
 
 		conn_type			_connMap;
 		req_type			_reqMap;
 
-};
+}; /* class Epoll */
 
 _END_NS_WEBSERV
 

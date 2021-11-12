@@ -36,14 +36,13 @@ class Socket
 		explicit Socket(const std::vector<Server *>);
 		Socket(const Socket &);
 		~Socket();
+		Socket&			operator=(const Socket &);
 
-		Socket&		operator=(const Socket &);
-
-
+	public:
 		short			getPort(void) const;
 		int				getServerFd(void) const;
 		const Server*	getServer(void) const;
-		const Server*	getServer(const std::string &name) const;
+		const Server*	getServer(const std::string &) const;
 		sockaddr_in		getAddr(void) const;
 		size_t			getAddrLen(void) const;
 

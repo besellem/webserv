@@ -210,7 +210,7 @@ std::string	Cgi::getOuput(int fd)
 
 /* Executes the CGI program on a file.
 Returns the output in a string */
-std::string Cgi::execute(void)
+std::string	Cgi::execute(void)
 {
 	pid_t		pid;
 	int			status = 0;

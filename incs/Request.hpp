@@ -20,9 +20,9 @@
 
 _BEGIN_NS_WEBSERV
 
-enum e_uploadKey
+enum	e_uploadKey
 {
-	FN = 0,
+	FN,
 	DQ,
 	CT,
 	RN,
@@ -44,7 +44,6 @@ class Request
 		Request(const Server *);
 		Request(const Request &);
 		~Request();
-		
 		Request&			operator=(const Request &);
 
 	private:
@@ -81,7 +80,8 @@ class Request
 	
 		info_type			_fileInfo;
 		std::string			_boundary;
-};
+	
+}; /* class Request */
 
 
 _END_NS_WEBSERV

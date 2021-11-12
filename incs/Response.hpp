@@ -22,6 +22,7 @@ _BEGIN_NS_WEBSERV
 
 class Response
 {
+
 	public:
 		typedef std::map<std::string, std::string>             info_type;
 		typedef std::pair<int, std::string>                    status_type;
@@ -42,9 +43,8 @@ class Response
 		const status_type&  getStatus(void) const;
 		bool				getCgiStatus(void) const;
 		
-		const std::string   generateAutoindexPage(std::string const &) const;
-		bool				uploadFile(void);
 	
+		const std::string   generateAutoindexPage(std::string const &) const;
 		void		        setContent(const std::string &);
 		void		        setHeader(void);
 		void		        setStatus(const status_type &);
@@ -57,17 +57,19 @@ class Response
 		void				methodDelete(void);
 		bool                isMethodAllowed(const std::string &);
 		void				cgi(void);
-
+		
+		bool				uploadFile(void);
 
 	private:
-		std::string						_header;
-		std::string						_content;
-		status_type						_status;
-		Request*						_request;
-		Cgi*							_cgi;
-		const t_location*				_location;
-		bool							_cgiStatus;
-};
+		std::string			_header;
+		std::string			_content;
+		status_type			_status;
+		Request*			_request;
+		Cgi*				_cgi;
+		const t_location*	_location;
+		bool				_cgiStatus;
+	
+}; /* class Response */
 
 
 _END_NS_WEBSERV

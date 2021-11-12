@@ -28,7 +28,7 @@ class Cgi
 	private:
 		Cgi(void);
 		Cgi(const Cgi &);
-		Cgi& 			operator=(const Cgi &);
+		Cgi& 				operator=(const Cgi &);
 	
 	public:
 		const std::string&	getExtension(void) const;
@@ -43,10 +43,10 @@ class Cgi
 		void				clear(void);
 
 	private:
-		std::string		getOuput(int);
-		void			handleProcess(int, time_t);
-		void			setEnv(void);
-		void			setStatus(void);
+		std::string			getOuput(int);
+		void				handleProcess(int, time_t);
+		void				setEnv(void);
+		void				setStatus(void);
 
 	public:
 		class CgiError : public std::exception
@@ -63,7 +63,7 @@ class Cgi
 		std::string			_header;
 		int					_status;
 		
-};
+}; /* class Cgi */
 
 _END_NS_WEBSERV
 

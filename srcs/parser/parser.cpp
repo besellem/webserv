@@ -17,7 +17,7 @@ _BEGIN_NS_WEBSERV
 /* Breaks a string into a sequence of zero or
 more nonempty tokens delimiter by tabulation or space
 Returns the vector of tokens. */
-Server::tokens_type    getTokens(std::string line)
+static Server::tokens_type	getTokens(std::string line)
 {
 	Server::tokens_type tokens;
 
@@ -38,7 +38,7 @@ Server::tokens_type    getTokens(std::string line)
 }
 
 /* Fills the servers with line's data */
-void	parse_line(ServerGenerator& servers, std::string line)
+static void	parse_line(ServerGenerator& servers, std::string line)
 {
 	line = ft_strcut(line, '#');
 	Server::tokens_type tok = getTokens(line);
@@ -65,10 +65,11 @@ void	parse_line(ServerGenerator& servers, std::string line)
 /* Reads the config file and parse it line by line */
 void	WebServer::parse(const std::string &config_file)
 {
-	if (getExtension(config_file) != ".conf")
+	if (getExtension(config_file) != CONFIG_FILETYPE)
 		throw ParsingError();
-	std::fstream os;
-	std::string line;
+	std::fstream	os;
+	std::string		line;
+
 	os.open(config_file);
 	if (!os)
 		throw ParsingError();

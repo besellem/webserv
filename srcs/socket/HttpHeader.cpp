@@ -12,7 +12,6 @@
 
 #include "HttpHeader.hpp"
 
-
 _BEGIN_NS_WEBSERV
 
 HttpHeader::HttpHeader(void) :

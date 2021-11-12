@@ -22,7 +22,7 @@ _BEGIN_NS_WEBSERV
 // class Server;
 
 /* Config file states */
-enum e_state
+enum	e_state
 {
 	START,
 	NEW_SERVER,
@@ -35,31 +35,28 @@ class ServerGenerator
 {
 
 	public:
-		typedef Server::tokens_type tokens_type;
+		typedef Server::tokens_type                            tokens_type;
 	
 	public:
 		ServerGenerator();
-		~ServerGenerator();
 		ServerGenerator(const ServerGenerator &);
+		~ServerGenerator();
 		ServerGenerator&	operator=(const ServerGenerator &);
 		
-		int			state() const;
-		size_t		size() const;
+	public:
+		int					state() const;
+		size_t				size() const;
 
-		/*
-		**  Element access
-		*/
-		Server*		operator[](int) const;
-		Server*		last() const;
+		/* Element access */
+		Server*				operator[](int) const;
+		Server*				last() const;
 		
-		/*
-		**  Modifiers / Checkers
-		*/
-		void		newDirective(Server *, const tokens_type &);
-		void		newLocation(Server *, const tokens_type &);
-		void		newServer(const tokens_type &);
-		void		openBlock(const tokens_type &);
-		void		closeBlock(const tokens_type &);
+		/* Modifiers / Checkers */
+		void				newDirective(Server *, const tokens_type &);
+		void				newLocation(Server *, const tokens_type &);
+		void				newServer(const tokens_type &);
+		void				openBlock(const tokens_type &);
+		void				closeBlock(const tokens_type &);
 		
 	private:
 		std::vector<Server *>	_servers;

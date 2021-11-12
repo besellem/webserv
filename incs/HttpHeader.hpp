@@ -29,9 +29,9 @@ class HttpHeader
 		~HttpHeader();
 		HttpHeader&		operator=(const HttpHeader &x);
 
+	public:
 		pointer			resetBuffer(void);
 		
-	
 	public:
 		class HttpHeaderParsingError : public std::exception
 		{
@@ -45,7 +45,6 @@ class HttpHeader
 				virtual const char*	what() const throw();
 		};
 
-
 	private:
 		value_type		data;
 		std::string		request_method;
@@ -54,6 +53,7 @@ class HttpHeader
 		std::string		content; // complete request converted to string from `buf'
 		bool			chunked;
 		char			buf[BUFFER_SIZE];
+
 
 	friend class Socket;
 	friend class Request;

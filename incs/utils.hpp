@@ -17,17 +17,17 @@
 
 _BEGIN_NS_WEBSERV
 
-std::vector<std::string>	split_string(const std::string& s, const std::string& delim);
-std::string	                getExtension(const std::string& fileName);
-std::string                 ft_strcut(const std::string& str, char delimiter);
-std::vector<std::string>	ft_vectorcut(const std::vector<std::string>& vect, char delimiter);
-std::string                 vectorJoin(const std::vector<std::string> &vect, char sep);
-bool						is_valid_path(const std::string& path);
-bool	                    ft_isDirectory(const std::string& path);
-std::string	                getFileContent(const std::string& file);
-ssize_t		                getFileLength(const std::string& file);
-bool						ft_isNumeric(const std::string &str);
-bool	                    ft_isIpAddress(const std::string &str);
+std::vector<std::string>	split_string(const std::string &, const std::string &);
+std::string	                getExtension(const std::string &);
+std::string                 ft_strcut(const std::string &, char);
+std::vector<std::string>	ft_vectorcut(const std::vector<std::string> &, char);
+std::string                 vectorJoin(const std::vector<std::string> &, char);
+bool						is_valid_path(const std::string &);
+bool	                    ft_isDirectory(const std::string &);
+std::string	                getFileContent(const std::string &);
+ssize_t		                getFileLength(const std::string &);
+bool						ft_isNumeric(const std::string &);
+bool	                    ft_isIpAddress(const std::string &);
 
 
 _END_NS_WEBSERV
