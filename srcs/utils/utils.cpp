@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 17:41:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/06 21:39:00 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/12 14:02:09 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,6 +193,19 @@ ssize_t		getFileLength(const std::string& file)
 		return size;
 	}
 	return SYSCALL_ERR; // may want to throw an error or something
+}
+
+void	errorExit(const std::string &str) {
+	std::cerr << "Exiting: " S_RED << str << S_NONE << std::endl;
+	exit(EXIT_FAILURE);
+}
+
+void	warnMsg(const std::string &str) {
+	std::cerr << "Warning: " S_YELLOW << str << S_NONE <<std::endl;
+}
+
+void	updateMsg(const std::string &str) {
+	std::cout << "Updating: " S_PURPLE << str << S_NONE << std::endl;
 }
 
 _END_NS_WEBSERV

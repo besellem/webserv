@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 00:36:05 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/07 22:52:33 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/12 16:32:35 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,13 +37,17 @@ class Cgi
 		const std::string	getEnv(const std::string &);
 		std::string			getHeaderData(const std::string &);
 		const int&			getStatus(void) const;
+		const int&			getCgiStatus(void) const;
 
 	
-		std::string			execute(void);
+		void			execute(void);
 		void				clear(void);
+		
+		std::pair<bool, std::string>	parseCgiContent(void);
 
 	private:
-		std::string			getOuput(int);
+		// std::string			getOuput(int);
+		std::pair<bool, std::string>	getOuput(int);
 		void				handleProcess(int, time_t);
 		void				setEnv(void);
 		void				setStatus(void);
@@ -62,6 +66,9 @@ class Cgi
 		Request*			_request;
 		std::string			_header;
 		int					_status;
+		int					_cgiStatus;
+
+		int					_cgiFd;
 		
 }; /* class Cgi */
 
