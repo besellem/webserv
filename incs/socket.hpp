@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/12 13:54:04 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/14 15:01:26 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ class Socket
 		const Server*	getServer(const std::string &) const;
 		sockaddr_in		getAddr(void) const;
 		size_t			getAddrLen(void) const;
+		int				getSendStatus(void) const;
 
 
 		/** @brief init socket */
@@ -57,6 +58,8 @@ class Socket
 
 		void			setNonBlock(int & fd);
 		int				socketAccept(void);
+
+		void			setSendStatus(int const status);
 
 	private:
 		void			errorExit(const std::string &) const;
@@ -73,6 +76,9 @@ class Socket
 		sockaddr_in				_addr;
 		size_t					_addrLen;
 	
+		int						_sendStatus;
+		Response				*_response;
+
 }; /* class Socket */
 
 

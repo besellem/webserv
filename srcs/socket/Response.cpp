@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/12 17:31:30 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/14 15:31:29 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ Response::Response(Request *req)
 
 	if (_location && !_location->cgi.first.empty()) {
 		_cgi = new Cgi(req);
-		_cgiStatus = CGI_INIT_STATUS;
 	}
 	else
 		_cgi = NULL;
@@ -43,11 +42,12 @@ Response::~Response()
 ** Getters
 */
 
-const std::string&				Response::getHeader(void)        const { return this->_header; }
-const std::string&				Response::getContent(void)       const { return this->_content; }
-size_t							Response::getContentLength(void) const { return this->_content.size(); }
-const Response::status_type&	Response::getStatus(void)        const {return this->_status; }
-bool							Response::getCgiStatus(void)     const { return this->_cgiStatus; }
+const std::string&				Response::getHeader(void)			const { return this->_header; }
+const std::string&				Response::getContent(void)			const { return this->_content; }
+size_t							Response::getContentLength(void)	const { return this->_content.size(); }
+const Response::status_type&	Response::getStatus(void)			const { return this->_status; }
+bool							Response::getCgiStatus(void)		const { return this->_cgiStatus; }
+int								Response::getCgiStep(void)			const { return this->_cgi->getCgiStep(); }
 
 /*
 ** Setters
@@ -230,7 +230,9 @@ void	Response::cgi(void) {
 
 	try
 	{
-		this->_cgi->execute();
+		if (this->getCgiStep() == CGI_INIT_STATUS) {
+			this->_cgi->execute();
+		}
 	}
 	catch (const std::exception& e)
 	{
@@ -241,15 +243,14 @@ void	Response::cgi(void) {
 		EXCEPT_WARNING(e);
 		return ;
 	}
-	
-	std::pair<bool, std::string> check = this->_cgi->parseCgiContent();
-	if (check.first == false) {
+
+	if (this->_cgi->parseCgiContent() == false) {
 		this->_cgiStatus = false;
 		return ;
 	}
 	
 	this->_cgiStatus = true;
-	this->_content = check.second;
+	this->_content = this->_cgi->getOutputContent();
 	this->setStatus(this->_cgi->getStatus());
 }
 

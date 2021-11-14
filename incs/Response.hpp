@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/11 16:17:18 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/14 14:35:44 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ class Response
 		size_t				getContentLength(void) const;
 		const status_type&  getStatus(void) const;
 		bool				getCgiStatus(void) const;
+		int					getCgiStep(void) const;
 		
 	
 		const std::string   generateAutoindexPage(std::string const &) const;

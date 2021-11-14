@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 00:36:05 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/12 16:32:35 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/14 15:29:21 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,20 +37,21 @@ class Cgi
 		const std::string	getEnv(const std::string &);
 		std::string			getHeaderData(const std::string &);
 		const int&			getStatus(void) const;
-		const int&			getCgiStatus(void) const;
-
+		const int&			getCgiStep(void) const;
+		const std::string&	getOutputContent(void) const;
 	
-		void			execute(void);
+		void				execute(void);
 		void				clear(void);
 		
-		std::pair<bool, std::string>	parseCgiContent(void);
+		bool	parseCgiContent(void);
 
 	private:
 		// std::string			getOuput(int);
-		std::pair<bool, std::string>	getOuput(int);
-		void				handleProcess(int, time_t);
-		void				setEnv(void);
-		void				setStatus(void);
+		bool	getOuput(int);
+		void	handleProcess(int, time_t);
+		void	setEnv(void);
+		void	setStatus(void);
+		void	setCgiStep(const int step);
 
 	public:
 		class CgiError : public std::exception
@@ -66,9 +67,10 @@ class Cgi
 		Request*			_request;
 		std::string			_header;
 		int					_status;
-		int					_cgiStatus;
 
+		int					_cgiStep;
 		int					_cgiFd;
+		std::string			_outputContent;
 		
 }; /* class Cgi */
 

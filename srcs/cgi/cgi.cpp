@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/12 18:07:50 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/14 15:32:07 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@ const char*	Cgi::CgiError::what() const throw() {
 
 Cgi::Cgi(Request *request) : _request(request), _header(""), _status(200)
 {
+	setCgiStep(CGI_INIT_STATUS);
+
 	const t_location	*loc = request->getLocation();
 
 	if (loc && !loc->cgi.first.empty())
@@ -45,7 +47,8 @@ const std::string&	Cgi::getExtension(void)		const { return this->_extension; }
 const std::string&	Cgi::getProgram(void)		const { return this->_program; }
 char**				Cgi::getEnv(void)			const { return this->_env; }
 const int&			Cgi::getStatus(void)		const { return this->_status; }
-const int&			Cgi::getCgiStatus(void)		const { return this->_cgiStatus; }
+const int&			Cgi::getCgiStep(void)		const { return this->_cgiStep; }
+const std::string&	Cgi::getOutputContent(void) const { return this->_outputContent; };
 
 std::string	Cgi::getHeaderData(const std::string &data) {
 	std::vector<std::string> lines = split_string(this->_header, NEW_LINE);
@@ -108,6 +111,8 @@ const std::string	Cgi::getEnv(const std::string &varName)
 ** Modifiers
 */
 
+void	Cgi::setCgiStep(const int step) { this->_cgiStep = step; }
+
 /* Free _env */
 void    Cgi::clear() {
 	if (this->_env != NULL)
@@ -164,20 +169,25 @@ void	Cgi::setEnv()
 }
 
 /* Read the standard output of the program */
-std::pair<bool, std::string>	Cgi::getOuput(int fd)
+bool	Cgi::getOuput(int fd)
 {
 	int			ret;
-	char		buffer[BUFFER_SIZE];
-	std::string	output;
+	char		buffer[BUFFER_SIZE] = {0};
+	// std::string	output;
 
-	while ((ret = read(fd, buffer, sizeof(buffer) - 1)) > 0)
+	while (1)
 	{
+		ret = read(fd, buffer, sizeof(buffer) - 1);
+		if (ret < 0)
+			break ;
 		buffer[ret] = 0;
-		output += buffer;
+		_outputContent += buffer;
+		if (ret == 0)
+			break ;
 	}
 	if (ret < 0)
-		return std::make_pair(false, output);
-	return std::make_pair(true, output);
+		return false;
+	return true;
 }
 
 /* Executes the CGI program on a file.
@@ -199,7 +209,7 @@ void	Cgi::execute(void)
 	if (write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size()) < 0)
 		throw CgiError();
 
-	_cgiStatus = CGI_EXECUTE_STATUS;
+	this->setCgiStep(CGI_EXECUTE_STATUS);
 
 	// time_t beginTime = time(NULL);
 	if ((pid = fork()) == SYSCALL_ERR)
@@ -269,29 +279,26 @@ void	Cgi::execute(void)
 	// return content;
 }
 
-std::pair<bool, std::string>	Cgi::parseCgiContent(void) {
-	_cgiStatus = CGI_READ_STATUS;
+bool	Cgi::parseCgiContent(void) {
+	this->setCgiStep(CGI_READ_STATUS);
 
-	std::pair<bool, std::string> contentStatus = this->getOuput(_cgiFd);
-
-	if (true == contentStatus.first) {
-		_cgiStatus = CGI_DONE_STATUS;
+	if (true == this->getOuput(_cgiFd)) {
+		this->setCgiStep(CGI_DONE_STATUS);
 
 		close(_cgiFd);
 
-		this->_header = contentStatus.second.substr(0, contentStatus.second.find(DELIMITER));
+		this->_header = _outputContent.substr(0, _outputContent.find(DELIMITER));
 
 		// remove cgi header
-		size_t pos = contentStatus.second.find(DELIMITER);
+		size_t pos = _outputContent.find(DELIMITER);
 		if (std::string::npos != pos)
-			contentStatus.second = contentStatus.second.substr(pos + 4);
+			_outputContent = _outputContent.substr(pos + 4);
 		
 		this->setStatus();
 			
 		// ##################################################################
 		if (DEBUG)
 		{
-			std::cout << "request content :\n" << this->_request->getContent() << std::endl;
 			std::cout << "............ CGI HEADER ............." <<std::endl;
 			std::cout << this->_header << std::endl;
 			std::cout << "............ CGI ENVIRON ............." <<std::endl;
@@ -300,9 +307,10 @@ std::pair<bool, std::string>	Cgi::parseCgiContent(void) {
 				std::cout << this->_env[i] << std::endl;
 			std::cout << "......................................" <<std::endl;
 		}
+		return true;
 	}
 
-	return contentStatus;
+	return false;
 }
 
 _END_NS_WEBSERV

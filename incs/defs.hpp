@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:18:09 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/12 16:31:28 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/14 14:58:45 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,9 @@ enum	e_send
 {
 	SEND_OK,
 	SEND_CGI_FAIL,
-	SEND_FAIL
+	SEND_FAIL,
+	WAIT_SEND,
+	CONTINU_SEND,
 };
 
 /*

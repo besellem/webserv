@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/12 17:58:36 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/14 15:04:13 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,6 +232,8 @@ int		Socket::resolveHttpRequest(Request *request)
 	request->setChunked();
 	request->setContent();
 
+	this->setSendStatus(WAIT_SEND);
+
 	return RESOLVE_OK;
 }
 
@@ -242,20 +244,26 @@ int		Socket::resolveHttpRequest(Request *request)
 */
 int		Socket::sendHttpResponse(Request* request, int socket_fd)
 {
-	Response		response(request);
+	// Response		response(request);
 	std::string		toSend;
 
+	if (this->getSendStatus() == WAIT_SEND) {
+		this->setSendStatus(CONTINU_SEND);
+
+		_response = new Response(request);
+	}
+
 	if (!is_valid_path(request->getConstructPath()))
-		response.setStatus(404);
+		_response->setStatus(404);
 
-	response.setContent(getFileContent(request->getConstructPath()));
-	if (response.getCgiStatus() == false)
+	_response->setContent(getFileContent(request->getConstructPath()));
+	if (_response->getCgiStatus() == false)
 		return SEND_FAIL;
-	response.setHeader();
+	_response->setHeader();
 
-	toSend =  response.getHeader();
+	toSend =  _response->getHeader();
 	toSend += NEW_LINE;
-	toSend += response.getContent();
+	toSend += _response->getContent();
 
 	/* -- Send to server -- */
 	if (SYSCALL_ERR == send(socket_fd, toSend.c_str(), toSend.length(), 0)) {
@@ -271,6 +279,9 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 	}
 	return SEND_OK;
 }
+
+int		Socket::getSendStatus(void) const { return this->_sendStatus; }
+void	Socket::setSendStatus(int const status) { this->_sendStatus = status; }
 
 /** @brief private function */
 
