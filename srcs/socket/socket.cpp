@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/14 15:04:13 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/14 17:08:43 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,8 @@ Socket::Socket(void) :
 Socket::Socket(const std::vector<Server *> serv) :
 	_server_blocks(serv),
 	_port(serv[0]->port()),
-	_addrLen(sizeof(sockaddr_in))
+	_addrLen(sizeof(sockaddr_in)),
+	_currResponse(NULL)
 {
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (SYSCALL_ERR == _serverFd)
@@ -106,49 +107,49 @@ void	Socket::setNonBlock(int & fd)
 **
 ** @return a `enum e_read' value
 */
-int		Socket::readHttpRequest(Request *request, int socket_fd)
-{
-	int	ret;
+// int		Socket::readHttpRequest(Request *request, int socket_fd)
+// {
+// 	int	ret;
 
-	while (true)
-	{
-		request->getHeader().resetBuffer();
-		std::cout << "buffer content: " << request->getHeader().content << std::endl;
-		std::cout << "buffer buf: " << request->getHeader().buf << std::endl;
-		std::cout << "buffer size: " << sizeof(request->getHeader().buf) << std::endl;
-		ret = recv(socket_fd, request->getHeader().buf, sizeof(request->getHeader().buf), 0);
-		std::cout << "ret: " << ret << std::endl;
-		if (SYSCALL_ERR == ret)
-		{
-			// return READ_FAIL; // false
-			break ;
-		}
-		else if (0 == ret)
-		{
-			std::cout << "Client disconnected" << std::endl;
-			break ;
-		}
-		else
-		{
-			request->getHeader().buf[ret] = '\0';
-			request->getHeader().content += request->getHeader().buf;
-		}
-	}
+// 	while (true)
+// 	{
+// 		request->getHeader().resetBuffer();
+// 		std::cout << "buffer content: " << request->getHeader().content << std::endl;
+// 		std::cout << "buffer buf: " << request->getHeader().buf << std::endl;
+// 		std::cout << "buffer size: " << sizeof(request->getHeader().buf) << std::endl;
+// 		ret = recv(socket_fd, request->getHeader().buf, sizeof(request->getHeader().buf), 0);
+// 		std::cout << "ret: " << ret << std::endl;
+// 		if (SYSCALL_ERR == ret)
+// 		{
+// 			// return READ_FAIL; // false
+// 			break ;
+// 		}
+// 		else if (0 == ret)
+// 		{
+// 			std::cout << "Client disconnected" << std::endl;
+// 			break ;
+// 		}
+// 		else
+// 		{
+// 			request->getHeader().buf[ret] = '\0';
+// 			request->getHeader().content += request->getHeader().buf;
+// 		}
+// 	}
 
-	if (DEBUG)
-	{
-		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
-		std::cout << request->getHeader().content << std::endl;
-		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
-	}
+// 	if (DEBUG)
+// 	{
+// 		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
+// 		std::cout << request->getHeader().content << std::endl;
+// 		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
+// 	}
 
-	if (0 == ret)
-		return READ_DISCONNECT;
-	// else if (SYSCALL_ERR == ret)
-	// 	return READ_FAIL;
-	else
-		return READ_OK;
-}
+// 	if (0 == ret)
+// 		return READ_DISCONNECT;
+// 	// else if (SYSCALL_ERR == ret)
+// 	// 	return READ_FAIL;
+// 	else
+// 		return READ_OK;
+// }
 
 
 int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
@@ -179,7 +180,7 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
 	}
 
-	if (resolveHttpRequest(request) == RESOLVE_FAIL) {
+	if (this->resolveHttpRequest(request) == RESOLVE_FAIL) {
 		std::cout << "Current client: [" << currEvt.ident << "]: ";
 		warnMsg("resolve request failed!");
 		return READ_FAIL;
@@ -232,8 +233,6 @@ int		Socket::resolveHttpRequest(Request *request)
 	request->setChunked();
 	request->setContent();
 
-	this->setSendStatus(WAIT_SEND);
-
 	return RESOLVE_OK;
 }
 
@@ -243,31 +242,46 @@ int		Socket::resolveHttpRequest(Request *request)
 ** @return a `enum e_send' value
 */
 int		Socket::sendHttpResponse(Request* request, int socket_fd)
-{
-	// Response		response(request);
+{	
 	std::string		toSend;
+	bool			responseStatus = false;
 
-	if (this->getSendStatus() == WAIT_SEND) {
-		this->setSendStatus(CONTINU_SEND);
+	if (_respMap.empty() == true) {
+		std::cout << "??\n\n";
+		responseStatus = false;
+	}
+	else {
+		_currResponse = this->getCurrResponse(socket_fd);
+		if (_currResponse == NULL)
+			responseStatus = false;
+		else
+			responseStatus = true;
+	}
 
-		_response = new Response(request);
+	if (responseStatus == false) {
+		Response	*response = new Response(request);
+		this->_respMap[socket_fd] = response;
+
+		_currResponse = response;
 	}
 
 	if (!is_valid_path(request->getConstructPath()))
-		_response->setStatus(404);
+		_currResponse->setStatus(404);
 
-	_response->setContent(getFileContent(request->getConstructPath()));
-	if (_response->getCgiStatus() == false)
+	_currResponse->setContent(getFileContent(request->getConstructPath()));
+	if (_currResponse->getCgiStatus() == false)
 		return SEND_FAIL;
-	_response->setHeader();
+	_currResponse->setHeader();
 
-	toSend =  _response->getHeader();
+	toSend =  _currResponse->getHeader();
 	toSend += NEW_LINE;
-	toSend += _response->getContent();
+	toSend += _currResponse->getContent();
 
 	/* -- Send to server -- */
 	if (SYSCALL_ERR == send(socket_fd, toSend.c_str(), toSend.length(), 0)) {
-		warnMsg("send reponse failed!");
+		warnMsg("send response failed!");
+		delete _currResponse;
+		_respMap.erase(socket_fd);
 		return SEND_OK;
 	}
 
@@ -277,11 +291,17 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 		std::cout << toSend.c_str() << std::endl;
 		std::cout << "--------------------------------------" << std::endl << std::endl;
 	}
+	delete _currResponse;
+	_respMap.erase(socket_fd);
 	return SEND_OK;
 }
 
-int		Socket::getSendStatus(void) const { return this->_sendStatus; }
-void	Socket::setSendStatus(int const status) { this->_sendStatus = status; }
+Response	*Socket::getCurrResponse(int const currSockFd) const {
+	resp_type::const_iterator it = _respMap.find(currSockFd);
+	if (it != _respMap.end())
+		return it->second;
+	return NULL;
+}
 
 /** @brief private function */
 

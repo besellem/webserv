@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 14:27:23 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/12 18:19:29 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/14 17:15:05 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ class Epoll {
 		void	_serverLoop(void);
 		
 		/** @brief checker which server is */
-		Socket	_checkServ(int const &, std::map<const int, Socket> &) const;
+		Socket *	_checkServ(int const &, std::map<const int, Socket> &) const;
 
 		/** @brief checker which client is */
 		bool	_checkClient(int const &) const;

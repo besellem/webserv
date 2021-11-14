@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/14 15:01:26 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/14 16:46:53 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,9 @@ _BEGIN_NS_WEBSERV
 class Socket
 {
 	public:
-		typedef std::vector<std::string>                       vector_type;
-		typedef std::pair<int, std::string>                    pair_type;
+		typedef std::vector< std::string >		vector_type;
+		typedef std::pair< int, std::string >	pair_type;
+		typedef std::map<const int, Response*>	resp_type;
 
 	public:
 	/** @brief constructor / destructor */
@@ -45,21 +46,19 @@ class Socket
 		const Server*	getServer(const std::string &) const;
 		sockaddr_in		getAddr(void) const;
 		size_t			getAddrLen(void) const;
-		int				getSendStatus(void) const;
+		Response		*getCurrResponse(int const) const;
 
 
 		/** @brief init socket */
 		void			startSocket(void);
 		
-		int				readHttpRequest(Request *, int);
+		// int			readHttpRequest(Request *, int);
 		int				readHttpRequest(Request *, struct kevent currEvt);
 		int				resolveHttpRequest(Request *);
 		int				sendHttpResponse(Request *, int);
 
 		void			setNonBlock(int & fd);
 		int				socketAccept(void);
-
-		void			setSendStatus(int const status);
 
 	private:
 		void			errorExit(const std::string &) const;
@@ -77,7 +76,8 @@ class Socket
 		size_t					_addrLen;
 	
 		int						_sendStatus;
-		Response				*_response;
+		resp_type				_respMap;
+		Response				*_currResponse;
 
 }; /* class Socket */
 

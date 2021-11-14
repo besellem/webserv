@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/12 18:19:56 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/14 17:16:17 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,14 +84,19 @@ void	Epoll::_serverLoop(void) {
 					continue ;
 				}
 
-				Socket tmp = _checkServ(currEvt.ident, _connMap);
-				if (tmp.getServerFd() == SYSCALL_ERR) {
+				Socket *tmp = _checkServ(currEvt.ident, _connMap);
+				// if (tmp.getServerFd() == SYSCALL_ERR) {
+				// 	warnMsg("connexion not found!");
+				// 	close(currEvt.ident);
+				// 	continue ;
+				// }
+				if (tmp == NULL) {
 					warnMsg("connexion not found!");
 					close(currEvt.ident);
 					continue ;
 				}
 				
-				_handleRequest(currEvt, tmp);
+				_handleRequest(currEvt, *tmp);
 			}
 		}
 	}
@@ -106,17 +111,15 @@ void	Epoll::_updateEvt(int ident, short filter, u_short flags, u_int fflags, int
 		warnMsg(msg);
 }
 
-Socket	Epoll::_checkServ(int const & currConn, std::map<const int, Socket> & _connMap) const {
-	Socket sock;
-
+Socket *	Epoll::_checkServ(int const & currConn, std::map<const int, Socket> & _connMap) const {
 	if (_connMap.empty() == true)
-		return sock;
+		return NULL;
 
 	for (std::map<const int, Socket>::iterator it = _connMap.begin(); it != _connMap.end(); it++) {
 		if (currConn == it->first)
-			return it->second;
+			return &it->second;
 	}
-	return sock;
+	return NULL;
 }
 
 bool	Epoll::_checkClient(int const & clientFd) const {
@@ -173,7 +176,6 @@ void	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 	if (currEvt.filter == EVFILT_READ) {
 		updateMsg("receive request (READ case)");
 
-		// Request	request(sock.getServer());
 		Request *request = new Request();
 
 		int readStatus = sock.readHttpRequest(request, currEvt);
