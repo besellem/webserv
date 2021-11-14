@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/14 17:08:43 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/14 17:37:13 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,10 +246,8 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 	std::string		toSend;
 	bool			responseStatus = false;
 
-	if (_respMap.empty() == true) {
-		std::cout << "??\n\n";
+	if (_respMap.empty() == true)
 		responseStatus = false;
-	}
 	else {
 		_currResponse = this->getCurrResponse(socket_fd);
 		if (_currResponse == NULL)

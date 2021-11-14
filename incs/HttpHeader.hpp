@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 16:04:15 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/12 15:00:45 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/14 18:16:18 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class HttpHeader
 		HttpHeader&		operator=(const HttpHeader &x);
 
 	public:
-		pointer			resetBuffer(void);
+		pointer			resetBuffer(void); // epoll send a length of data, so we don't need a BUFFER_SIZE, but need malloc
 		
 	public:
 		class HttpHeaderParsingError : public std::exception

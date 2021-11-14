@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/14 17:16:17 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/14 18:26:23 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,11 +85,6 @@ void	Epoll::_serverLoop(void) {
 				}
 
 				Socket *tmp = _checkServ(currEvt.ident, _connMap);
-				// if (tmp.getServerFd() == SYSCALL_ERR) {
-				// 	warnMsg("connexion not found!");
-				// 	close(currEvt.ident);
-				// 	continue ;
-				// }
 				if (tmp == NULL) {
 					warnMsg("connexion not found!");
 					close(currEvt.ident);
@@ -200,8 +195,9 @@ void	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 		if (it == _reqMap.end() || sendStatus == SEND_OK) {
 			delete it->second;
 			_reqMap.erase(currEvt.ident);
-			_updateEvt(currEvt.ident, EVFILT_READ, EV_ENABLE, 0, 0, NULL, "failed in read enable");
-			_updateEvt(currEvt.ident, EVFILT_WRITE, EV_DISABLE, 0, 0, NULL, "failed in write disable");
+			// _updateEvt(currEvt.ident, EVFILT_READ, EV_ENABLE, 0, 0, NULL, "failed in read enable");
+			// _updateEvt(currEvt.ident, EVFILT_WRITE, EV_DISABLE, 0, 0, NULL, "failed in write disable");
+			_clientDisconnect(currEvt.ident, _connMap);
 		}
 	}
 }
