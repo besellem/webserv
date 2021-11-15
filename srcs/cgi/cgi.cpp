@@ -49,17 +49,7 @@ char**				Cgi::getEnv(void)			const { return this->_env; }
 const int&			Cgi::getStatus(void)		const { return this->_status; }
 const int&			Cgi::getCgiStep(void)		const { return this->_cgiStep; }
 const std::string&	Cgi::getOutputContent(void) const { return this->_outputContent; };
-
-std::string	Cgi::getHeaderData(const std::string &data) {
-	std::vector<std::string> lines = split_string(this->_header, NEW_LINE);
-	
-	for (size_t i = 0 ; i < lines.size(); i++)
-	{
-		if (ft_strcut(lines[i], ':') == data)
-			return lines[i].substr(data.size() + 2);
-	}
-	return std::string();
-}
+const std::string&	Cgi::getHeader(void)		const { return this->_header; }
 
 /* Returns the value of a cgi environment variables */
 const std::string	Cgi::getEnv(const std::string &varName)
@@ -111,6 +101,22 @@ const std::string	Cgi::getEnv(const std::string &varName)
 ** Modifiers
 */
 
+void	Cgi::setHeader(const std::string& header){
+	std::vector<std::string> lines = split_string(header, NEW_LINE);
+	
+	for (size_t i = 0 ; i < lines.size(); i++)
+	{
+		if (ft_strcut(lines[i], ':') != "Status")
+			this->_header += lines[i] + NEW_LINE;
+		else
+		{
+			/* Modify the status according to the header */
+			std::string status = lines[i].substr(8);
+			std::stringstream(status) >> this->_status;
+		}
+	}
+}
+
 void	Cgi::setCgiStep(const int step) { this->_cgiStep = step; }
 
 /* Free _env */
@@ -122,13 +128,6 @@ void    Cgi::clear() {
 		free(this->_env);
 		this->_env = NULL;
 	}
-}
-
-/* Modify the status according to the header */
-void	Cgi::setStatus(void) {
-	std::string status = this->getHeaderData("Status");
-	if (!status.empty())
-		std::stringstream(status) >> this->_status;
 }
 
 /* Set the CGI environment variables.
@@ -247,36 +246,6 @@ void	Cgi::execute(void)
 
 	if (fcntl(_cgiFd, F_SETFL, O_NONBLOCK))
 		warnMsg("set get output non blocking failed");
-
-	///////////////////
-
-	// content = this->getOuput(fdOut[0]);
-	// close(fdOut[0]);
-
-	// this->_header = content.substr(0, content.find(DELIMITER));
-	
-	// // remove cgi header
-	// size_t pos = content.find(DELIMITER);
-	// if (std::string::npos != pos)
-	// 	content = content.substr(pos + 4);
-	
-	// this->setStatus();
-		
-	// // ##################################################################
-	// if (DEBUG)
-	// {
-	// 	std::cout << "request content :\n" << this->_request->getContent() << std::endl;
-	// 	std::cout << "............ CGI HEADER ............." <<std::endl;
-	// 	std::cout << this->_header << std::endl;
-	// 	std::cout << "............ CGI ENVIRON ............." <<std::endl;
-	// 	int i = -1;
-	// 	while(this->_env && this->_env[++i])
-	// 		std::cout << this->_env[i] << std::endl;
-	// 	std::cout << "......................................" <<std::endl;
-	// }
-	// // ##################################################################
-	
-	// return content;
 }
 
 bool	Cgi::parseCgiContent(void) {
@@ -287,15 +256,13 @@ bool	Cgi::parseCgiContent(void) {
 
 		close(_cgiFd);
 
-		this->_header = _outputContent.substr(0, _outputContent.find(DELIMITER));
+		this->setHeader(_outputContent.substr(0, _outputContent.find(DELIMITER)));
 
 		// remove cgi header
 		size_t pos = _outputContent.find(DELIMITER);
 		if (std::string::npos != pos)
 			_outputContent = _outputContent.substr(pos + 4);
 		
-		this->setStatus();
-			
 		// ##################################################################
 		if (DEBUG)
 		{

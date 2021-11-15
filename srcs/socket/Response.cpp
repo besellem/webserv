@@ -116,17 +116,21 @@ void    Response::setHeader(void)
     this->_header =  HTTP_PROTOCOL_VERSION " ";
 	this->_header += std::to_string(this->_status.first) + " ";
 	this->_header += this->_status.second + NEW_LINE;
-	this->_header += "Content-Length: " + std::to_string(this->_content.size()) + NEW_LINE;
-	if (this->_status.first >= 300 && this->_status.first <= 400)
+	if (this->_cgi && !this->_cgi->getHeader().empty())
+		this->_header += this->_cgi->getHeader();
+	else
 	{
-		this->_header += "Location: ";
-		if (this->_cgi && !this->_cgi->getHeaderData("Location").empty())
-			this->_header += this->_cgi->getHeaderData("Location");
-		else
-			this->_header += this->_location->redirection.second;
-		this->_header += NEW_LINE;
+		this->_header += "Content-Length: " + std::to_string(this->_content.size()) + NEW_LINE;
+		if (this->_status.first >= 300 && this->_status.first <= 400)
+		{
+			this->_header += "Location: ";
+			this->_header += this->_location->redirection.second + NEW_LINE;
+		}
 	}
 }
+			// if (this->_cgi && !this->_cgi->getHeaderData("Location").empty())
+			// 	this->_header += this->_cgi->getHeaderData("Location");
+			// else
 
 bool	Response::isMethodAllowed(const std::string &method)
 {

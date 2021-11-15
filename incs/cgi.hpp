@@ -35,7 +35,7 @@ class Cgi
 		const std::string&	getProgram(void) const;
 		char**				getEnv(void) const;
 		const std::string	getEnv(const std::string &);
-		std::string			getHeaderData(const std::string &);
+		const std::string&	getHeader(void) const;
 		const int&			getStatus(void) const;
 		const int&			getCgiStep(void) const;
 		const std::string&	getOutputContent(void) const;
@@ -46,12 +46,11 @@ class Cgi
 		bool	parseCgiContent(void);
 
 	private:
-		// std::string			getOuput(int);
 		bool	getOuput(int);
 		void	handleProcess(int, time_t);
 		void	setEnv(void);
-		void	setStatus(void);
 		void	setCgiStep(const int step);
+		void	setHeader(const std::string &);
 
 	public:
 		class CgiError : public std::exception
