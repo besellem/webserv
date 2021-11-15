@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/14 18:26:23 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/15 13:33:15 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ void	Epoll::_updateEvt(int ident, short filter, u_short flags, u_int fflags, int
 		warnMsg(msg);
 }
 
-Socket *	Epoll::_checkServ(int const & currConn, std::map<const int, Socket> & _connMap) const {
+Socket	*Epoll::_checkServ(int const & currConn, std::map<const int, Socket> & _connMap) const {
 	if (_connMap.empty() == true)
 		return NULL;
 
