@@ -137,9 +137,12 @@ void	Request::setContent(void)
 		
 		this->_content = tmp_string;
 	}
-	std::cout << S_GREEN "> CONTENT" S_NONE << std::endl;
-	std::cout << "[" << this->_content << "]" << std::endl;
-	std::cout << S_GREEN "< END CONTENT" S_NONE << std::endl;
+	if (DEBUG)
+	{
+		std::cout << S_GREEN "> CONTENT" S_NONE << std::endl;
+		std::cout << "[" << this->_content << "]" << std::endl;
+		std::cout << S_GREEN "< END CONTENT" S_NONE << std::endl;
+	}
 }
 
 void	Request::setConstructPath(void)

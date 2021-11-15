@@ -175,7 +175,8 @@ void	Response::methodPost(void)
 			return ;
 	}
 	
-	if (this->_request->getContent().size() > (size_t)this->_request->getServer()->clientMaxBodySize())
+	if ((size_t)this->_request->getServer()->clientMaxBodySize() != 0 &&
+		this->_request->getContent().size() > (size_t)this->_request->getServer()->clientMaxBodySize())
 		this->setStatus(413);
 	else
 		this->_content = this->_request->getContent();

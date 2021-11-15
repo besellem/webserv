@@ -195,9 +195,9 @@ void	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 		if (it == _reqMap.end() || sendStatus == SEND_OK) {
 			delete it->second;
 			_reqMap.erase(currEvt.ident);
-			// _updateEvt(currEvt.ident, EVFILT_READ, EV_ENABLE, 0, 0, NULL, "failed in read enable");
-			// _updateEvt(currEvt.ident, EVFILT_WRITE, EV_DISABLE, 0, 0, NULL, "failed in write disable");
-			_clientDisconnect(currEvt.ident, _connMap);
+			_updateEvt(currEvt.ident, EVFILT_READ, EV_ENABLE, 0, 0, NULL, "failed in read enable");
+			_updateEvt(currEvt.ident, EVFILT_WRITE, EV_DISABLE, 0, 0, NULL, "failed in write disable");
+			// _clientDisconnect(currEvt.ident, _connMap);
 		}
 	}
 }
