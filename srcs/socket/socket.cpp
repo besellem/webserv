@@ -155,8 +155,11 @@ void	Socket::setNonBlock(int & fd)
 int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 	request->getHeader().resetBuffer();
 	
-	int ret = recv(currEvt.ident, request->getHeader().buf, currEvt.data, 0);
-	
+	char	*buff = new char[currEvt.data + 1];
+	int		ret;
+
+	std::memset(buff, 0, currEvt.data + 1);
+	ret = recv(currEvt.ident, buff, currEvt.data, 0);
 	if (ret == 0) {
 		std::cout << "Current client: [" << currEvt.ident << "]: ";
 		updateMsg("has opted to close the connection");
@@ -168,7 +171,9 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 		return READ_FAIL;
 	}
 	
-	request->getHeader().content += request->getHeader().buf;
+	request->getHeader().content += buff;
+
+	delete [] buff;
 
 	std::cout << "receive data len: " << currEvt.data << std::endl;
 	std::cout << "content data len: " << request->getHeader().content.length() << std::endl;

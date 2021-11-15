@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 15:53:23 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/05 17:28:26 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/12 18:36:54 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ static void	parse_line(ServerGenerator& servers, std::string line)
 	if (!tok.empty())
 	{
 		if (tok[0] == "server")
-			servers.newServer(tok);
+			servers.newServer(tok); // creer un nouveau server quand on trouve un listen, si directive avant listen alors c'est le listen par default
 		else if (tok[0] == "location")
 			servers.newLocation(servers.last(), tok);
 		else if (tok[0] == "{")

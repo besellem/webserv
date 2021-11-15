@@ -12,10 +12,23 @@
 
 #include "webserv.hpp"
 
+INLINE_NAMESPACE::WebServer	serv;
+
+void	ft_sig(int sig)
+{
+	printf("\n\033[1;31m[%s]\033[0m\n", "SIGINT");
+	if (sig == SIGINT)
+	{
+		system("leaks webserv");
+		kill(getpid(), SIGKILL);
+	}
+}
+
 int	main(int ac, char **av, __unused char **env)
 {
-	INLINE_NAMESPACE::WebServer	serv;
 	
+	signal(SIGINT, ft_sig);
+
 	try
 	{
 		serv.parse((ac > 1) ? av[1] : DEFAULT_CONFIG_FILE);
@@ -27,6 +40,8 @@ int	main(int ac, char **av, __unused char **env)
 	}
 
 	serv.createServers();
-	
+
+	// sigaction()
+	// system("leaks webserv");
 	return EXIT_SUCCESS;
 }
