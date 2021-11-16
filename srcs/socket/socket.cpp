@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/16 16:35:56 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/16 17:30:00 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,18 +171,17 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 		return READ_FAIL;
 	}
 	
-	request->getHeader().content += buff;
+	request->getHeader().content.assign(buff, currEvt.data);
 
 	delete [] buff;
 
 	std::cout << "receive data len: " << currEvt.data << std::endl;
-	std::cout << "content data len: " << request->getHeader().content.length() << std::endl;
+	std::cout << "content data len: " << request->getHeader().content.size() << std::endl;
 
 	if (DEBUG)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
-		// std::cout << request->getHeader().content << std::endl;
-		// write(STDOUT_FILENO, buff, currEvt.data);
+		std::cout << request->getHeader().content << std::endl;
 		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
 	}
 
