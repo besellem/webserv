@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:20:57 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/02 15:33:17 by besellem         ###   ########.fr       */
+/*   Updated: 2021/11/16 15:51:40 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,7 @@ void	ft_sig(int sig)
 {
 	printf("\n\033[1;31m[%s]\033[0m\n", "SIGINT");
 	if (sig == SIGINT)
-	{
-		system("leaks webserv");
-		kill(getpid(), SIGKILL);
-	}
+		exit(0);
 }
 
 int	main(int ac, char **av, __unused char **env)
@@ -41,7 +38,5 @@ int	main(int ac, char **av, __unused char **env)
 
 	serv.createServers();
 
-	// sigaction()
-	// system("leaks webserv");
 	return EXIT_SUCCESS;
 }

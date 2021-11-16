@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/16 15:17:56 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/16 15:38:18 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,11 +190,7 @@ void	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 
 		req_type::iterator it = _reqMap.find(currEvt.ident);
 		if (it != _reqMap.end())
-		{
-			LOG;
 			sendStatus = sock.sendHttpResponse(it->second, currEvt.ident);
-			LOG;
-		}
 
 		if (it == _reqMap.end() || sendStatus == SEND_OK) {
 			delete it->second;

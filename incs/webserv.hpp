@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 14:22:05 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/10 19:09:41 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/16 15:51:59 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,7 @@ class WebServer
 {
 	public:
 		WebServer(void);
-		WebServer(const WebServer &);
 		~WebServer();
-		WebServer&				operator=(const WebServer &);
 	
 	public:
 		void					parse(const std::string &);
@@ -42,6 +40,8 @@ class WebServer
 		void					createServers(void);
 
 	private:
+		WebServer(const WebServer &);
+		WebServer&				operator=(const WebServer &);
 		size_t					countSocket() const;
 		std::vector<Server *>	getSocketConfigs(size_t& index);
 

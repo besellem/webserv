@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/12 17:41:25 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/16 15:52:14 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,28 +20,14 @@ WebServer::WebServer(void) :
 	_socks(nullptr)
 {}
 
-WebServer::WebServer(const WebServer& x)
-{
-	*this = x;
-}
-
 WebServer::~WebServer()
 {
+	std::cout << "Webserv exit." << std::endl;
 	if (_socks != nullptr)
 	{
 		delete [] _socks;
 		_socks = nullptr;
 	}
-}
-
-// TO DO but unused
-WebServer&		WebServer::operator=(const WebServer& x)
-{
-	if (this == &x)
-		return *this;
-	_servers = x._servers;
-	// _socks = x._socks;
-	return *this;
 }
 
 /*

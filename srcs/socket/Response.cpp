@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/14 15:31:29 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/16 15:54:25 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,6 @@
 _BEGIN_NS_WEBSERV
 
 Response::Response(Request *req)
-	// _request(req),
-	// _location(req->getLocation())
 {
 	_request = req;
 	_location = req->getLocation();
@@ -128,9 +126,6 @@ void    Response::setHeader(void)
 		}
 	}
 }
-			// if (this->_cgi && !this->_cgi->getHeaderData("Location").empty())
-			// 	this->_header += this->_cgi->getHeaderData("Location");
-			// else
 
 bool	Response::isMethodAllowed(const std::string &method)
 {
@@ -201,33 +196,6 @@ void	Response::methodDelete(void)
 	this->_content += "</html>" NEW_LINE;
 }
 
-// void	Response::cgi(void) {
-	
-// 	if (this->_status.first != 200)
-// 		return ;
-
-// 	try
-// 	{
-// 		this->_content = this->_cgi->execute();
-// 		this->setStatus(this->_cgi->getStatus());
-// 		_cgiStatus = true;
-// 	}
-// 	catch (const std::exception& e)
-// 	{
-// 		_cgiStatus = false;
-// 		///////////////////////////////////////////////////////////////
-// 		// WHAT'S THIS ?
-// 		return ;
-// 		///////////////////////////////////////////////////////////////
-
-// 		if (this->_cgi->getStatus() == 200)
-// 			this->setStatus(500);
-// 		else
-// 			this->setStatus(this->_cgi->getStatus());
-// 		EXCEPT_WARNING(e);
-// 	}
-// }
-
 void	Response::cgi(void) {
 	
 	if (this->_status.first != 200)
@@ -241,10 +209,10 @@ void	Response::cgi(void) {
 	}
 	catch (const std::exception& e)
 	{
-		// if (this->_cgi->getStatus() == 200)
-			// this->setStatus(500);
-		// else
-		// 	this->setStatus(this->_cgi->getStatus());
+		if (this->_cgi->getStatus() == 200)
+			this->setStatus(500);
+		else
+			this->setStatus(this->_cgi->getStatus());
 		EXCEPT_WARNING(e);
 		return ;
 	}

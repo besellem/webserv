@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/12 18:20:57 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/16 15:55:29 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,10 +168,6 @@ void	Request::setConstructPath(void)
 				ret += uriPath.substr(loc->path.size() - 1);
 			else
 				ret += uriPath.substr(loc->path.size());
-			// if (ret[ret.size() - 1] == '/')
-			// 	ret += uriPath.substr(uriPath.find_last_of('/') + 1);
-			// else
-			// 	ret += uriPath.substr(uriPath.find_last_of('/'));
 		}
 		else
 			ret += uriPath;
