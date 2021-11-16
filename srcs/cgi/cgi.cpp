@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/16 15:53:11 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/16 15:56:25 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,7 +171,6 @@ bool	Cgi::getOuput(int fd)
 {
 	int			ret;
 	char		buffer[BUFFER_SIZE] = {0};
-	// std::string	output;
 
 	while (1)
 	{
