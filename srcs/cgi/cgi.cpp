@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/16 15:56:25 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/16 17:58:54 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,7 +192,6 @@ Returns the output in a string */
 void	Cgi::execute(void)
 {
 	pid_t		pid;
-	int			status = 0;
 	int			fdIn[2];
 	int			fdOut[2];
 	std::string	content;
@@ -233,13 +232,6 @@ void	Cgi::execute(void)
 	close(fdIn[0]);
 	close(fdIn[1]);
 
-	waitpid(-1, &status, WNOHANG);
-	if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
-	{
-		this->_status = 502;
-		throw CgiError();
-	}
-
 	_cgiFd = fdOut[0];
 
 	if (fcntl(_cgiFd, F_SETFL, O_NONBLOCK))
@@ -247,11 +239,18 @@ void	Cgi::execute(void)
 }
 
 bool	Cgi::parseCgiContent(void) {
-	this->setCgiStep(CGI_READ_STATUS);
 
 	if (true == this->getOuput(_cgiFd)) {
 		this->setCgiStep(CGI_DONE_STATUS);
-
+		
+		int status;
+		waitpid(-1, &status, 0);
+		if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
+		{
+			this->_status = 502;
+			throw CgiError();
+		}
+		
 		close(_cgiFd);
 
 		this->setHeader(_outputContent.substr(0, _outputContent.find(DELIMITER)));
@@ -275,6 +274,7 @@ bool	Cgi::parseCgiContent(void) {
 		return true;
 	}
 
+	this->setCgiStep(CGI_READ_STATUS);
 	return false;
 }
 

@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/16 15:54:25 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/16 17:57:26 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,6 +206,10 @@ void	Response::cgi(void) {
 		if (this->getCgiStep() == CGI_INIT_STATUS) {
 			this->_cgi->execute();
 		}
+		if (this->_cgi->parseCgiContent() == false) {
+			this->_cgiStatus = false;
+			return ;
+		}
 	}
 	catch (const std::exception& e)
 	{
@@ -217,11 +221,6 @@ void	Response::cgi(void) {
 		return ;
 	}
 
-	if (this->_cgi->parseCgiContent() == false) {
-		this->_cgiStatus = false;
-		return ;
-	}
-	
 	this->_cgiStatus = true;
 	this->_content = this->_cgi->getOutputContent();
 	this->setStatus(this->_cgi->getStatus());
