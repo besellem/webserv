@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/16 16:34:36 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/16 16:35:56 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,7 +181,7 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 	if (DEBUG)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
-		std::cout << request->getHeader().content << std::endl;
+		// std::cout << request->getHeader().content << std::endl;
 		// write(STDOUT_FILENO, buff, currEvt.data);
 		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
 	}
@@ -252,43 +252,34 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 	std::string		toSend;
 	bool			responseStatus = false;
 
-	LOG;
 	if (_respMap.empty() == true)
 		responseStatus = false;
 	else {
-		LOG;
 		_currResponse = this->getCurrResponse(socket_fd);
-		LOG;
 		if (_currResponse == NULL)
 			responseStatus = false;
 		else
 			responseStatus = true;
 	}
 
-	LOG;
 	if (responseStatus == false) {
 		Response	*response = new Response(request);
 		this->_respMap[socket_fd] = response;
 
 		_currResponse = response;
 	}
-	LOG;
 
 	if (!is_valid_path(request->getConstructPath()))
 		_currResponse->setStatus(404);
-	LOG;
 
 	_currResponse->setContent(getFileContent(request->getConstructPath()));
-	LOG;
 	if (_currResponse->getCgiStatus() == false)
 		return SEND_FAIL;
 	_currResponse->setHeader();
-	LOG;
 
-	toSend = _currResponse->getHeader();
+	toSend =  _currResponse->getHeader();
 	toSend += NEW_LINE;
 	toSend += _currResponse->getContent();
-	LOG;
 
 	/* -- Send to server -- */
 	if (SYSCALL_ERR == send(socket_fd, toSend.c_str(), toSend.length(), 0)) {
