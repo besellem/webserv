@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/14 17:37:13 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/16 15:20:23 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -276,7 +276,7 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 		return SEND_FAIL;
 	_currResponse->setHeader();
 
-	toSend =  _currResponse->getHeader();
+	toSend = _currResponse->getHeader();
 	toSend += NEW_LINE;
 	toSend += _currResponse->getContent();
 
