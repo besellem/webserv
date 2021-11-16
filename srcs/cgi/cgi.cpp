@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/16 18:09:35 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/16 18:11:22 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -245,7 +245,7 @@ bool	Cgi::parseCgiContent(void) {
 		this->setCgiStep(CGI_DONE_STATUS);
 		
 		int status;
-		waitpid(-1, &status, WNOHANG);
+		waitpid(-1, &status, 0);
 		if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_FAILURE)
 		{
 			this->_status = 502;
