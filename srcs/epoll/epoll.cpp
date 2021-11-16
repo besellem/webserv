@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   epoll.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/16 15:38:18 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/16 16:34:18 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ void	Epoll::_updateEvt(int ident, short filter, u_short flags, u_int fflags, int
 		warnMsg(msg);
 }
 
-Socket *	Epoll::_checkServ(int const & currConn, std::map<const int, Socket> & _connMap) const {
+Socket	*Epoll::_checkServ(int const & currConn, std::map<const int, Socket> & _connMap) const {
 	if (_connMap.empty() == true)
 		return NULL;
 
