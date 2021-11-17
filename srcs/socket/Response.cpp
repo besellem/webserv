@@ -230,7 +230,8 @@ void	Response::cgi(void) {
 
 void    Response::setContent(const std::string &file_content)
 {
-	this->isMethodAllowed(this->_request->getHeader().request_method);
+	if (this->_status.first < 400)
+		this->isMethodAllowed(this->_request->getHeader().request_method);
 
 	_cgiStatus = true;
 	
@@ -257,14 +258,8 @@ void    Response::setContent(const std::string &file_content)
 
 void	Response::setErrorContent(void)
 {
-	LOG;
 	std::map<int, std::string>::const_iterator	it;
-	if (this->_request->getServer())
-		std::cout << "server: " << this->_request->getServer()->port() << std::endl;
-	else
-		std::cout << "No server in the request.\n";
 	it = this->_request->getServer()->errorPages().find(this->_status.first);
-	LOG;
 	/* Default error page setup case */
 	if (it != this->_request->getServer()->errorPages().end() &&
 		is_valid_path(it->second))
