@@ -42,7 +42,6 @@ size_t			WebServer::serverSize(void) const
 const Server&	WebServer::getServer(int i) const
 { return *(this->_servers[i]); }
 
-/* Count the differents socket of the config file */
 size_t			WebServer::countSocket() const
 {
 	size_t	count = _servers.size();
@@ -61,13 +60,12 @@ size_t			WebServer::countSocket() const
 	return count;
 }
 
-/* Selects all server blocks adapted to the socket */
-std::vector<Server *>	WebServer::selectServers(size_t& index)
+std::vector<Server *>	WebServer::getSocketConfigs(size_t& index)
 {
-	std::vector<Server *>	blocks;
+	std::vector<Server *>	configs;
 	bool					firstOccur = false;
 
-	/* is index the first server block of this socket */
+	/* is index the first config of this socket config */
 	while (false == firstOccur)
 	{
 		firstOccur = true;
@@ -77,40 +75,40 @@ std::vector<Server *>	WebServer::selectServers(size_t& index)
 				_servers[index]->port() == _servers[j]->port())
 			{
 				firstOccur = false;
-				if (index == _servers.size()) // should never happen
-					return blocks;
 				++index;
 				break ;
 			}
 		}
 	}
 	
-	blocks.push_back(_servers[index]);
+	configs.push_back(_servers[index]);
 	
-	/* get the others server blocks for this socket */
+	/* get the others configs for this socket */
 	for (size_t i = index + 1; i < _servers.size(); i++)
 	{
 		if (_servers[index]->ip() == _servers[i]->ip() &&
 			_servers[index]->port() == _servers[i]->port())
 		{
-			blocks.push_back(_servers[i]);
+			configs.push_back(_servers[i]);
 		}
 	}
-	return blocks;
+	return configs;
 }
 
 void			WebServer::createServers(void)
 {
-	const size_t	n = countSocket();
+	const size_t	n = _servers.size();
 	Socket			cur;
 
-	// create a socket for each different server declared in the config file
+	// create a socket for each server declared in the config file
 	_socks = new Socket[n];
-	for (size_t i = 0, j = 0; j < n; ++i, ++j)
+
+	for (size_t i = 0; i < n; ++i)
 	{
 		/** @brief init server */
-		_socks[j] = Socket(selectServers(i));
-		_socks[j].startSocket();
+		// std::vector<Server *> tmp = getSocketConfigs(i);
+		_socks[i] = Socket(getSocketConfigs(i));
+		_socks[i].startSocket();
 	}
 
 	/** @brief start server */

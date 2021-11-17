@@ -139,7 +139,7 @@ void	Request::setContent(void)
 		
 		this->_content = tmp_string;
 	}
-	if (!DEBUG)
+	if (DEBUG)
 	{
 		std::cout << "is chunked : " << (_isChunked == true ? "true" : "false") << std ::endl;
 		std::cout << S_GREEN "> CONTENT" S_NONE << std::endl;
@@ -310,7 +310,7 @@ bool	Request::parseFile(void) {
 
 	size_t begin;
 	size_t end;
-	LOG;
+
 	while (true) {
 		// get file name
 		if ((begin = toParse.find(key[FN])) != std::string::npos)
@@ -325,6 +325,7 @@ bool	Request::parseFile(void) {
 			toParse.erase(0, begin + key[DRN].length());
 		if ((end = toParse.find(key[RN])) != std::string::npos)
 			fileContent = toParse.substr(0, end);
+
 		// add to list of file info
 		if(!fileName.empty())
 			_fileInfo.insert(std::make_pair(fileName, fileContent));

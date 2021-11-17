@@ -74,7 +74,7 @@ size_t			Socket::getAddrLen(void)  const { return _addrLen; }
 
 const Server*	Socket::getServer(void)	const { return _server_blocks[0]; }
 
-const Server*	Socket::selectServer(const std::string &name) const
+const Server*	Socket::getServer(const std::string &name) const
 {
 	for (size_t i = 0; i < _server_blocks.size(); ++i)
 	{
@@ -102,6 +102,30 @@ void	Socket::setNonBlock(int & fd)
 	}
 }
 
+size_t	Socket::checkRequestLen(std::string const & content) {
+	size_t pos = content.find("Content-Length: ");
+
+	if (pos == std::string::npos)
+		return std::string::npos;
+	
+	pos += std::string("Content-Length: ").length();
+
+	std::string getLen;
+
+	for (size_t i = pos; i < content.length() - pos; i++) {
+		if (std::isdigit(content[i]))
+			getLen += content[i];
+		else
+			break ;
+	}
+
+	std::stringstream sstream(getLen);
+	size_t ret = 0;
+
+	sstream >> ret;
+	return ret;
+}
+
 int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 	// request->getHeader().resetBuffer();
 	
@@ -122,7 +146,7 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 	}
 	
 	request->getHeader().content.assign(buff, currEvt.data);
-	
+
 	delete [] buff;
 
 	std::cout << "receive data len: " << currEvt.data << std::endl;
@@ -134,7 +158,6 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 		std::cout << "Request len: " << reqLen << std::endl;
 		warnMsg("request length too large");
 		request->setLenStatus(false);
-		sendError
 		return READ_FAIL;
 	}
 
@@ -159,6 +182,10 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 */
 int		Socket::resolveHttpRequest(Request *request)
 {
+	/* the buffer is empty, therefore the header was also empty */
+	// if (request->getHeader().content.empty())
+	// 	return RESOLVE_EMPTY;
+	
 	vector_type				buffer = split_string(request->getHeader().content, NEW_LINE);
 	vector_type::iterator	line = buffer.begin();
 
@@ -181,7 +208,7 @@ int		Socket::resolveHttpRequest(Request *request)
 	}
 
 	std::string name = request->getHeader().data["Host"][0];
-	request->setServer(selectServer(name));
+	request->setServer(getServer(name));
 	request->setConstructPath();
 
 	if (DEBUG)

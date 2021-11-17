@@ -13,7 +13,7 @@
 #ifndef DEFS_HPP
 # define DEFS_HPP
 
-# define DEBUG     false // print some logs/warnings
+# define DEBUG     true // print some logs/warnings
 
 /** @brief Anscii code */
 # define S_NONE    "\e[0m"

@@ -322,9 +322,7 @@ const std::string	Response::generateAutoindexPage(std::string const &path) const
 	content = "<html>\n";
 	content += "<head><title>autoindex</title></head>\n";
 	content += "<body>\n";
-	content += "<h1>Index of ";
-	content += path.substr(5);
-	content += "</h1><hr/>\n";
+	content += "<h1>Index of /</h1><hr/>\n";
 
 	/* create table */
 	content += "<table width=\"100%\" border=\"0\">\n";
