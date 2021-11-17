@@ -102,7 +102,10 @@ void	Request::setServer(const Server *server) { this->_server = server; }
 
 void	Request::setContent(void)
 {
+	std::cout << "header content size: " << this->_header.content.length() << std::endl;
+
 	std::string					buf(this->_header.content);
+	std::cout << "buf size: " << buf.length() << std::endl;
 	const std::string			delim(DELIMITER);
 	const size_t				pos = buf.find(delim);
 	
@@ -137,7 +140,7 @@ void	Request::setContent(void)
 		
 		this->_content = tmp_string;
 	}
-	if (DEBUG)
+	if (!DEBUG)
 	{
 		std::cout << "is chunked : " << (_isChunked == true ? "true" : "false") << std ::endl;
 		std::cout << S_GREEN "> CONTENT" S_NONE << std::endl;
@@ -303,7 +306,8 @@ bool	Request::parseFile(void) {
 
 	size_t begin;
 	size_t end;
-
+	LOG;
+	std::cout << "content size: " << this->getContent().length() << std::endl;
 	while (true) {
 		// get file name
 		if ((begin = toParse.find(key[FN])) != std::string::npos)

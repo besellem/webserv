@@ -43,11 +43,11 @@ class Socket
 		short			getPort(void) const;
 		int				getServerFd(void) const;
 		const Server*	getServer(void) const;
-		const Server*	getServer(const std::string &) const;
 		sockaddr_in		getAddr(void) const;
 		size_t			getAddrLen(void) const;
 		Response		*getCurrResponse(int const) const;
 
+		const Server*	selectServer(const std::string &) const;
 
 		/** @brief init socket */
 		void			startSocket(void);

@@ -74,7 +74,7 @@ size_t			Socket::getAddrLen(void)  const { return _addrLen; }
 
 const Server*	Socket::getServer(void)	const { return _server_blocks[0]; }
 
-const Server*	Socket::getServer(const std::string &name) const
+const Server*	Socket::selectServer(const std::string &name) const
 {
 	for (size_t i = 0; i < _server_blocks.size(); ++i)
 	{
@@ -101,56 +101,6 @@ void	Socket::setNonBlock(int & fd)
 		exit(EXIT_FAILURE);
 	}
 }
-
-/*
-** Read the socket's http request
-**
-** @return a `enum e_read' value
-*/
-// int		Socket::readHttpRequest(Request *request, int socket_fd)
-// {
-// 	int	ret;
-
-// 	while (true)
-// 	{
-// 		request->getHeader().resetBuffer();
-// 		std::cout << "buffer content: " << request->getHeader().content << std::endl;
-// 		std::cout << "buffer buf: " << request->getHeader().buf << std::endl;
-// 		std::cout << "buffer size: " << sizeof(request->getHeader().buf) << std::endl;
-// 		ret = recv(socket_fd, request->getHeader().buf, sizeof(request->getHeader().buf), 0);
-// 		std::cout << "ret: " << ret << std::endl;
-// 		if (SYSCALL_ERR == ret)
-// 		{
-// 			// return READ_FAIL; // false
-// 			break ;
-// 		}
-// 		else if (0 == ret)
-// 		{
-// 			std::cout << "Client disconnected" << std::endl;
-// 			break ;
-// 		}
-// 		else
-// 		{
-// 			request->getHeader().buf[ret] = '\0';
-// 			request->getHeader().content += request->getHeader().buf;
-// 		}
-// 	}
-
-// 	if (DEBUG)
-// 	{
-// 		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
-// 		std::cout << request->getHeader().content << std::endl;
-// 		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
-// 	}
-
-// 	if (0 == ret)
-// 		return READ_DISCONNECT;
-// 	// else if (SYSCALL_ERR == ret)
-// 	// 	return READ_FAIL;
-// 	else
-// 		return READ_OK;
-// }
-
 
 int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 	request->getHeader().resetBuffer();
@@ -200,10 +150,6 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 */
 int		Socket::resolveHttpRequest(Request *request)
 {
-	/* the buffer is empty, therefore the header was also empty */
-	// if (request->getHeader().content.empty())
-	// 	return RESOLVE_EMPTY;
-	
 	vector_type				buffer = split_string(request->getHeader().content, NEW_LINE);
 	vector_type::iterator	line = buffer.begin();
 
@@ -226,7 +172,7 @@ int		Socket::resolveHttpRequest(Request *request)
 	}
 
 	std::string name = request->getHeader().data["Host"][0];
-	request->setServer(getServer(name));
+	request->setServer(selectServer(name));
 	request->setConstructPath();
 
 	if (DEBUG)
@@ -248,6 +194,7 @@ int		Socket::resolveHttpRequest(Request *request)
 */
 int		Socket::sendHttpResponse(Request* request, int socket_fd)
 {	
+	LOG;
 	std::string		toSend;
 	bool			responseStatus = false;
 
@@ -261,6 +208,7 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 			responseStatus = true;
 	}
 
+	LOG;
 	if (responseStatus == false) {
 		Response	*response = new Response(request);
 		this->_respMap[socket_fd] = response;
@@ -268,17 +216,22 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 		_currResponse = response;
 	}
 
+	LOG;
 	if (!is_valid_path(request->getConstructPath()))
 		_currResponse->setStatus(404);
 
+	LOG;
 	_currResponse->setContent(getFileContent(request->getConstructPath()));
+	LOG;
 	if (_currResponse->getCgiStatus() == false)
 		return SEND_FAIL;
 	_currResponse->setHeader();
 
 	toSend =  _currResponse->getHeader();
 	toSend += NEW_LINE;
+	LOG;
 	toSend += _currResponse->getContent();
+	LOG;
 
 	/* -- Send to server -- */
 	if (SYSCALL_ERR == send(socket_fd, toSend.c_str(), toSend.length(), 0)) {

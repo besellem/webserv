@@ -78,7 +78,7 @@ std::vector<Server *>	WebServer::selectServers(size_t& index)
 				_servers[index]->port() == _servers[j]->port())
 			{
 				firstOccur = false;
-				if (index == _servers.size())
+				if (index == _servers.size()) // should never happen
 					return blocks;
 				++index;
 				break ;
