@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/15 13:33:15 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/17 15:14:47 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,6 +177,7 @@ void	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 
 		if (readStatus == READ_FAIL || readStatus == READ_DISCONNECT) {
 			_clientDisconnect(currEvt.ident, _connMap);
+			return ;
 		}
 
 		_reqMap[currEvt.ident] = request;
@@ -195,9 +196,9 @@ void	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 		if (it == _reqMap.end() || sendStatus == SEND_OK) {
 			delete it->second;
 			_reqMap.erase(currEvt.ident);
-			// _updateEvt(currEvt.ident, EVFILT_READ, EV_ENABLE, 0, 0, NULL, "failed in read enable");
-			// _updateEvt(currEvt.ident, EVFILT_WRITE, EV_DISABLE, 0, 0, NULL, "failed in write disable");
-			_clientDisconnect(currEvt.ident, _connMap);
+			_updateEvt(currEvt.ident, EVFILT_READ, EV_ENABLE, 0, 0, NULL, "failed in read enable");
+			_updateEvt(currEvt.ident, EVFILT_WRITE, EV_DISABLE, 0, 0, NULL, "failed in write disable");
+			// _clientDisconnect(currEvt.ident, _connMap);
 		}
 	}
 }

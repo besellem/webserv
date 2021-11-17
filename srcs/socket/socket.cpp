@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/14 17:37:13 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/17 15:18:01 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,12 +151,38 @@ void	Socket::setNonBlock(int & fd)
 // 		return READ_OK;
 // }
 
+size_t	Socket::checkRequestLen(std::string const & content) {
+	size_t pos = content.find("Content-Length: ");
+
+	if (pos == std::string::npos)
+		return std::string::npos;
+	
+	pos += std::string("Content-Length: ").length();
+
+	std::string getLen;
+
+	for (size_t i = pos; i < content.length() - pos; i++) {
+		if (std::isdigit(content[i]))
+			getLen += content[i];
+		else
+			break ;
+	}
+
+	std::stringstream sstream(getLen);
+	size_t ret = 0;
+
+	sstream >> ret;
+	return ret;
+}
 
 int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
-	request->getHeader().resetBuffer();
+	// request->getHeader().resetBuffer();
 	
-	int ret = recv(currEvt.ident, request->getHeader().buf, currEvt.data, 0);
-	
+	char	*buff = new char[currEvt.data + 1];
+	int		ret;
+
+	std::memset(buff, 0, currEvt.data + 1);
+	ret = recv(currEvt.ident, buff, currEvt.data, 0);
 	if (ret == 0) {
 		std::cout << "Current client: [" << currEvt.ident << "]: ";
 		updateMsg("has opted to close the connection");
@@ -168,16 +194,27 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 		return READ_FAIL;
 	}
 	
-	request->getHeader().content += request->getHeader().buf;
+	request->getHeader().content.assign(buff, currEvt.data);
+
+	delete [] buff;
 
 	std::cout << "receive data len: " << currEvt.data << std::endl;
-	std::cout << "content data len: " << request->getHeader().content.length() << std::endl;
+	std::cout << "content data len: " << request->getHeader().content.size() << std::endl;
+
+	size_t reqLen = this->checkRequestLen(request->getHeader().content);
+
+	if (reqLen > static_cast<size_t>(currEvt.data) && reqLen != std::string::npos) {
+		std::cout << "Data len:    " << currEvt.data << std::endl;
+		std::cout << "Request len: " << reqLen << std::endl;
+		warnMsg("request length too large");
+		return READ_FAIL;
+	}
 
 	if (DEBUG)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
 		std::cout << request->getHeader().content << std::endl;
-		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
+		std::cout << "\n+++++++++++ FINAL REQ ++++++++++++++++" << std::endl << std::endl;
 	}
 
 	if (this->resolveHttpRequest(request) == RESOLVE_FAIL) {
