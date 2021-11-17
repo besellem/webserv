@@ -55,6 +55,7 @@ class Request
 		size_t				getContentLength(void) const;
 		const Server*		getServer(void) const;
 		const t_location*	getLocation(void) const;
+		const int&			getStatus(void) const;
 		
 		
 		bool				setRequestFirstLine(const std::string &);
@@ -64,6 +65,7 @@ class Request
 		void				setHeaderData(const std::string &);
 		void				setChunked(void);
 		void				setServer(const Server *);
+		void				setStatus(const int &);
 
 		const info_type&	getFileInfo(void) const;
 		bool				checkIsUploadCase(void);
@@ -79,6 +81,7 @@ class Request
 	
 		info_type			_fileInfo;
 		std::string			_boundary;
+		int					_status;
 	
 }; /* class Request */
 

@@ -15,7 +15,9 @@
 _BEGIN_NS_WEBSERV
 
 Request::Request(void) :
-	_isChunked(false)
+	_constructPath(ROOT_PATH),
+	_isChunked(false),
+	_status(200)
 {}
 
 Request::Request(const Request &x)
@@ -35,6 +37,7 @@ Request&			Request::operator=(const Request &x)
 	_isChunked = x._isChunked;
 	_fileInfo = x._fileInfo;
 	_boundary = x._boundary;
+	_status = x._status;
 	return *this;
 }
 
@@ -46,6 +49,7 @@ const std::string&	Request::getContent(void)       const { return this->_content
 const std::string&	Request::getConstructPath(void) const { return this->_constructPath; }
 size_t				Request::getContentLength(void) const { return this->_content.size(); }
 const Server*		Request::getServer(void)        const { return this->_server; }
+const int&			Request::getStatus(void)        const { return this->_status; }
 
 /* Find the location of the request */
 const t_location*	Request::getLocation(void) const
@@ -86,6 +90,11 @@ const t_location*	Request::getLocation(void) const
 /*
 ** Setters
 */
+
+void	Request::setStatus(const int& status) {
+	this->_status = status;
+}
+
 bool	Request::setRequestFirstLine(const std::string &first_line)
 {
 	const vector_type	line = split_string(first_line, " ");
@@ -137,7 +146,7 @@ void	Request::setContent(void)
 		
 		this->_content = tmp_string;
 	}
-	if (!DEBUG)
+	if (DEBUG)
 	{
 		std::cout << "is chunked : " << (_isChunked == true ? "true" : "false") << std ::endl;
 		std::cout << S_GREEN "> CONTENT" S_NONE << std::endl;
@@ -148,7 +157,7 @@ void	Request::setContent(void)
 
 void	Request::setConstructPath(void)
 {
-	std::string			ret;
+	std::string			ret("");
 	const t_location	*loc = this->getLocation();
 	std::string			uriPath = ft_strcut(this->_header.uri, '?');
 	
@@ -156,7 +165,6 @@ void	Request::setConstructPath(void)
 	std::string							index_tmp;
 	Server::tokens_type::const_iterator	idx; // iterator on indexes
 	
-	ret = ROOT_PATH;
 	if (loc != NULL)
 	{
 		std::cout << "location        : [" S_GREEN << loc->path << S_NONE "]" << std::endl;
@@ -196,7 +204,7 @@ void	Request::setConstructPath(void)
 		ret += uriPath;
 	}
 	
-	this->_constructPath = ret;
+	this->_constructPath += ret;
 }
 
 void	Request::setConstructPath(const std::string &path)
@@ -303,7 +311,7 @@ bool	Request::parseFile(void) {
 
 	size_t begin;
 	size_t end;
-	LOG;
+
 	while (true) {
 		// get file name
 		if ((begin = toParse.find(key[FN])) != std::string::npos)

@@ -102,55 +102,6 @@ void	Socket::setNonBlock(int & fd)
 	}
 }
 
-/*
-** Read the socket's http request
-**
-** @return a `enum e_read' value
-*/
-// int		Socket::readHttpRequest(Request *request, int socket_fd)
-// {
-// 	int	ret;
-
-// 	while (true)
-// 	{
-// 		request->getHeader().resetBuffer();
-// 		std::cout << "buffer content: " << request->getHeader().content << std::endl;
-// 		std::cout << "buffer buf: " << request->getHeader().buf << std::endl;
-// 		std::cout << "buffer size: " << sizeof(request->getHeader().buf) << std::endl;
-// 		ret = recv(socket_fd, request->getHeader().buf, sizeof(request->getHeader().buf), 0);
-// 		std::cout << "ret: " << ret << std::endl;
-// 		if (SYSCALL_ERR == ret)
-// 		{
-// 			// return READ_FAIL; // false
-// 			break ;
-// 		}
-// 		else if (0 == ret)
-// 		{
-// 			std::cout << "Client disconnected" << std::endl;
-// 			break ;
-// 		}
-// 		else
-// 		{
-// 			request->getHeader().buf[ret] = '\0';
-// 			request->getHeader().content += request->getHeader().buf;
-// 		}
-// 	}
-
-// 	if (DEBUG)
-// 	{
-// 		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
-// 		std::cout << request->getHeader().content << std::endl;
-// 		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
-// 	}
-
-// 	if (0 == ret)
-// 		return READ_DISCONNECT;
-// 	// else if (SYSCALL_ERR == ret)
-// 	// 	return READ_FAIL;
-// 	else
-// 		return READ_OK;
-// }
-
 size_t	Socket::checkRequestLen(std::string const & content) {
 	size_t pos = content.find("Content-Length: ");
 
@@ -206,10 +157,10 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 		std::cout << "Data len:    " << currEvt.data << std::endl;
 		std::cout << "Request len: " << reqLen << std::endl;
 		warnMsg("request length too large");
-		return READ_FAIL;
+		request->setStatus(413);
 	}
 
-	if (!DEBUG)
+	if (DEBUG)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
 		std::cout << request->getHeader().content << std::endl;
@@ -218,7 +169,7 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 	if (this->resolveHttpRequest(request) == RESOLVE_FAIL) {
 		std::cout << "Current client: [" << currEvt.ident << "]: ";
 		warnMsg("resolve request failed!");
-		return READ_FAIL;
+		request->setStatus(400);
 	}
 
 	return READ_OK;
@@ -242,7 +193,10 @@ int		Socket::resolveHttpRequest(Request *request)
 	**   GET /index.html HTTP/1.1
 	*/
 	if (request->setRequestFirstLine(*line++) == false)
+	{
+		request->setServer(selectServer(""));
 		return RESOLVE_FAIL;
+	}
 
 	// set query string
 	size_t pos = request->getHeader().uri.find("?");

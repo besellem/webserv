@@ -17,7 +17,7 @@ _BEGIN_NS_WEBSERV
 HttpHeader::HttpHeader(void) :
 	data(),
 	request_method(),
-	uri(),
+	uri("/"),
 	queryString(""),
 	content(),
 	chunked(false)

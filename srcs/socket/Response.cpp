@@ -24,7 +24,9 @@ Response::Response(Request *req)
 	}
 	else
 		_cgi = NULL;
-	setStatus(200);
+	setStatus(_request->getStatus());
+	if (!is_valid_path(_request->getConstructPath()))
+		setStatus(404);
 }
 
 Response::~Response()
@@ -68,6 +70,7 @@ void    Response::setStatus(int code)
 		303,
 		304,
 		308,
+		400,
 		403,
 		404,
 		405,
@@ -76,6 +79,7 @@ void    Response::setStatus(int code)
 		500,
 		502
 	};
+
 	static std::string	actionTab[] = {
 		"OK",
 		"Accepted",
@@ -86,6 +90,7 @@ void    Response::setStatus(int code)
 		"See Other",
 		"Not Modified",
 		"Temporary Redirect",
+		"Bad Request",
 		"Forbidden",
 		"Not Found",
 		"Method Not Allowed",
@@ -226,20 +231,21 @@ void	Response::cgi(void) {
 void    Response::setContent(const std::string &file_content)
 {
 	this->isMethodAllowed(this->_request->getHeader().request_method);
+
 	_cgiStatus = true;
 	
 	/* CGI case */
 	if (this->_cgi != NULL && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension())
 		this->cgi();
-	
+
 	/* GET case */
 	else if (this->_request->getHeader().request_method == "GET")
 		this->methodGet(file_content);
-	
+
 	/* POST case */
 	else if (this->_request->getHeader().request_method == "POST")
 		this->methodPost();
-	
+
 	/* DELETE case */
 	else if (this->_request->getHeader().request_method == "DELETE")
 		this->methodDelete();
@@ -251,9 +257,14 @@ void    Response::setContent(const std::string &file_content)
 
 void	Response::setErrorContent(void)
 {
+	LOG;
 	std::map<int, std::string>::const_iterator	it;
+	if (this->_request->getServer())
+		std::cout << "server: " << this->_request->getServer()->port() << std::endl;
+	else
+		std::cout << "No server in the request.\n";
 	it = this->_request->getServer()->errorPages().find(this->_status.first);
-	
+	LOG;
 	/* Default error page setup case */
 	if (it != this->_request->getServer()->errorPages().end() &&
 		is_valid_path(it->second))
