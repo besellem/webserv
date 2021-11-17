@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/16 17:30:00 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/17 15:22:12 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,8 +102,81 @@ void	Socket::setNonBlock(int & fd)
 	}
 }
 
+/*
+** Read the socket's http request
+**
+** @return a `enum e_read' value
+*/
+// int		Socket::readHttpRequest(Request *request, int socket_fd)
+// {
+// 	int	ret;
+
+// 	while (true)
+// 	{
+// 		request->getHeader().resetBuffer();
+// 		std::cout << "buffer content: " << request->getHeader().content << std::endl;
+// 		std::cout << "buffer buf: " << request->getHeader().buf << std::endl;
+// 		std::cout << "buffer size: " << sizeof(request->getHeader().buf) << std::endl;
+// 		ret = recv(socket_fd, request->getHeader().buf, sizeof(request->getHeader().buf), 0);
+// 		std::cout << "ret: " << ret << std::endl;
+// 		if (SYSCALL_ERR == ret)
+// 		{
+// 			// return READ_FAIL; // false
+// 			break ;
+// 		}
+// 		else if (0 == ret)
+// 		{
+// 			std::cout << "Client disconnected" << std::endl;
+// 			break ;
+// 		}
+// 		else
+// 		{
+// 			request->getHeader().buf[ret] = '\0';
+// 			request->getHeader().content += request->getHeader().buf;
+// 		}
+// 	}
+
+// 	if (DEBUG)
+// 	{
+// 		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
+// 		std::cout << request->getHeader().content << std::endl;
+// 		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
+// 	}
+
+// 	if (0 == ret)
+// 		return READ_DISCONNECT;
+// 	// else if (SYSCALL_ERR == ret)
+// 	// 	return READ_FAIL;
+// 	else
+// 		return READ_OK;
+// }
+
+size_t	Socket::checkRequestLen(std::string const & content) {
+	size_t pos = content.find("Content-Length: ");
+
+	if (pos == std::string::npos)
+		return std::string::npos;
+	
+	pos += std::string("Content-Length: ").length();
+
+	std::string getLen;
+
+	for (size_t i = pos; i < content.length() - pos; i++) {
+		if (std::isdigit(content[i]))
+			getLen += content[i];
+		else
+			break ;
+	}
+
+	std::stringstream sstream(getLen);
+	size_t ret = 0;
+
+	sstream >> ret;
+	return ret;
+}
+
 int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
-	request->getHeader().resetBuffer();
+	// request->getHeader().resetBuffer();
 	
 	char	*buff = new char[currEvt.data + 1];
 	int		ret;
@@ -122,19 +195,26 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 	}
 	
 	request->getHeader().content.assign(buff, currEvt.data);
-	
+
 	delete [] buff;
 
 	std::cout << "receive data len: " << currEvt.data << std::endl;
 	std::cout << "content data len: " << request->getHeader().content.size() << std::endl;
 
-	if (DEBUG)
+	size_t reqLen = this->checkRequestLen(request->getHeader().content);
+	if (reqLen > static_cast<size_t>(currEvt.data) && reqLen != std::string::npos) {
+		std::cout << "Data len:    " << currEvt.data << std::endl;
+		std::cout << "Request len: " << reqLen << std::endl;
+		warnMsg("request length too large");
+		return READ_FAIL;
+	}
+
+	if (!DEBUG)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
 		std::cout << request->getHeader().content << std::endl;
-		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
+		std::cout << "\n+++++++++++ FINAL REQ ++++++++++++++++" << std::endl << std::endl;
 	}
-
 	if (this->resolveHttpRequest(request) == RESOLVE_FAIL) {
 		std::cout << "Current client: [" << currEvt.ident << "]: ";
 		warnMsg("resolve request failed!");
@@ -150,6 +230,10 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 */
 int		Socket::resolveHttpRequest(Request *request)
 {
+	/* the buffer is empty, therefore the header was also empty */
+	// if (request->getHeader().content.empty())
+	// 	return RESOLVE_EMPTY;
+	
 	vector_type				buffer = split_string(request->getHeader().content, NEW_LINE);
 	vector_type::iterator	line = buffer.begin();
 
@@ -193,7 +277,7 @@ int		Socket::resolveHttpRequest(Request *request)
 ** @return a `enum e_send' value
 */
 int		Socket::sendHttpResponse(Request* request, int socket_fd)
-{	
+{
 	std::string		toSend;
 	bool			responseStatus = false;
 
@@ -213,15 +297,10 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 
 		_currResponse = response;
 	}
-
-	if (!is_valid_path(request->getConstructPath()))
-		_currResponse->setStatus(404);
-
 	_currResponse->setContent(getFileContent(request->getConstructPath()));
 	if (_currResponse->getCgiStatus() == false)
 		return SEND_FAIL;
 	_currResponse->setHeader();
-
 	toSend =  _currResponse->getHeader();
 	toSend += NEW_LINE;
 	toSend += _currResponse->getContent();
