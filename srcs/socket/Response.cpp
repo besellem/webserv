@@ -24,7 +24,12 @@ Response::Response(Request *req)
 	}
 	else
 		_cgi = NULL;
-	setStatus(200);
+	if (req->getLenStatus() == false)
+		setStatus(413);
+	else if (!is_valid_path(req->getConstructPath()))
+		setStatus(404);
+	else
+		setStatus(200);
 }
 
 Response::~Response()
@@ -161,6 +166,7 @@ void	Response::methodGet(const std::string &file_content)
 
 void	Response::methodPost(void)
 {
+	std::cout << ">>>>> " << this->_status.first << std::endl;
 	if (this->_status.first != 200)
 		return ;
 	
@@ -243,7 +249,7 @@ void    Response::setContent(const std::string &file_content)
 	/* DELETE case */
 	else if (this->_request->getHeader().request_method == "DELETE")
 		this->methodDelete();
-	
+
 	/* Error case */
 	if (this->_status.first >= 400)
 		this->setErrorContent();

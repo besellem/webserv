@@ -15,11 +15,12 @@
 _BEGIN_NS_WEBSERV
 
 Request::Request(void) :
-	_isChunked(false)
+	_isChunked(false),
+	_lenStatus(true)
 {}
 
-Request::Request(const Request &x)
-{ *this = x; }
+Request::Request(const Request &x) {
+	*this = x; }
 
 Request::~Request()
 {}
@@ -35,6 +36,7 @@ Request&			Request::operator=(const Request &x)
 	_isChunked = x._isChunked;
 	_fileInfo = x._fileInfo;
 	_boundary = x._boundary;
+	_lenStatus = x._lenStatus;
 	return *this;
 }
 
@@ -46,11 +48,11 @@ const std::string&	Request::getContent(void)       const { return this->_content
 const std::string&	Request::getConstructPath(void) const { return this->_constructPath; }
 size_t				Request::getContentLength(void) const { return this->_content.size(); }
 const Server*		Request::getServer(void)        const { return this->_server; }
+const bool&			Request::getLenStatus(void)     const { return this->_lenStatus; }
 
 /* Find the location of the request */
 const t_location*	Request::getLocation(void) const
 {		
-	
 	location_type		loc;
 	if (this->_server != NULL)
 		loc = this->_server->locations();
@@ -86,10 +88,10 @@ const t_location*	Request::getLocation(void) const
 /*
 ** Setters
 */
+
 bool	Request::setRequestFirstLine(const std::string &first_line)
 {
 	const vector_type	line = split_string(first_line, " ");
-
 	if (line.size() != 3)
 		return false;
 	
@@ -289,6 +291,11 @@ bool	Request::checkIsUploadCase(void) {
 		return false;
 	return true;
 }
+
+void	Request::setLenStatus(bool status) {
+	this->_lenStatus = status;
+}
+
 
 bool	Request::parseFile(void) {
 	if (this->checkIsUploadCase() == false) {

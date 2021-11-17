@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/16 17:30:00 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/17 15:22:12 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ void	Socket::setNonBlock(int & fd)
 }
 
 int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
-	request->getHeader().resetBuffer();
+	// request->getHeader().resetBuffer();
 	
 	char	*buff = new char[currEvt.data + 1];
 	int		ret;
@@ -128,13 +128,22 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 	std::cout << "receive data len: " << currEvt.data << std::endl;
 	std::cout << "content data len: " << request->getHeader().content.size() << std::endl;
 
-	if (DEBUG)
+	size_t reqLen = this->checkRequestLen(request->getHeader().content);
+	if (reqLen > static_cast<size_t>(currEvt.data) && reqLen != std::string::npos) {
+		std::cout << "Data len:    " << currEvt.data << std::endl;
+		std::cout << "Request len: " << reqLen << std::endl;
+		warnMsg("request length too large");
+		request->setLenStatus(false);
+		sendError
+		return READ_FAIL;
+	}
+
+	if (!DEBUG)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
 		std::cout << request->getHeader().content << std::endl;
-		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
+		std::cout << "\n+++++++++++ FINAL REQ ++++++++++++++++" << std::endl << std::endl;
 	}
-
 	if (this->resolveHttpRequest(request) == RESOLVE_FAIL) {
 		std::cout << "Current client: [" << currEvt.ident << "]: ";
 		warnMsg("resolve request failed!");
@@ -193,7 +202,7 @@ int		Socket::resolveHttpRequest(Request *request)
 ** @return a `enum e_send' value
 */
 int		Socket::sendHttpResponse(Request* request, int socket_fd)
-{	
+{
 	std::string		toSend;
 	bool			responseStatus = false;
 
@@ -213,15 +222,11 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 
 		_currResponse = response;
 	}
-
-	if (!is_valid_path(request->getConstructPath()))
-		_currResponse->setStatus(404);
-
+	std::cout << _currResponse->getStatus().first << std::endl;
 	_currResponse->setContent(getFileContent(request->getConstructPath()));
 	if (_currResponse->getCgiStatus() == false)
 		return SEND_FAIL;
 	_currResponse->setHeader();
-
 	toSend =  _currResponse->getHeader();
 	toSend += NEW_LINE;
 	toSend += _currResponse->getContent();
