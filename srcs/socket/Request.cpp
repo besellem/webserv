@@ -102,10 +102,7 @@ void	Request::setServer(const Server *server) { this->_server = server; }
 
 void	Request::setContent(void)
 {
-	std::cout << "header content size: " << this->_header.content.length() << std::endl;
-
 	std::string					buf(this->_header.content);
-	std::cout << "buf size: " << buf.length() << std::endl;
 	const std::string			delim(DELIMITER);
 	const size_t				pos = buf.find(delim);
 	
@@ -307,7 +304,6 @@ bool	Request::parseFile(void) {
 	size_t begin;
 	size_t end;
 	LOG;
-	std::cout << "content size: " << this->getContent().length() << std::endl;
 	while (true) {
 		// get file name
 		if ((begin = toParse.find(key[FN])) != std::string::npos)
@@ -322,7 +318,6 @@ bool	Request::parseFile(void) {
 			toParse.erase(0, begin + key[DRN].length());
 		if ((end = toParse.find(key[RN])) != std::string::npos)
 			fileContent = toParse.substr(0, end);
-
 		// add to list of file info
 		if(!fileName.empty())
 			_fileInfo.insert(std::make_pair(fileName, fileContent));

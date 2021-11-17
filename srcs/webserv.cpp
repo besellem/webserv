@@ -68,7 +68,6 @@ std::vector<Server *>	WebServer::selectServers(size_t& index)
 	bool					firstOccur = false;
 
 	/* is index the first server block of this socket */
-	std::cout << "index: " << index << std::endl;
 	while (false == firstOccur)
 	{
 		firstOccur = true;
@@ -107,7 +106,6 @@ void			WebServer::createServers(void)
 
 	// create a socket for each different server declared in the config file
 	_socks = new Socket[n];
-	std::cout << ">>>> n = " << n << std::endl;
 	for (size_t i = 0, j = 0; j < n; ++i, ++j)
 	{
 		/** @brief init server */

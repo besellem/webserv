@@ -122,7 +122,7 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 	}
 	
 	request->getHeader().content.assign(buff, currEvt.data);
-
+	
 	delete [] buff;
 
 	std::cout << "receive data len: " << currEvt.data << std::endl;
@@ -194,7 +194,6 @@ int		Socket::resolveHttpRequest(Request *request)
 */
 int		Socket::sendHttpResponse(Request* request, int socket_fd)
 {	
-	LOG;
 	std::string		toSend;
 	bool			responseStatus = false;
 
@@ -208,7 +207,6 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 			responseStatus = true;
 	}
 
-	LOG;
 	if (responseStatus == false) {
 		Response	*response = new Response(request);
 		this->_respMap[socket_fd] = response;
@@ -216,22 +214,17 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 		_currResponse = response;
 	}
 
-	LOG;
 	if (!is_valid_path(request->getConstructPath()))
 		_currResponse->setStatus(404);
 
-	LOG;
 	_currResponse->setContent(getFileContent(request->getConstructPath()));
-	LOG;
 	if (_currResponse->getCgiStatus() == false)
 		return SEND_FAIL;
 	_currResponse->setHeader();
 
 	toSend =  _currResponse->getHeader();
 	toSend += NEW_LINE;
-	LOG;
 	toSend += _currResponse->getContent();
-	LOG;
 
 	/* -- Send to server -- */
 	if (SYSCALL_ERR == send(socket_fd, toSend.c_str(), toSend.length(), 0)) {
