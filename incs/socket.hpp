@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/17 14:52:59 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/14 16:46:53 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,10 +43,11 @@ class Socket
 		short			getPort(void) const;
 		int				getServerFd(void) const;
 		const Server*	getServer(void) const;
-		const Server*	getServer(const std::string &) const;
 		sockaddr_in		getAddr(void) const;
 		size_t			getAddrLen(void) const;
 		Response		*getCurrResponse(int const) const;
+
+		const Server*	selectServer(const std::string &) const;
 
 		/** @brief init socket */
 		void			startSocket(void);
@@ -59,7 +60,6 @@ class Socket
 		void			setNonBlock(int & fd);
 		int				socketAccept(void);
 
-
 	private:
 		void			errorExit(const std::string &) const;
 		void			bindStep(const int &, const sockaddr_in &);
@@ -68,8 +68,6 @@ class Socket
 		void			setHeaderData(const std::string &);
 		std::string		constructPath(void);
 
-		size_t			checkRequestLen(std::string const &);
-		
 	private:
 		std::vector<Server *>	_server_blocks; // which was parsed for this socket
 		short					_port;

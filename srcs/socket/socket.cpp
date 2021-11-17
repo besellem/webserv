@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/17 15:22:12 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/16 17:30:00 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ size_t			Socket::getAddrLen(void)  const { return _addrLen; }
 
 const Server*	Socket::getServer(void)	const { return _server_blocks[0]; }
 
-const Server*	Socket::getServer(const std::string &name) const
+const Server*	Socket::selectServer(const std::string &name) const
 {
 	for (size_t i = 0; i < _server_blocks.size(); ++i)
 	{
@@ -102,32 +102,8 @@ void	Socket::setNonBlock(int & fd)
 	}
 }
 
-size_t	Socket::checkRequestLen(std::string const & content) {
-	size_t pos = content.find("Content-Length: ");
-
-	if (pos == std::string::npos)
-		return std::string::npos;
-	
-	pos += std::string("Content-Length: ").length();
-
-	std::string getLen;
-
-	for (size_t i = pos; i < content.length() - pos; i++) {
-		if (std::isdigit(content[i]))
-			getLen += content[i];
-		else
-			break ;
-	}
-
-	std::stringstream sstream(getLen);
-	size_t ret = 0;
-
-	sstream >> ret;
-	return ret;
-}
-
 int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
-	// request->getHeader().resetBuffer();
+	request->getHeader().resetBuffer();
 	
 	char	*buff = new char[currEvt.data + 1];
 	int		ret;
@@ -146,27 +122,19 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 	}
 	
 	request->getHeader().content.assign(buff, currEvt.data);
-
+	
 	delete [] buff;
 
 	std::cout << "receive data len: " << currEvt.data << std::endl;
 	std::cout << "content data len: " << request->getHeader().content.size() << std::endl;
 
-	size_t reqLen = this->checkRequestLen(request->getHeader().content);
-	if (reqLen > static_cast<size_t>(currEvt.data) && reqLen != std::string::npos) {
-		std::cout << "Data len:    " << currEvt.data << std::endl;
-		std::cout << "Request len: " << reqLen << std::endl;
-		warnMsg("request length too large");
-		request->setLenStatus(false);
-		return READ_FAIL;
-	}
-
-	if (!DEBUG)
+	if (DEBUG)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
 		std::cout << request->getHeader().content << std::endl;
-		std::cout << "\n+++++++++++ FINAL REQ ++++++++++++++++" << std::endl << std::endl;
+		std::cout << "\n++++++++++++++++++++++++++++++++++++++" << std::endl << std::endl;
 	}
+
 	if (this->resolveHttpRequest(request) == RESOLVE_FAIL) {
 		std::cout << "Current client: [" << currEvt.ident << "]: ";
 		warnMsg("resolve request failed!");
@@ -182,10 +150,6 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 */
 int		Socket::resolveHttpRequest(Request *request)
 {
-	/* the buffer is empty, therefore the header was also empty */
-	// if (request->getHeader().content.empty())
-	// 	return RESOLVE_EMPTY;
-	
 	vector_type				buffer = split_string(request->getHeader().content, NEW_LINE);
 	vector_type::iterator	line = buffer.begin();
 
@@ -208,7 +172,7 @@ int		Socket::resolveHttpRequest(Request *request)
 	}
 
 	std::string name = request->getHeader().data["Host"][0];
-	request->setServer(getServer(name));
+	request->setServer(selectServer(name));
 	request->setConstructPath();
 
 	if (DEBUG)
@@ -229,7 +193,7 @@ int		Socket::resolveHttpRequest(Request *request)
 ** @return a `enum e_send' value
 */
 int		Socket::sendHttpResponse(Request* request, int socket_fd)
-{
+{	
 	std::string		toSend;
 	bool			responseStatus = false;
 
@@ -249,11 +213,15 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 
 		_currResponse = response;
 	}
-	std::cout << _currResponse->getStatus().first << std::endl;
+
+	if (!is_valid_path(request->getConstructPath()))
+		_currResponse->setStatus(404);
+
 	_currResponse->setContent(getFileContent(request->getConstructPath()));
 	if (_currResponse->getCgiStatus() == false)
 		return SEND_FAIL;
 	_currResponse->setHeader();
+
 	toSend =  _currResponse->getHeader();
 	toSend += NEW_LINE;
 	toSend += _currResponse->getContent();

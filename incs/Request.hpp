@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 22:41:14 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/17 14:52:33 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/12 17:07:40 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,6 @@ class Request
 		size_t				getContentLength(void) const;
 		const Server*		getServer(void) const;
 		const t_location*	getLocation(void) const;
-		const bool&			getLenStatus(void) const;
 		
 		
 		bool				setRequestFirstLine(const std::string &);
@@ -65,7 +64,6 @@ class Request
 		void				setHeaderData(const std::string &);
 		void				setChunked(void);
 		void				setServer(const Server *);
-		void				setLenStatus(bool);
 
 		const info_type&	getFileInfo(void) const;
 		bool				checkIsUploadCase(void);
@@ -81,7 +79,6 @@ class Request
 	
 		info_type			_fileInfo;
 		std::string			_boundary;
-		bool				_lenStatus;
 	
 }; /* class Request */
 
