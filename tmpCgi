@@ -1,14 +1,14 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   cgi.cpp                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/16 18:25:05 by adbenoit         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    tmpCgi                                             :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2021/10/21 15:46:09 by adbenoit          #+#    #+#              #
+#    Updated: 2021/11/16 18:23:52 by adbenoit         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
 #include "webserv.hpp"
 
@@ -227,10 +227,12 @@ void	Cgi::execute(void)
 		execve(this->_program.c_str(), NULL, this->_env);
 		exit(EXIT_FAILURE);
 	}
-	
+
 	close(fdOut[1]);
 	close(fdIn[0]);
 	close(fdIn[1]);
+	
+	waitpid(-1, NULL, WNOHANG);
 	
 	_cgiFd = fdOut[0];
 
@@ -256,7 +258,7 @@ bool	Cgi::parseCgiContent(void) {
 
 		this->setHeader(_outputContent.substr(0, _outputContent.find(DELIMITER)));
 
-		// remove cgi header from content
+		// remove cgi header
 		size_t pos = _outputContent.find(DELIMITER);
 		if (std::string::npos != pos)
 			_outputContent = _outputContent.substr(pos + 4);

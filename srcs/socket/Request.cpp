@@ -139,6 +139,7 @@ void	Request::setContent(void)
 	}
 	if (DEBUG)
 	{
+		std::cout << "is chunked : " << (_isChunked == true ? "true" : "false") << std ::endl;
 		std::cout << S_GREEN "> CONTENT" S_NONE << std::endl;
 		std::cout << "[" << this->_content << "]" << std::endl;
 		std::cout << S_GREEN "< END CONTENT" S_NONE << std::endl;
