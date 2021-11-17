@@ -43,7 +43,7 @@ class WebServer
 		WebServer(const WebServer &);
 		WebServer&				operator=(const WebServer &);
 		size_t					countSocket() const;
-		std::vector<Server *>	getSocketConfigs(size_t& index);
+		std::vector<Server *>	selectServers(size_t& index);
 
 	public:
 		class ParsingError : public std::exception
