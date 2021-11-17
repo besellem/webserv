@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 18:35:48 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/16 16:36:48 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/17 15:22:32 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,6 +177,7 @@ void	Epoll::_handleRequest(struct kevent const & currEvt, Socket & sock) {
 
 		if (readStatus == READ_FAIL || readStatus == READ_DISCONNECT) {
 			_clientDisconnect(currEvt.ident, _connMap);
+			return ;
 		}
 
 		_reqMap[currEvt.ident] = request;
