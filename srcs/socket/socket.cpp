@@ -202,21 +202,21 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
 	std::cout << "content data len: " << request->getHeader().content.size() << std::endl;
 
 	size_t reqLen = this->checkRequestLen(request->getHeader().content);
-
 	if (reqLen > static_cast<size_t>(currEvt.data) && reqLen != std::string::npos) {
 		std::cout << "Data len:    " << currEvt.data << std::endl;
 		std::cout << "Request len: " << reqLen << std::endl;
 		warnMsg("request length too large");
+		request->setLenStatus(false);
+		sendError
 		return READ_FAIL;
 	}
 
-	if (DEBUG)
+	if (!DEBUG)
 	{
 		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
 		std::cout << request->getHeader().content << std::endl;
 		std::cout << "\n+++++++++++ FINAL REQ ++++++++++++++++" << std::endl << std::endl;
 	}
-
 	if (this->resolveHttpRequest(request) == RESOLVE_FAIL) {
 		std::cout << "Current client: [" << currEvt.ident << "]: ";
 		warnMsg("resolve request failed!");
@@ -279,7 +279,7 @@ int		Socket::resolveHttpRequest(Request *request)
 ** @return a `enum e_send' value
 */
 int		Socket::sendHttpResponse(Request* request, int socket_fd)
-{	
+{
 	std::string		toSend;
 	bool			responseStatus = false;
 
@@ -299,15 +299,11 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 
 		_currResponse = response;
 	}
-
-	if (!is_valid_path(request->getConstructPath()))
-		_currResponse->setStatus(404);
-
+	std::cout << _currResponse->getStatus().first << std::endl;
 	_currResponse->setContent(getFileContent(request->getConstructPath()));
 	if (_currResponse->getCgiStatus() == false)
 		return SEND_FAIL;
 	_currResponse->setHeader();
-
 	toSend =  _currResponse->getHeader();
 	toSend += NEW_LINE;
 	toSend += _currResponse->getContent();
