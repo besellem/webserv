@@ -1,8 +1,0 @@
-- [x] Parser
-- [x] Server engine
-- [x] poll / epoll / select / kqueue
-- [x] HTTP requests
-- [ ] HTTP response codes
-- [x] Autoindex page generator
-- [ ] CGI
-- [ ] Tester (to do & to pass)
