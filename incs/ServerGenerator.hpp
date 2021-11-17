@@ -16,13 +16,10 @@
 # include "defs.hpp"
 # include "Server.hpp"
 
-
 _BEGIN_NS_WEBSERV
 
-// class Server;
-
 /* Config file states */
-enum	e_state
+enum	e_config_state
 {
 	START,
 	NEW_SERVER,
@@ -65,7 +62,6 @@ class ServerGenerator
 }; /* class ServerGenerator */
 
 std::ostream&	operator<<(std::ostream &, const ServerGenerator &);
-
 
 _END_NS_WEBSERV
 

@@ -78,12 +78,13 @@ void	WebServer::parse(const std::string &config_file)
 	if (this->_servers.state() != START)
 		throw ParsingError();
 	os.close();
-	if (DEBUG)
-	{
-		std::cout << "============== Parsing ===============" << std::endl;
-		std::cout << this->_servers;
-        std::cout << "======================================" << std::endl;
-	}
+
+#if DEBUG >= DEBUG_LVL_2
+	std::cout << "============== Parsing ===============" << std::endl;
+	std::cout << this->_servers;
+	std::cout << "======================================" << std::endl;
+#endif
+
 }
 
 _END_NS_WEBSERV

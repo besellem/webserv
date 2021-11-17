@@ -12,23 +12,16 @@
 
 #include "webserv.hpp"
 
-INLINE_NAMESPACE::WebServer	serv;
+/* global */
+INLINE_NAMESPACE::WebServer		webserv_g;
 
-void	ft_sig(int sig)
+int		main(int ac, char **av)
 {
-	printf("\n\033[1;31m[%s]\033[0m\n", "SIGINT");
-	if (sig == SIGINT)
-		exit(0);
-}
-
-int	main(int ac, char **av, __unused char **env)
-{
-	
-	signal(SIGINT, ft_sig);
+	INLINE_NAMESPACE::printWebservHeader();
 
 	try
 	{
-		serv.parse((ac > 1) ? av[1] : DEFAULT_CONFIG_FILE);
+		webserv_g.parse((ac > 1) ? av[1] : DEFAULT_CONFIG_FILE);
 	}
 	catch (std::exception &e)
 	{
@@ -36,7 +29,9 @@ int	main(int ac, char **av, __unused char **env)
 		return EXIT_FAILURE;
 	}
 
-	serv.createServers();
+	signal(SIGINT, INLINE_NAMESPACE::handleSignals);
 
+	webserv_g.createServers();
+	
 	return EXIT_SUCCESS;
 }

@@ -24,7 +24,7 @@ class Cgi
 	public:
 		Cgi(Request *);
 		~Cgi();
-		
+	
 	private:
 		Cgi(void);
 		Cgi(const Cgi &);
@@ -43,14 +43,14 @@ class Cgi
 		void				execute(void);
 		void				clear(void);
 		
-		bool	parseCgiContent(void);
+		bool				parseCgiContent(void);
 
 	private:
-		bool	getOuput(int);
-		void	handleProcess(int, time_t);
-		void	setEnv(void);
-		void	setCgiStep(const int step);
-		void	setHeader(const std::string &);
+		bool				getOuput(int);
+		void				handleProcess(int, time_t);
+		void				setEnv(void);
+		void				setCgiStep(const int step);
+		void				setHeader(const std::string &);
 
 	public:
 		class CgiError : public std::exception
@@ -58,7 +58,7 @@ class Cgi
 			public:
 				virtual const char*	what() const throw();
 		};
-		
+	
 	private:
 		char 				**_env;
 		std::string			_program;
@@ -66,11 +66,10 @@ class Cgi
 		Request*			_request;
 		std::string			_header;
 		int					_status;
-
 		int					_cgiStep;
 		int					_cgiFd;
 		std::string			_outputContent;
-		
+	
 }; /* class Cgi */
 
 _END_NS_WEBSERV

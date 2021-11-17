@@ -19,7 +19,6 @@
 
 _BEGIN_NS_WEBSERV
 
-
 class Response
 {
 
@@ -71,7 +70,6 @@ class Response
 		bool				_cgiStatus;
 	
 }; /* class Response */
-
 
 _END_NS_WEBSERV
 

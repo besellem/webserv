@@ -20,7 +20,6 @@ _BEGIN_NS_WEBSERV
 class HttpHeader
 {
 	public:
-		typedef	void*                                                pointer;
 		typedef std::map<std::string, std::vector<std::string> >     value_type;
 	
 	public:
@@ -28,9 +27,6 @@ class HttpHeader
 		HttpHeader(const HttpHeader &x);
 		~HttpHeader();
 		HttpHeader&		operator=(const HttpHeader &x);
-
-	public:
-		pointer			resetBuffer(void); // epoll send a length of data, so we don't need a BUFFER_SIZE, but need malloc
 		
 	public:
 		class HttpHeaderParsingError : public std::exception
@@ -50,9 +46,8 @@ class HttpHeader
 		std::string		request_method;
 		std::string		uri;
 		std::string		queryString;
-		std::string		content; // mcomplete request converted to string from `buf'
+		std::string		content; // complete request converted to string from `buf'
 		bool			chunked;
-		char			buf[BUFFER_SIZE];
 
 
 	friend class Socket;
@@ -61,7 +56,6 @@ class HttpHeader
 	friend class Cgi;
 
 }; /* class HttpHeader */
-
 
 _END_NS_WEBSERV
 

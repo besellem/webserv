@@ -15,6 +15,19 @@
 _BEGIN_NS_WEBSERV
 
 
+void		printWebservHeader(void)
+{
+	std::cout << S_YELLOW;
+	std::cout << " _       __     __                        "    << std::endl;
+	std::cout << "| |     / /__  / /_  ________  ______   __"    << std::endl;
+	std::cout << "| | /| / / _ \\/ __ \\/ ___/ _ \\/ ___/ | / /" << std::endl;
+	std::cout << "| |/ |/ /  __/ /_/ (__  )  __/ /   | |/ /"     << std::endl;
+	std::cout << "|__/|__/\\___/_.___/____/\\___/_/    |___/"    << std::endl;
+	std::cout << S_NONE << std::endl;
+	std::cout << S_CYAN "      adbenoit - kaye - besellem" S_NONE << std::endl;
+	std::cout << "------------------------------------------\n" << std::endl;
+}
+
 /* Returns the extension of a file */
 std::string	getExtension(const std::string& fileName)
 {
@@ -53,10 +66,12 @@ std::vector<std::string>	split_string(const std::string& s, const std::string& d
 Otherwise, returns 0. */
 bool	ft_isNumeric(const std::string &str)
 {
-	for (size_t i = 0; i < str.size(); i++)
+	for (size_t i = 0; i < str.size(); ++i)
+	{
 		if (std::isdigit(str[i]) == 0)
-			return 0;
-	return 1;
+			return false;
+	}
+	return true;
 }
 
 /* Returns 1 if the string is an ip address.
@@ -67,31 +82,32 @@ bool	ft_isIpAddress(const std::string &str)
 	size_t 		n = 0;
 	std::string	tmp = "";
 	
-	for (size_t i = 0; i < str.size(); i++)
+	for (size_t i = 0; i < str.size(); ++i)
 	{
 		if (!std::isdigit(str[i]) && str[i] != '.')
-			return 0;
+			return false;
 		if (std::isdigit(str[i]))
 			tmp += str[i];
-		if (str[i] == '.' || i == str.size() - 1)
+		if (str[i] == '.' || i == (str.size() - 1))
 		{
 			++n;
 			std::stringstream(tmp) >> x;
 			if (x > 255 || n > 4)
-				return 0;
+				return false;
 			tmp = "";
 		}
 	}
 	if (n != 4)
-		return 0;
-	return 1;
+		return false;
+	return true;
 }
 
 /* Cuts str from delimiter.
 Returns the new string. */
 std::string    ft_strcut(const std::string& str, char delimiter)
 {
-	size_t pos = str.find(delimiter);
+	size_t	pos = str.find(delimiter);
+
 	if (pos == std::string::npos)
 		return str;
 	return str.substr(0, pos);
@@ -101,17 +117,17 @@ std::string    ft_strcut(const std::string& str, char delimiter)
 Returns the new vector. */
 std::vector<std::string>	ft_vectorcut(const std::vector<std::string>& vect, char delimiter)
 {
-	size_t pos = 0;
-	std::vector<std::string> newVect(vect);
-	std::vector<std::string>::const_iterator it;
+	std::vector<std::string>					newVect(vect);
+	std::vector<std::string>::const_iterator	it;
+	size_t										pos = 0;
 
-	for(it = newVect.begin(); it != newVect.end(); it++, pos++)
+	for(it = newVect.begin(); it != newVect.end(); ++it, ++pos)
 	{
 		if (*it != ft_strcut(*it, delimiter))
 		{
 			newVect[pos] = ft_strcut(*it, delimiter);
 			if (!newVect[pos].empty())
-				it++;
+				++it;
 			break ;
 		}
 	}
@@ -122,12 +138,14 @@ std::vector<std::string>	ft_vectorcut(const std::vector<std::string>& vect, char
 /* Joins all the strings of vect separate by sep.
 Returns the new string */
 
-std::string vectorJoin(const std::vector<std::string> &vect, char sep)
+std::string	vectorJoin(const std::vector<std::string> &vect, char sep)
 {
     if (vect.empty())
         return std::string("");
-    std::string str = vect[0];
-    for (size_t i = 1; i < vect.size(); i++)
+
+    std::string	str = vect[0];
+
+    for (size_t i = 1; i < vect.size(); ++i)
     {
         str += sep;
         str += vect[i];
@@ -139,30 +157,27 @@ std::string vectorJoin(const std::vector<std::string> &vect, char sep)
 /* Most optimized way of checking if a file exist */
 bool	is_valid_path(const std::string& path)
 {
-	struct stat	buf;
-	int			_s = stat(path.c_str(), &buf);
-	// std::cout << "is_valid_path(" << path << ") : " << _s << std::endl;
-	return (0 == _s);
+	struct stat	stat_buf;
+
+	return (0 == stat(path.c_str(), &stat_buf));
 }
 
 /* Check if a path is a directory */
 bool	ft_isDirectory(const std::string& path)
 {
-	struct stat	statBuf;
-	
-	stat(path.c_str(), &statBuf);
-	if (S_ISDIR(statBuf.st_mode))
-		return 1;
-	return 0;
+	struct stat	stat_buf;
+
+	stat(path.c_str(), &stat_buf);
+	return (S_ISDIR(stat_buf.st_mode) != 0);
 }
 
 /* Returns the content of a file */
 std::string	getFileContent(const std::string& file)
 {
-	std::string		content;
 	std::ifstream	ifs(file, std::ios::in);
-
+	std::string		content;
 	std::string		gline;
+
 	if (ifs.is_open())
 	{
 		do
@@ -179,33 +194,46 @@ std::string	getFileContent(const std::string& file)
 }
 
 /* Returns the size of a file */
-ssize_t		getFileLength(const std::string& file)
+off_t	getFileLength(const std::string &file)
 {
+	struct stat	buf;
+
 	if (ft_isDirectory(file))
 		return 0;
-	
-	std::ifstream	ifs(file, std::ios::binary | std::ios::ate);
-
-	if (ifs.is_open())
-	{
-		ssize_t	size = ifs.tellg();
-		ifs.close();
-		return size;
-	}
-	return SYSCALL_ERR; // may want to throw an error or something
+	if (SYSCALL_ERR != stat(file.c_str(), &buf))
+		return buf.st_size;
+	return SYSCALL_ERR;
 }
 
-void	errorExit(const std::string &str) {
-	std::cerr << "Exiting: " S_RED << str << S_NONE << std::endl;
+void	handleSignals(int sig)
+{
+	std::cout << std::endl << S_RED "[Quit]" S_NONE << std::endl;
+	if (SIGINT == sig)
+		exit(EXIT_SUCCESS);
+}
+
+void	errorExit(const std::string &str)
+{
+	std::cerr << S_RED "Exit: " S_NONE << str << std::endl;
 	exit(EXIT_FAILURE);
 }
 
-void	warnMsg(const std::string &str) {
-	std::cerr << "Warning: " S_YELLOW << str << S_NONE <<std::endl;
+void	warnMsg(const std::string &str)
+{
+#if DEBUG >= DEBUG_LVL_1
+	std::cerr << S_YELLOW "Warning: " S_NONE << str << std::endl;
+#else
+	(void)str;
+#endif
 }
 
-void	updateMsg(const std::string &str) {
-	std::cout << "Updating: " S_PURPLE << str << S_NONE << std::endl;
+void	updateMsg(const std::string &str)
+{
+#if DEBUG >= DEBUG_LVL_3
+	std::cout << S_PURPLE "Updating: " S_NONE << str << std::endl;
+#else
+	(void)str;
+#endif
 }
 
 _END_NS_WEBSERV

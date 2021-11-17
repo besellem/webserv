@@ -13,39 +13,48 @@
 #ifndef DEFS_HPP
 # define DEFS_HPP
 
-# define DEBUG     false // print some logs/warnings
+/* Debug levels */
+# define DEBUG_LVL_0  0 // Only errors - debug disabled
+# define DEBUG_LVL_1  1 // Errors and warnings
+# define DEBUG_LVL_2  2 // Errors, warnings and infos
+# define DEBUG_LVL_3  3 // Errors, warnings, infos and debug
 
-/** @brief Anscii code */
+/* Set the debug level */
+# define DEBUG        DEBUG_LVL_0
+
+
+
+/* ANSI color codes */
 # define S_NONE    "\e[0m"
-# define S_BLACK   "\e[1;30m"
 # define S_RED     "\e[1;31m"
 # define S_GREEN   "\e[1;32m"
 # define S_YELLOW  "\e[1;33m"
 # define S_BLUE    "\e[1;34m"
 # define S_PURPLE  "\e[1;35m"
 # define S_CYAN    "\e[1;36m"
-# define S_CLRLINE "\e[K\r"
-
-/** @brief namespace define */
-# define INLINE_NAMESPACE     webserv
-# define _BEGIN_NS_WEBSERV    namespace INLINE_NAMESPACE {
-# define _END_NS_WEBSERV      }
 
 
-# define CONFIG_DEFAULT_PATH  "./config_files"
-# define CONFIG_FILETYPE      ".conf"
-# define CONFIG_FILETYPE_LEN  std::strlen(CONFIG_FILETYPE)
-# define DEFAULT_CONFIG_FILE  CONFIG_DEFAULT_PATH "/default" CONFIG_FILETYPE
-
-# define ROOT_PATH            "./www"
+/* Namespace definition */
+# define INLINE_NAMESPACE       webserv
+# define _BEGIN_NS_WEBSERV      namespace INLINE_NAMESPACE {
+# define _END_NS_WEBSERV        }
 
 
-/* Logs & messages to print */
-# define LOG \
-	std::cout << S_RED << __FILE__ << ":" << __LINE__ << S_NONE ": Here\n" << std::endl
+/* Default paths */
+# define ROOT_PATH              "./www"
+# define CONFIG_DEFAULT_PATH    "./config_files"
+# define CONFIG_FILETYPE        ".conf"
+# define DEFAULT_CONFIG_FILE    CONFIG_DEFAULT_PATH "/default" CONFIG_FILETYPE
+
+# define HTTP_PROTOCOL_VERSION  "HTTP/1.1"
+
+/* HTTP header delimiters */
+# define NEW_LINE               "\r\n"
+# define DELIMITER              "\r\n\r\n"
+
 
 /* Warnings are not printed if the debug mode is not activated */
-# if defined(DEBUG) && (DEBUG == true)
+# if DEBUG > 0
 #  define EXCEPT_WARNING(exception) std::cerr << S_BLUE "Warning: " S_NONE << exception.what() << std::endl
 # else
 #  define EXCEPT_WARNING(exception)
@@ -55,45 +64,29 @@
 # define EXCEPT_ERROR(exception)    std::cerr << S_RED  "Error: "   S_NONE << exception.what() << std::endl
 
 
-
-////////////////////////////////////////////////////////////////////////////////
-// TO REMOVE - DEBUG
-////////////////////////////////////////////////////////////////////////////////
-# define STRINGIFY(x)   #x
-# define TOSTRING(x)    STRINGIFY(x)
-# define PRINT(x)       std::cout << TOSTRING(x) << ": [" << (x) << "]" << std::endl;
-////////////////////////////////////////////////////////////////////////////////
-// TO REMOVE - DEBUG
-////////////////////////////////////////////////////////////////////////////////
-
-
-
-/* Http response new lines (may change based on the sytem -- to check) */
-# define NEW_LINE               "\r\n"
-# define DELIMITER              "\r\n\r\n"
-
-# define HTTP_PROTOCOL_VERSION  "HTTP/1.1"
-
 /* Most syscalls return -1 */
 # define SYSCALL_ERR    (-1)
 
-/* Listen Backlog */
+/* Listen backlog */
 #ifndef SOMAXCONN
 # define SOMAXCONN      128
 #endif
 
-/* Timeout in seconds */
-# define TIMEOUT        3
-
-# define BUFFER_SIZE    4096
-
+/* Used in the parsing */
 # define AUTOINDEX_OFF  false
 # define AUTOINDEX_ON   true
 
+/* Used in pipe() */
+# define FD_IN          0
+# define FD_OUT         1
+
+# define BUFFER_SIZE    4096
+
 
 /*
-** -- GENERAL DATA-TYPES --
+** -- Enums --
 */
+/* read/recv status */
 enum	e_read
 {
 	READ_OK,
@@ -101,6 +94,7 @@ enum	e_read
 	READ_DISCONNECT
 };
 
+/* resolve status */
 enum	e_resolve
 {
 	RESOLVE_OK,
@@ -108,6 +102,7 @@ enum	e_resolve
 	RESOLVE_EMPTY
 };
 
+/* send status */
 enum	e_send
 {
 	SEND_OK,
@@ -118,9 +113,7 @@ enum	e_send
 	NOFOUND_SEND
 };
 
-/*
-** -- CGI-STATUS --
-*/
+/* CGI status */
 enum	e_cgi
 {
 	CGI_INIT_STATUS,
@@ -128,6 +121,7 @@ enum	e_cgi
 	CGI_READ_STATUS,
 	CGI_DONE_STATUS
 };
+
 
 /*
 ** -- Includes --
@@ -147,6 +141,7 @@ enum	e_cgi
 # include <fcntl.h>
 # include <unistd.h>
 # include <sys/stat.h>
+# include <signal.h>
 
 # include <string>
 # include <cstring>
@@ -164,9 +159,6 @@ enum	e_cgi
 # include <list>
 # include <algorithm>
 
-#include <signal.h>
-
 # include "utils.hpp"
-
 
 #endif /* !defined(DEFS_HPP) */

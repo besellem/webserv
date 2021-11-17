@@ -14,14 +14,19 @@
 
 _BEGIN_NS_WEBSERV
 
-const char*	Cgi::CgiError::what() const throw() {
-	return "cgi failed";
-}
+const char*	Cgi::CgiError::what() const throw()
+{ return "cgi failed"; }
 
-Cgi::Cgi(Request *request) : _request(request), _header(""), _status(200)
+Cgi::Cgi(Request *request) :
+	_env(NULL),
+	_program(""),
+	_extension(""),
+	_request(request),
+	_header(""),
+	_status(200),
+	_cgiStep(CGI_INIT_STATUS),
+	_outputContent("")
 {
-	setCgiStep(CGI_INIT_STATUS);
-
 	const t_location	*loc = request->getLocation();
 
 	if (loc && !loc->cgi.first.empty())
@@ -30,11 +35,10 @@ Cgi::Cgi(Request *request) : _request(request), _header(""), _status(200)
 		_program = loc->cgi.second;
 		this->setEnv();
 	}
-	else
-		this->_env = NULL;
 }
 
-Cgi::~Cgi() {
+Cgi::~Cgi()
+{
 	this->clear();
 }
 
@@ -100,13 +104,16 @@ const std::string	Cgi::getEnv(const std::string &varName)
 ** Modifiers
 */
 
-void	Cgi::setHeader(const std::string& header){
-	std::vector<std::string> lines = split_string(header, NEW_LINE);
+void	Cgi::setHeader(const std::string& header)
+{
+	std::vector<std::string>	lines = split_string(header, NEW_LINE);
 	
-	for (size_t i = 0 ; i < lines.size(); i++)
+	for (size_t i = 0 ; i < lines.size(); ++i)
 	{
 		if (ft_strcut(lines[i], ':') != "Status")
+		{
 			this->_header += lines[i] + NEW_LINE;
+		}
 		else
 		{
 			/* Modify the status according to the header */
@@ -116,10 +123,14 @@ void	Cgi::setHeader(const std::string& header){
 	}
 }
 
-void	Cgi::setCgiStep(const int step) { this->_cgiStep = step; }
+void	Cgi::setCgiStep(const int step)
+{
+	this->_cgiStep = step;
+}
 
 /* Free _env */
-void    Cgi::clear() {
+void    Cgi::clear()
+{
 	if (this->_env != NULL)
 	{
 		for (int i = 0; this->_env[i]; ++i)
@@ -169,10 +180,10 @@ void	Cgi::setEnv()
 /* Read the standard output of the program */
 bool	Cgi::getOuput(int fd)
 {
-	int			ret;
 	char		buffer[BUFFER_SIZE] = {0};
+	int			ret;
 
-	while (1)
+	while (true)
 	{
 		ret = read(fd, buffer, sizeof(buffer) - 1);
 		if (ret < 0)
@@ -197,12 +208,15 @@ void	Cgi::execute(void)
 	std::string	content;
 	std::string	method = this->getEnv("REQUEST_METHOD");
 
+#if DEBUG >= DEBUG_LVL_2
 	std::cout << "Executing cgi ..." << std::endl;
+#endif
+
 	if (pipe(fdIn) == SYSCALL_ERR || pipe(fdOut) == SYSCALL_ERR)
 		throw CgiError();
 
 	// Send variables to the standard input of the program
-	if (write(fdIn[1], this->_request->getContent().c_str(), this->_request->getContent().size()) < 0)
+	if (write(fdIn[FD_OUT], this->_request->getContent().c_str(), this->_request->getContent().size()) < 0)
 		throw CgiError();
 
 	this->setCgiStep(CGI_EXECUTE_STATUS);
@@ -213,26 +227,26 @@ void	Cgi::execute(void)
 	else if (pid == 0)
 	{
 		// Modify standard input and output
-		close(fdIn[1]);
-		if (dup2(fdIn[0], STDIN_FILENO) == SYSCALL_ERR)
+		close(fdIn[FD_OUT]);
+		if (dup2(fdIn[FD_IN], STDIN_FILENO) == SYSCALL_ERR)
 			exit(EXIT_FAILURE);
-		close(fdIn[0]); 
+		close(fdIn[FD_IN]); 
 
-		close(fdOut[0]);
-		if (dup2(fdOut[1], STDOUT_FILENO) == SYSCALL_ERR)
+		close(fdOut[FD_IN]);
+		if (dup2(fdOut[FD_OUT], STDOUT_FILENO) == SYSCALL_ERR)
 			exit(EXIT_FAILURE);
-		close(fdOut[1]);
+		close(fdOut[FD_OUT]);
 		
 		// Execute the cgi program on the file
 		execve(this->_program.c_str(), NULL, this->_env);
 		exit(EXIT_FAILURE);
 	}
 	
-	close(fdOut[1]);
-	close(fdIn[0]);
-	close(fdIn[1]);
+	close(fdOut[FD_OUT]);
+	close(fdIn[FD_IN]);
+	close(fdIn[FD_OUT]);
 	
-	_cgiFd = fdOut[0];
+	_cgiFd = fdOut[FD_IN];
 
 	if (fcntl(_cgiFd, F_SETFL, O_NONBLOCK))
 		warnMsg("set get output non blocking failed");
@@ -256,25 +270,22 @@ bool	Cgi::parseCgiContent(void) {
 
 		this->setHeader(_outputContent.substr(0, _outputContent.find(DELIMITER)));
 
-		// remove cgi header from content
+		/* remove cgi header from content */
 		size_t pos = _outputContent.find(DELIMITER);
 		if (std::string::npos != pos)
 			_outputContent = _outputContent.substr(pos + 4);
-		
-		// ##################################################################
-		if (DEBUG)
-		{
-			std::cout << "............ CGI HEADER ............." <<std::endl;
-			std::cout << this->_header << std::endl;
-			std::cout << "............ CGI ENVIRON ............." <<std::endl;
-			int i = -1;
-			while(this->_env && this->_env[++i])
-				std::cout << this->_env[i] << std::endl;
-			std::cout << "......................................" <<std::endl;
-		}
+
+#if DEBUG >= DEBUG_LVL_3
+		std::cout << "............ CGI HEADER ............." << std::endl;
+		std::cout << this->_header << std::endl;
+		std::cout << "............ CGI ENVIRON ............." << std::endl;
+		for (size_t i = 0; this->_env && this->_env[i]; ++i)
+			std::cout << this->_env[i] << std::endl;
+		std::cout << "......................................" << std::endl;
+#endif
+
 		return true;
 	}
-
 	return false;
 }
 

@@ -20,7 +20,6 @@
 # include "Response.hpp"
 # include "Request.hpp"
 
-
 _BEGIN_NS_WEBSERV
 
 class Socket
@@ -62,7 +61,6 @@ class Socket
 
 
 	private:
-		void			errorExit(const std::string &) const;
 		void			bindStep(const int &, const sockaddr_in &);
 		void			listenStep(const int &);
 		
@@ -83,7 +81,6 @@ class Socket
 		Response				*_currResponse;
 
 }; /* class Socket */
-
 
 _END_NS_WEBSERV
 

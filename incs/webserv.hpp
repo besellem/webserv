@@ -19,7 +19,6 @@
 # include "socket.hpp"
 # include "epoll.hpp"
 
-
 _BEGIN_NS_WEBSERV
 
 class ServerGenerator;
@@ -33,6 +32,10 @@ class WebServer
 		WebServer(void);
 		~WebServer();
 	
+	private:
+		WebServer(const WebServer &);
+		WebServer&				operator=(const WebServer &);
+	
 	public:
 		void					parse(const std::string &);
 		size_t					serverSize(void) const;
@@ -40,8 +43,6 @@ class WebServer
 		void					createServers(void);
 
 	private:
-		WebServer(const WebServer &);
-		WebServer&				operator=(const WebServer &);
 		size_t					countSocket() const;
 		std::vector<Server *>	selectServers(size_t& index);
 
@@ -57,7 +58,6 @@ class WebServer
 		Socket				*_socks;
 	
 }; /* class WebServer */
-
 
 _END_NS_WEBSERV
 

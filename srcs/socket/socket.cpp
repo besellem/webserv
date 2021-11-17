@@ -31,10 +31,10 @@ Socket::Socket(const std::vector<Server *> serv) :
 {
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (SYSCALL_ERR == _serverFd)
-		errorExit("socket init");
+		errorExit("socket()");
 	_addr.sin_family = AF_INET;
 	if ((_addr.sin_addr.s_addr = inet_addr(serv[0]->ip().c_str())) == (in_addr_t)SYSCALL_ERR)
-		errorExit("socket address");
+		errorExit("inet_addr()");
 	_addr.sin_port = htons(_port);
 	std::memset(_addr.sin_zero, 0, sizeof(_addr.sin_zero));
 
@@ -42,7 +42,7 @@ Socket::Socket(const std::vector<Server *> serv) :
 	if (SYSCALL_ERR == setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int))) // can rebind
 	{
 		close(_serverFd);
-		errorExit("set opt");
+		errorExit("setsockopt()");
 	}
 	setNonBlock(_serverFd);
 }
@@ -96,13 +96,11 @@ void	Socket::startSocket(void)
 void	Socket::setNonBlock(int & fd)
 {
 	if (SYSCALL_ERR == fcntl(fd, F_SETFL, O_NONBLOCK))
-	{
-		std::cout << "Error: set non block" << std::endl;
-		exit(EXIT_FAILURE);
-	}
+		errorExit("fcntl()");
 }
 
-size_t	Socket::checkRequestLen(std::string const & content) {
+size_t	Socket::checkRequestLen(std::string const & content)
+{
 	size_t pos = content.find("Content-Length: ");
 
 	if (pos == std::string::npos)
@@ -112,7 +110,8 @@ size_t	Socket::checkRequestLen(std::string const & content) {
 
 	std::string getLen;
 
-	for (size_t i = pos; i < content.length() - pos; i++) {
+	for (size_t i = pos; i < content.length() - pos; i++)
+	{
 		if (std::isdigit(content[i]))
 			getLen += content[i];
 		else
@@ -126,51 +125,44 @@ size_t	Socket::checkRequestLen(std::string const & content) {
 	return ret;
 }
 
-int		Socket::readHttpRequest(Request *request, struct kevent currEvt) {
-	// request->getHeader().resetBuffer();
-	
+int		Socket::readHttpRequest(Request *request, struct kevent currEvt)
+{
 	char	*buff = new char[currEvt.data + 1];
 	int		ret;
 
 	std::memset(buff, 0, currEvt.data + 1);
 	ret = recv(currEvt.ident, buff, currEvt.data, 0);
-	if (ret == 0) {
-		std::cout << "Current client: [" << currEvt.ident << "]: ";
-		updateMsg("has opted to close the connection");
+	if (ret == 0)
+	{
+		updateMsg("closing the connection");
 		return READ_DISCONNECT;
 	}
-	else if (ret == SYSCALL_ERR) {
-		std::cout << "Current client: [" << currEvt.ident << "]: ";
+	else if (SYSCALL_ERR == ret)
+	{
 		warnMsg("recv request failed!");
 		return READ_FAIL;
 	}
-	
 	request->getHeader().content.assign(buff, currEvt.data);
-
 	delete [] buff;
 
-	std::cout << "receive data len: " << currEvt.data << std::endl;
-	std::cout << "content data len: " << request->getHeader().content.size() << std::endl;
-
-	size_t reqLen = this->checkRequestLen(request->getHeader().content);
-	if (reqLen > static_cast<size_t>(currEvt.data) && reqLen != std::string::npos) {
-		std::cout << "Data len:    " << currEvt.data << std::endl;
-		std::cout << "Request len: " << reqLen << std::endl;
+	size_t reqLen = checkRequestLen(request->getHeader().content);
+	if (reqLen > static_cast<size_t>(currEvt.data) && reqLen != std::string::npos)
+	{
 		warnMsg("request length too large");
 		request->setStatus(413);
 	}
 
-	if (DEBUG)
+	if (RESOLVE_FAIL == resolveHttpRequest(request))
 	{
-		std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
-		std::cout << request->getHeader().content << std::endl;
-		std::cout << "\n+++++++++++ FINAL REQ ++++++++++++++++" << std::endl << std::endl;
-	}
-	if (this->resolveHttpRequest(request) == RESOLVE_FAIL) {
-		std::cout << "Current client: [" << currEvt.ident << "]: ";
 		warnMsg("resolve request failed!");
 		request->setStatus(400);
 	}
+
+#if DEBUG >= DEBUG_LVL_3
+	std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
+	std::cout << request->getHeader().content << std::endl;
+	std::cout << "\n+++++++++++ FINAL REQ ++++++++++++++++" << std::endl << std::endl;
+#endif
 
 	return READ_OK;
 }
@@ -213,12 +205,10 @@ int		Socket::resolveHttpRequest(Request *request)
 	request->setServer(selectServer(name));
 	request->setConstructPath();
 
-	if (DEBUG)
-	{
-		std::cout << "Path            : [" S_CYAN << request->getHeader().uri    << S_NONE "]\n";
-		std::cout << "Contructed Path : [" S_CYAN << request->getConstructPath() << S_NONE "]\n";
-	}
-	
+#if DEBUG >= DEBUG_LVL_1
+	std::cout << "Request: [" S_CYAN << request->getConstructPath() << S_NONE "]\n";
+#endif
+
 	request->setChunked();
 	request->setContent();
 
@@ -235,50 +225,55 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 	std::string		toSend;
 	bool			responseStatus = false;
 
-	if (_respMap.empty() == true)
+	if (_respMap.empty())
 		responseStatus = false;
-	else {
-		_currResponse = this->getCurrResponse(socket_fd);
-		if (_currResponse == NULL)
-			responseStatus = false;
-		else
-			responseStatus = true;
+	else
+	{
+		_currResponse = getCurrResponse(socket_fd);
+		responseStatus = (_currResponse != NULL);
 	}
 
-	if (responseStatus == false) {
+	if (responseStatus == false)
+	{
 		Response	*response = new Response(request);
-		this->_respMap[socket_fd] = response;
 
+		_respMap[socket_fd] = response;
 		_currResponse = response;
 	}
+
 	_currResponse->setContent(getFileContent(request->getConstructPath()));
+
 	if (_currResponse->getCgiStatus() == false)
 		return SEND_FAIL;
+	
+	/* actual construction of the header we're sending */
 	_currResponse->setHeader();
 	toSend =  _currResponse->getHeader();
 	toSend += NEW_LINE;
 	toSend += _currResponse->getContent();
 
-	/* -- Send to server -- */
-	if (SYSCALL_ERR == send(socket_fd, toSend.c_str(), toSend.length(), 0)) {
+	/* send to client */
+	if (SYSCALL_ERR == send(socket_fd, toSend.c_str(), toSend.length(), 0))
+	{
 		warnMsg("send response failed!");
 		delete _currResponse;
 		_respMap.erase(socket_fd);
 		return SEND_OK;
 	}
-
-	if (DEBUG)
-	{
-		std::cout << "------------- RESPONSE ---------------" << std::endl;
-		std::cout << toSend.c_str() << std::endl;
-		std::cout << "--------------------------------------" << std::endl << std::endl;
-	}
 	delete _currResponse;
 	_respMap.erase(socket_fd);
+
+#if DEBUG >= DEBUG_LVL_3
+	std::cout << "------------- RESPONSE ---------------" << std::endl;
+	std::cout << toSend.c_str() << std::endl;
+	std::cout << "--------------------------------------" << std::endl << std::endl;
+#endif
+
 	return SEND_OK;
 }
 
-Response	*Socket::getCurrResponse(int const currSockFd) const {
+Response	*Socket::getCurrResponse(int const currSockFd) const
+{
 	resp_type::const_iterator it = _respMap.find(currSockFd);
 	if (it != _respMap.end())
 		return it->second;
@@ -287,22 +282,16 @@ Response	*Socket::getCurrResponse(int const currSockFd) const {
 
 /** @brief private function */
 
-void	Socket::errorExit(const std::string& str) const
-{
-	std::cout << "Exit: " << str << std::endl;
-	exit(EXIT_FAILURE);
-}
-
 void	Socket::bindStep(const int& serverFd, const sockaddr_in& addr)
 {
 	if (SYSCALL_ERR == bind(serverFd, (struct sockaddr *)&addr, sizeof(addr)))
-		errorExit("bind step");
+		errorExit("bind()");
 }
 
 void	Socket::listenStep(const int& serverFd)
 {
 	if (SYSCALL_ERR == listen(serverFd, SOMAXCONN))
-		errorExit("listen step");
+		errorExit("listen()");
 }
 
 _END_NS_WEBSERV

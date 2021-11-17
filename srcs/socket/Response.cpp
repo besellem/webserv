@@ -42,12 +42,12 @@ Response::~Response()
 ** Getters
 */
 
-const std::string&				Response::getHeader(void)			const { return this->_header; }
-const std::string&				Response::getContent(void)			const { return this->_content; }
-size_t							Response::getContentLength(void)	const { return this->_content.size(); }
-const Response::status_type&	Response::getStatus(void)			const { return this->_status; }
-bool							Response::getCgiStatus(void)		const { return this->_cgiStatus; }
-int								Response::getCgiStep(void)			const { return this->_cgi->getCgiStep(); }
+const std::string&				Response::getHeader(void)        const { return this->_header; }
+const std::string&				Response::getContent(void)       const { return this->_content; }
+size_t							Response::getContentLength(void) const { return this->_content.size(); }
+const Response::status_type&	Response::getStatus(void)        const { return this->_status; }
+bool							Response::getCgiStatus(void)     const { return this->_cgiStatus; }
+int								Response::getCgiStep(void)       const { return this->_cgi->getCgiStep(); }
 
 /*
 ** Setters
@@ -131,7 +131,7 @@ void    Response::setHeader(void)
 
 bool	Response::isMethodAllowed(const std::string &method)
 {
-	// GET is always allowed
+	/* GET is always allowed */
 	if (method == "GET")
 		return true;
 
@@ -169,7 +169,7 @@ void	Response::methodPost(void)
 	if (this->_status.first != 200)
 		return ;
 	
-	// upload case
+	/* upload case */
 	if (this->_location && !this->_location->uploadStore.empty())
 	{
 		if (uploadFile() == true || this->_status.first != 200)
@@ -205,9 +205,8 @@ void	Response::cgi(void) {
 
 	try
 	{
-		if (this->getCgiStep() == CGI_INIT_STATUS) {
+		if (this->getCgiStep() == CGI_INIT_STATUS)
 			this->_cgi->execute();
-		}
 	}
 	catch (const std::exception& e)
 	{
@@ -238,19 +237,13 @@ void    Response::setContent(const std::string &file_content)
 	/* CGI case */
 	if (this->_cgi != NULL && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension())
 		this->cgi();
-
-	/* GET case */
-	else if (this->_request->getHeader().request_method == "GET")
+	else if (this->_request->getHeader().request_method == "GET")    // run GET method
 		this->methodGet(file_content);
-
-	/* POST case */
-	else if (this->_request->getHeader().request_method == "POST")
+	else if (this->_request->getHeader().request_method == "POST")   // run POST method
 		this->methodPost();
-
-	/* DELETE case */
-	else if (this->_request->getHeader().request_method == "DELETE")
+	else if (this->_request->getHeader().request_method == "DELETE") // run DELETE method
 		this->methodDelete();
-	
+
 	/* Error case */
 	if (this->_status.first >= 400)
 		this->setErrorContent();
@@ -309,14 +302,7 @@ const std::string	Response::generateAutoindexPage(std::string const &path) const
 	DIR				*dir = opendir(path.c_str());
 	struct dirent	*dirInfo;
 	struct stat		statBuf;
-
-	std::string		addPrefix;
-
-	std::string		fileName;
-	std::string		lastModTime;
-	std::string		fileSize;
-
-	std::string		content;
+	std::string		addPrefix, fileName, lastModTime, fileSize, content;
 	
 	/* begin html */
 	content = "<html>\n";
@@ -335,9 +321,8 @@ const std::string	Response::generateAutoindexPage(std::string const &path) const
 	content += "</tr>\n";
 
 	if (dir == NULL) {
-		std::cout << "open dir error!" << std::endl;
-		// return ""; // if return NULL, get a seg ...
-		return NULL;
+		warnMsg("opendir failed");
+		return std::string("");
 	}
 
 	/* create table content */
@@ -414,7 +399,7 @@ const std::string	Response::generateAutoindexPage(std::string const &path) const
 
 bool	Response::uploadFile(void)
 {
-	if (_request->parseFile() == false)
+	if (false == _request->parseFile())
 		return false;
 	
 	const std::string	absolutePath = ROOT_PATH + _location->uploadStore;
@@ -437,7 +422,7 @@ bool	Response::uploadFile(void)
 			return false;
 		}
 		ofs << it->second;
-		// ofs.close();
+		ofs.close();
 	}
 	return true;
 }

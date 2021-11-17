@@ -21,15 +21,15 @@ HttpHeader::HttpHeader(void) :
 	queryString(""),
 	content(),
 	chunked(false)
-{ this->resetBuffer(); }
+{}
 
 HttpHeader::HttpHeader(const HttpHeader &x)
 { *this = x; }
 
 HttpHeader::~HttpHeader()
-{ this->resetBuffer(); }
+{}
 
-HttpHeader&			HttpHeader::operator=(const HttpHeader &x)
+HttpHeader&		HttpHeader::operator=(const HttpHeader &x)
 {
 	if (this == &x)
 		return *this;
@@ -39,18 +39,13 @@ HttpHeader&			HttpHeader::operator=(const HttpHeader &x)
 	queryString = x.queryString;
 	content = x.content;
 	chunked = x.chunked;
-	std::memcpy(buf, x.buf, sizeof(buf));
 	return *this;
 }
 
-HttpHeader::pointer	HttpHeader::resetBuffer(void)
-{ return std::memset(buf, 0, sizeof(buf)); }
-
-
-const char*			HttpHeader::HttpHeaderParsingError::what() const throw()
+const char*		HttpHeader::HttpHeaderParsingError::what() const throw()
 { return "incomplete http header received"; }
 
-const char*			HttpHeader::HttpBadRequestError::what() const throw()
+const char*		HttpHeader::HttpBadRequestError::what() const throw()
 { return "bad http request"; }
 
 _END_NS_WEBSERV

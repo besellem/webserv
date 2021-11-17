@@ -146,13 +146,14 @@ void	Request::setContent(void)
 		
 		this->_content = tmp_string;
 	}
-	if (DEBUG)
-	{
-		std::cout << "is chunked : " << (_isChunked == true ? "true" : "false") << std ::endl;
-		std::cout << S_GREEN "> CONTENT" S_NONE << std::endl;
-		std::cout << "[" << this->_content << "]" << std::endl;
-		std::cout << S_GREEN "< END CONTENT" S_NONE << std::endl;
-	}
+
+#if DEBUG >= DEBUG_LVL_3
+	std::cout << "is chunked : " << (_isChunked == true ? "true" : "false") << std ::endl;
+	std::cout << S_GREEN "> CONTENT" S_NONE << std::endl;
+	std::cout << "[" << this->_content << "]" << std::endl;
+	std::cout << S_GREEN "< END CONTENT" S_NONE << std::endl;
+#endif
+
 }
 
 void	Request::setConstructPath(void)
@@ -167,11 +168,19 @@ void	Request::setConstructPath(void)
 	
 	if (loc != NULL)
 	{
+
+#if DEBUG >= DEBUG_LVL_3
 		std::cout << "location        : [" S_GREEN << loc->path << S_NONE "]" << std::endl;
+#endif
+
 		// add the root to the path
 		if (!loc->root.empty())
 		{
+
+#if DEBUG >= DEBUG_LVL_3
 			std::cout << "location root   : [" S_GREEN << loc->root << S_NONE "]" << std::endl;
+#endif
+
 			ret += loc->root;
 			if (ret[ret.size() - 1] != '/')
 				ret += uriPath.substr(loc->path.size() - 1);
@@ -200,7 +209,11 @@ void	Request::setConstructPath(void)
 	}
 	else
 	{
+
+#if DEBUG >= DEBUG_LVL_3
 		std::cout << "location root   : [" S_RED << "unknow" << S_NONE "]" << std::endl;
+#endif
+
 		ret += uriPath;
 	}
 	
@@ -259,10 +272,11 @@ void	Request::setChunked(void)
 	{
 		if (*it == "chunked")
 		{
-			if (DEBUG)
-			{
-				std::cout << S_GREEN "Chunked request found" S_NONE << std::endl;
-			}
+
+#if DEBUG >= DEBUG_LVL_2
+			std::cout << S_GREEN "Chunked request found" S_NONE << std::endl;
+#endif
+
 			_header.chunked = true;
 			break ;
 		}
@@ -277,12 +291,12 @@ bool	Request::checkIsUploadCase(void) {
 	std::string	headerBuf(_header.content);
 	size_t		pos;
 
-	for (int i = 0; toFind[i].empty() == false; i++) {
+	for (size_t i = 0; toFind[i].empty() == false; ++i) {
 		if ((pos = headerBuf.find(toFind[i])) == std::string::npos)
 			return false;
 	}
 
-	std::string boundary = "boundary=";
+	std::string	boundary = "boundary=";
 	_boundary = headerBuf;
 	if ((pos = _boundary.find(boundary)) != std::string::npos) {
 		_boundary.erase(0, pos + boundary.length());
@@ -299,7 +313,7 @@ bool	Request::checkIsUploadCase(void) {
 }
 
 bool	Request::parseFile(void) {
-	if (this->checkIsUploadCase() == false) {
+	if (false == checkIsUploadCase()) {
 		return false;
 	}
 
@@ -327,7 +341,7 @@ bool	Request::parseFile(void) {
 		if ((end = toParse.find(key[RN])) != std::string::npos)
 			fileContent = toParse.substr(0, end);
 		// add to list of file info
-		if(!fileName.empty())
+		if(false == fileName.empty())
 			_fileInfo.insert(std::make_pair(fileName, fileContent));
 		toParse.erase(0, fileContent.length() + key[RN].length());
 		if (toParse == key[LAST_BOUNDARY])
@@ -335,9 +349,6 @@ bool	Request::parseFile(void) {
 		else
 			toParse.erase(0, this->getBoundary().length() + key[RN].length());
 	}
-
-	// for (std::map<std::string, std::string>::iterator it = _fileInfo.begin(); it != _fileInfo.end(); it++)
-	// 	std::cout << "[" << it->first << "]: [" << it->second << "]" << std::endl;
 	return true;
 }
 

@@ -17,16 +17,15 @@ _BEGIN_NS_WEBSERV
 
 WebServer::WebServer(void) :
 	_servers(),
-	_socks(nullptr)
+	_socks(NULL)
 {}
 
 WebServer::~WebServer()
 {
-	std::cout << "Webserv exit." << std::endl;
-	if (_socks != nullptr)
+	if (_socks != NULL)
 	{
 		delete [] _socks;
-		_socks = nullptr;
+		_socks = NULL;
 	}
 }
 
@@ -46,9 +45,10 @@ const Server&	WebServer::getServer(int i) const
 size_t			WebServer::countSocket() const
 {
 	size_t	count = _servers.size();
-	for (size_t i = 0; i < _servers.size(); i++)
+
+	for (size_t i = 0; i < _servers.size(); ++i)
 	{
-		for (size_t j = 0; j < i; j++)
+		for (size_t j = 0; j < i; ++j)
 		{
 			if (_servers[i]->ip() == _servers[j]->ip() && _servers[i]->port() == _servers[j]->port())
 			{
@@ -57,7 +57,6 @@ size_t			WebServer::countSocket() const
 			}
 		}
 	}
-	
 	return count;
 }
 
@@ -71,7 +70,7 @@ std::vector<Server *>	WebServer::selectServers(size_t& index)
 	while (false == firstOccur)
 	{
 		firstOccur = true;
-		for (size_t j = 0; j < index; j++)
+		for (size_t j = 0; j < index; ++j)
 		{
 			if (_servers[index]->ip() == _servers[j]->ip() &&
 				_servers[index]->port() == _servers[j]->port())

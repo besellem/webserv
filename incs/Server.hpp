@@ -16,7 +16,6 @@
 # include <defs.hpp>
 # include "Server.hpp"
 
-
 _BEGIN_NS_WEBSERV
 
 typedef struct s_location

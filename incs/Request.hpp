@@ -85,7 +85,6 @@ class Request
 	
 }; /* class Request */
 
-
 _END_NS_WEBSERV
 
 #endif
