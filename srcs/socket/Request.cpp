@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/18 08:36:15 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/18 09:30:54 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,7 @@ void	Request::setContent(void)
 	}
 
 #if DEBUG >= DEBUG_LVL_3
-	std::cout << "is chunked : " << (_isChunked == true ? "true" : "false") << std ::endl;
+	std::cout << "is chunked: " << (_isChunked == true ? "true" : "false") << std ::endl;
 	std::cout << S_GREEN "> CONTENT" S_NONE << std::endl;
 	std::cout << "[" << this->_content << "]" << std::endl;
 	std::cout << S_GREEN "< END CONTENT" S_NONE << std::endl;
@@ -170,7 +170,7 @@ void	Request::setConstructPath(void)
 	{
 
 #if DEBUG >= DEBUG_LVL_3
-		std::cout << "location        : [" S_GREEN << loc->path << S_NONE "]" << std::endl;
+		std::cout << "location: [" S_GREEN << loc->path << S_NONE "]" << std::endl;
 #endif
 
 		/* add the root to the path */
@@ -178,7 +178,7 @@ void	Request::setConstructPath(void)
 		{
 
 #if DEBUG >= DEBUG_LVL_3
-			std::cout << "location root   : [" S_GREEN << loc->root << S_NONE "]" << std::endl;
+			std::cout << "location root: [" S_GREEN << loc->root << S_NONE "]" << std::endl;
 #endif
 
 			path_tmp += loc->root;
@@ -191,7 +191,7 @@ void	Request::setConstructPath(void)
 			path_tmp += uriPath;
 
 		/* use default index */
-		if (ft_isDirectory(path_tmp))
+		if (ft_isDirectory(ROOT_PATH + path_tmp))
 		{
 			if (path_tmp[path_tmp.size() - 1] != '/')
 				path_tmp += "/";
@@ -199,7 +199,7 @@ void	Request::setConstructPath(void)
 			for (idx = loc->index.begin(); idx != loc->index.end(); ++idx)
 			{
 				index_tmp = path_tmp + *idx;
-				if (is_valid_path(index_tmp))
+				if (is_valid_path(ROOT_PATH + index_tmp))
 				{
 					path_tmp = index_tmp;
 					break ;
