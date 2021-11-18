@@ -1,7 +1,10 @@
-# WEBSERV
+# WEBSERV(@42Paris)
 *This is when you finally understand why a URL starts with HTTP*
 
 ## Usage
+
+Compatible with Mozilla Firefox.
+
 ```
 $ git clone https://github.com/besellem/webserv.git
 $ cd webserv/
