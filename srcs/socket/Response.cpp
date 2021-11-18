@@ -445,14 +445,14 @@ void	Response::printStatus(void) const
 {
 	std::string color;
 	if (this->_status.first < 300)
-		color = S_GREEN;
+		color = "\e[30;42m"; // background green
 	else if (this->_status.first < 400)
-		color = S_BLUE;
+		color = "\e[30;44m";  // background blue
 	else
-		color = S_RED;
+		color = "\e[30;41m";  // background red
 	std::cout	<< "[HTTP/1.1 "
-				<< color << this->_status.first << " "
-				<< S_NONE << this->_status.second << "]\n";
+				<< color << this->_status.first
+				<< S_NONE << " " << this->_status.second << "]\n";
 }
 
 _END_NS_WEBSERV
