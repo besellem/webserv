@@ -72,6 +72,8 @@ class Request
 		const std::string&	getBoundary(void) const;
 		bool				parseFile(void);
 
+		void				print(void) const;
+
 	private:
 		HttpHeader			_header;
 		std::string			_constructPath;

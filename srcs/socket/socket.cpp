@@ -158,13 +158,14 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt)
 		warnMsg("resolve request failed!");
 		request->setStatus(400);
 	}
+	
+	request->print();
 
 #if DEBUG >= DEBUG_LVL_3
 	std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
 	std::cout << request->getHeader().content << std::endl;
 	std::cout << "\n+++++++++++ FINAL REQ ++++++++++++++++" << std::endl << std::endl;
 #endif
-
 	return READ_OK;
 }
 /*
@@ -262,6 +263,7 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 	delete _currResponse;
 	_respMap.erase(socket_fd);
 
+	_currResponse->printStatus();
 #if DEBUG >= DEBUG_LVL_3
 	std::cout << "------------- RESPONSE ---------------" << std::endl;
 	std::cout << toSend.c_str() << std::endl;

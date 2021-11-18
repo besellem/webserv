@@ -242,14 +242,24 @@ void	Response::methodPost(void)
 	if (this->_status.first != 200)
 		return ;
 	
+	bool isUpload = false;
 	/* upload case */
 	if (this->_location && !this->_location->uploadStore.empty())
 	{
-		if (uploadFile() == true || this->_status.first != 200)
+		isUpload = uploadFile();
+		if (this->_status.first != 200)
 			return ;
 	}
 	
-	if ((size_t)this->_request->getServer()->clientMaxBodySize() != 0 &&
+	if (isUpload == true)
+	{
+		this->_content = "<html>" NEW_LINE;
+		this->_content += "<body>" NEW_LINE;
+		this->_content += "<h1>File uploaded.</h1>" NEW_LINE;
+		this->_content += "</body>" NEW_LINE;
+		this->_content += "</html>" NEW_LINE;
+	}
+	else if ((size_t)this->_request->getServer()->clientMaxBodySize() != 0 &&
 		this->_request->getContent().size() > (size_t)this->_request->getServer()->clientMaxBodySize())
 		this->setStatus(413);
 	else
@@ -429,6 +439,20 @@ bool	Response::uploadFile(void)
 		ofs.close();
 	}
 	return true;
+}
+
+void	Response::printStatus(void) const
+{
+	std::string color;
+	if (this->_status.first < 300)
+		color = S_GREEN;
+	else if (this->_status.first < 400)
+		color = S_BLUE;
+	else
+		color = S_RED;
+	std::cout	<< "[HTTP/1.1 "
+				<< color << this->_status.first << " "
+				<< S_NONE << this->_status.second << "]\n";
 }
 
 _END_NS_WEBSERV

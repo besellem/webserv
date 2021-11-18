@@ -353,4 +353,11 @@ bool	Request::parseFile(void) {
 	return true;
 }
 
+void	Request::print(void) const
+{
+	std::cout	<< this->_header.request_method << " "
+				<< "http://" << (this->_server->ip() == "127.0.0.1" ? "localhost" : this->_server->ip())
+				<< ":" << this->_server->port() << this->_header.uri << "\t\t\t";
+}
+
 _END_NS_WEBSERV

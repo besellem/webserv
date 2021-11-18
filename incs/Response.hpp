@@ -60,6 +60,8 @@ class Response
 		
 		bool				uploadFile(void);
 
+		void				printStatus(void) const;
+
 	private:
 		std::string			_header;
 		std::string			_content;
