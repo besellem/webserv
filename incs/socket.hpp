@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 16:49:04 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/17 14:52:59 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/18 08:40:40 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ class Socket
 		void			setHeaderData(const std::string &);
 		std::string		constructPath(void);
 
-		size_t			checkRequestLen(std::string const &);
+		size_t			requestLen(std::string const &);
 		
 	private:
 		std::vector<Server *>	_server_blocks; // which was parsed for this socket

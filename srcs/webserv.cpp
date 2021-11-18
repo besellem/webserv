@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/21 05:59:50 by besellem          #+#    #+#             */
-/*   Updated: 2021/11/16 15:52:14 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/18 08:28:15 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ void			WebServer::createServers(void)
 	const size_t	n = countSocket();
 	Socket			cur;
 
-	// create a socket for each different server declared in the config file
+	/* create a socket for each different server declared in the config file */
 	_socks = new Socket[n];
 	for (size_t i = 0, j = 0; j < n; ++i, ++j)
 	{

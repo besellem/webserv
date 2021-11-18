@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/16 17:29:54 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/18 08:36:15 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,11 +158,11 @@ void	Request::setContent(void)
 
 void	Request::setConstructPath(void)
 {
-	std::string			ret("");
 	const t_location	*loc = this->getLocation();
 	std::string			uriPath = ft_strcut(this->_header.uri, '?');
 	
-	// tmp variables
+	/* tmp variables */
+	std::string							path_tmp("");
 	std::string							index_tmp;
 	Server::tokens_type::const_iterator	idx; // iterator on indexes
 	
@@ -173,7 +173,7 @@ void	Request::setConstructPath(void)
 		std::cout << "location        : [" S_GREEN << loc->path << S_NONE "]" << std::endl;
 #endif
 
-		// add the root to the path
+		/* add the root to the path */
 		if (!loc->root.empty())
 		{
 
@@ -181,27 +181,27 @@ void	Request::setConstructPath(void)
 			std::cout << "location root   : [" S_GREEN << loc->root << S_NONE "]" << std::endl;
 #endif
 
-			ret += loc->root;
-			if (ret[ret.size() - 1] != '/')
-				ret += uriPath.substr(loc->path.size() - 1);
+			path_tmp += loc->root;
+			if (path_tmp[path_tmp.size() - 1] != '/')
+				path_tmp += uriPath.substr(loc->path.size() - 1);
 			else
-				ret += uriPath.substr(loc->path.size());
+				path_tmp += uriPath.substr(loc->path.size());
 		}
 		else
-			ret += uriPath;
+			path_tmp += uriPath;
 
-		// use default index
-		if (ft_isDirectory(ret))
+		/* use default index */
+		if (ft_isDirectory(path_tmp))
 		{
-			if (ret[ret.size() - 1] != '/')
-				ret += "/";
+			if (path_tmp[path_tmp.size() - 1] != '/')
+				path_tmp += "/";
 			/* loop through indexes */
 			for (idx = loc->index.begin(); idx != loc->index.end(); ++idx)
 			{
-				index_tmp = ret + *idx;
+				index_tmp = path_tmp + *idx;
 				if (is_valid_path(index_tmp))
 				{
-					ret = index_tmp;
+					path_tmp = index_tmp;
 					break ;
 				}
 			}
@@ -214,10 +214,10 @@ void	Request::setConstructPath(void)
 		std::cout << "location root   : [" S_RED << "unknow" << S_NONE "]" << std::endl;
 #endif
 
-		ret += uriPath;
+		path_tmp += uriPath;
 	}
 	
-	this->_constructPath += ret;
+	this->_constructPath += path_tmp;
 }
 
 void	Request::setConstructPath(const std::string &path)
@@ -327,20 +327,21 @@ bool	Request::parseFile(void) {
 	size_t end;
 
 	while (true) {
-		// get file name
+		/* get file name */
 		if ((begin = toParse.find(key[FN])) != std::string::npos)
 			toParse.erase(0, begin + key[FN].length());
 		if ((end = toParse.find(key[DQ])) != std::string::npos)
 			fileName = toParse.substr(0, end);
 
-		// get file content;
+		/* get file content; */
 		if ((begin = toParse.find(key[CT])) != std::string::npos)
 			toParse.erase(0, begin + key[CT].length());
 		if ((begin = toParse.find(key[DRN])) != std::string::npos)
 			toParse.erase(0, begin + key[DRN].length());
 		if ((end = toParse.find(key[RN])) != std::string::npos)
 			fileContent = toParse.substr(0, end);
-		// add to list of file info
+
+		/* add to list of file info */
 		if(false == fileName.empty())
 			_fileInfo.insert(std::make_pair(fileName, fileContent));
 		toParse.erase(0, fileContent.length() + key[RN].length());

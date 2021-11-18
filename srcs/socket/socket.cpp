@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/19 17:04:47 by kaye              #+#    #+#             */
-/*   Updated: 2021/11/17 15:22:12 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/18 08:43:01 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,8 @@ void	Socket::setNonBlock(int & fd)
 		errorExit("fcntl()");
 }
 
-size_t	Socket::checkRequestLen(std::string const & content)
+/* Returns the the content length of the request */
+size_t	Socket::requestLen(std::string const & content)
 {
 	size_t pos = content.find("Content-Length: ");
 
@@ -145,7 +146,7 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt)
 	request->getHeader().content.assign(buff, currEvt.data);
 	delete [] buff;
 
-	size_t reqLen = checkRequestLen(request->getHeader().content);
+	size_t reqLen = requestLen(request->getHeader().content);
 	if (reqLen > static_cast<size_t>(currEvt.data) && reqLen != std::string::npos)
 	{
 		warnMsg("request length too large");
@@ -190,16 +191,14 @@ int		Socket::resolveHttpRequest(Request *request)
 		return RESOLVE_FAIL;
 	}
 
-	// set query string
+	/* set query string */
 	size_t pos = request->getHeader().uri.find("?");
 	if (pos != std::string::npos)
 		request->getHeader().queryString = request->getHeader().uri.substr(pos + 1);
 
 	/* map each line of the header */
 	for ( ; line != buffer.end() && !(*line).empty(); ++line)
-	{
 		request->setHeaderData(*line);
-	}
 
 	std::string name = request->getHeader().data["Host"][0];
 	request->setServer(selectServer(name));

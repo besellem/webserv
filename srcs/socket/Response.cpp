@@ -6,7 +6,7 @@
 /*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/03 23:01:12 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/16 18:26:13 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/18 08:47:01 by adbenoit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,6 +129,79 @@ void    Response::setHeader(void)
 	}
 }
 
+void    Response::setContent(const std::string &file_content)
+{
+	if (this->_status.first < 400)
+		this->isMethodAllowed(this->_request->getHeader().request_method);
+
+	_cgiStatus = true;
+	
+	if (this->_cgi != NULL && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension())
+		this->cgi();												 // run CGI
+	else if (this->_request->getHeader().request_method == "GET")	 // run GET method
+		this->methodGet(file_content);
+	else if (this->_request->getHeader().request_method == "POST")	 // run POST method
+		this->methodPost();
+	else if (this->_request->getHeader().request_method == "DELETE") // run DELETE method
+		this->methodDelete();
+
+	/* Error case */
+	if (this->_status.first >= 400)
+		this->setErrorContent();
+}
+
+void	Response::setErrorContent(void)
+{
+	std::map<int, std::string>::const_iterator	it;
+	it = this->_request->getServer()->errorPages().find(this->_status.first);
+	/* Default error page setup case */
+	if (it != this->_request->getServer()->errorPages().end() &&
+		is_valid_path(it->second))
+	{
+		this->_content = getFileContent(it->second);
+		return ;
+	}
+	
+	/* Default case */
+	std::string content = "<!DOCTYPE html>" NEW_LINE;
+	content += "<html lang=\"en\">" NEW_LINE;
+	content += "<head>" NEW_LINE;
+	content += "<meta charset=\"utf-8\" /><meta http-equiv=\"X-UA-Compatible\" ";
+	content += "content=\"IE=edge\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />" NEW_LINE;
+	content += "<title>";
+	content += this->_status.second;
+	content += " | ";
+	content += std::to_string(this->_status.first);
+	content += "</title>" NEW_LINE;
+	content += "<style type=\"text/css\">";
+    content += "body{margin:0}sub{bottom:-.25em}sup{top:-.5em}body,";
+	content += "html{width:100%;height:100%;background-color:#21232a}";
+	content += "body{color:#fff;text-align:center;text-shadow:0 2px 4px rgba(0,0,0,.5);padding:0;min-height:100%;";
+	content += "-webkit-box-shadowinset 0 0 100px rgba(0,0,0,.8);box-shadow:inset 0 0 100px rgba(0,0,0,.8);display:";
+	content += "table;font-family:\"Open Sans\",Arial,sans-serif}";
+	content += "h1{font-family:inherit;font-weight:500;line-height:1.1;color:inherit;font-size:36px}";
+	content += "h1 small{font-size:68%;font-weight:400;line-height:1;color:#777}";
+	content += "a{text-decoration:none;color:#fff;font-size:inherit;border-bottom:dotted 1px #707070}";
+	content += ".lead{color:silver;font-size:21px;line-height:1.4}";
+	content += ".cover{display:table-cell;vertical-align:middle;padding:0 20px}";
+	content += "</style>" NEW_LINE;
+	content += "</head>" NEW_LINE;
+	content += "<body>" NEW_LINE;
+	content += "<body>" NEW_LINE;
+	content += "<div class=\"cover\"><h1>";
+	content += this->_status.second;
+	content += " <small>";
+	content += std::to_string(this->_status.first);
+	content += "</small></h1></div>" NEW_LINE;
+	content += "</body>" NEW_LINE;
+	
+	this->_content = content;
+}
+
+/*
+** Process the request
+*/
+
 bool	Response::isMethodAllowed(const std::string &method)
 {
 	/* GET is always allowed */
@@ -203,6 +276,7 @@ void	Response::cgi(void) {
 	if (this->_status.first != 200)
 		return ;
 
+	/* CGI case */
 	try
 	{
 		if (this->getCgiStep() == CGI_INIT_STATUS)
@@ -225,76 +299,6 @@ void	Response::cgi(void) {
 	this->_cgiStatus = true;
 	this->_content = this->_cgi->getOutputContent();
 	this->setStatus(this->_cgi->getStatus());
-}
-
-void    Response::setContent(const std::string &file_content)
-{
-	if (this->_status.first < 400)
-		this->isMethodAllowed(this->_request->getHeader().request_method);
-
-	_cgiStatus = true;
-	
-	/* CGI case */
-	if (this->_cgi != NULL && getExtension(this->_request->getConstructPath()) == this->_cgi->getExtension())
-		this->cgi();
-	else if (this->_request->getHeader().request_method == "GET")    // run GET method
-		this->methodGet(file_content);
-	else if (this->_request->getHeader().request_method == "POST")   // run POST method
-		this->methodPost();
-	else if (this->_request->getHeader().request_method == "DELETE") // run DELETE method
-		this->methodDelete();
-
-	/* Error case */
-	if (this->_status.first >= 400)
-		this->setErrorContent();
-}
-
-void	Response::setErrorContent(void)
-{
-	std::map<int, std::string>::const_iterator	it;
-	it = this->_request->getServer()->errorPages().find(this->_status.first);
-	/* Default error page setup case */
-	if (it != this->_request->getServer()->errorPages().end() &&
-		is_valid_path(it->second))
-	{
-		this->_content = getFileContent(it->second);
-		return ;
-	}
-	
-	/* Default case */
-	std::string content = "<!DOCTYPE html>" NEW_LINE;
-	content += "<html lang=\"en\">" NEW_LINE;
-	content += "<head>" NEW_LINE;
-	content += "<meta charset=\"utf-8\" /><meta http-equiv=\"X-UA-Compatible\" ";
-	content += "content=\"IE=edge\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />" NEW_LINE;
-	content += "<title>";
-	content += this->_status.second;
-	content += " | ";
-	content += std::to_string(this->_status.first);
-	content += "</title>" NEW_LINE;
-	content += "<style type=\"text/css\">";
-    content += "body{margin:0}sub{bottom:-.25em}sup{top:-.5em}body,";
-	content += "html{width:100%;height:100%;background-color:#21232a}";
-	content += "body{color:#fff;text-align:center;text-shadow:0 2px 4px rgba(0,0,0,.5);padding:0;min-height:100%;";
-	content += "-webkit-box-shadowinset 0 0 100px rgba(0,0,0,.8);box-shadow:inset 0 0 100px rgba(0,0,0,.8);display:";
-	content += "table;font-family:\"Open Sans\",Arial,sans-serif}";
-	content += "h1{font-family:inherit;font-weight:500;line-height:1.1;color:inherit;font-size:36px}";
-	content += "h1 small{font-size:68%;font-weight:400;line-height:1;color:#777}";
-	content += "a{text-decoration:none;color:#fff;font-size:inherit;border-bottom:dotted 1px #707070}";
-	content += ".lead{color:silver;font-size:21px;line-height:1.4}";
-	content += ".cover{display:table-cell;vertical-align:middle;padding:0 20px}";
-	content += "</style>" NEW_LINE;
-	content += "</head>" NEW_LINE;
-	content += "<body>" NEW_LINE;
-	content += "<body>" NEW_LINE;
-	content += "<div class=\"cover\"><h1>";
-	content += this->_status.second;
-	content += " <small>";
-	content += std::to_string(this->_status.first);
-	content += "</small></h1></div>" NEW_LINE;
-	content += "</body>" NEW_LINE;
-	
-	this->_content = content;
 }
 
 const std::string	Response::generateAutoindexPage(std::string const &path) const
