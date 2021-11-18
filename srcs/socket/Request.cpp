@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adbenoit <adbenoit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/18 09:30:54 by adbenoit         ###   ########.fr       */
+/*   Updated: 2021/11/18 13:57:17 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -355,9 +355,18 @@ bool	Request::parseFile(void) {
 
 void	Request::print(void) const
 {
+	size_t	len = this->_header.uri.length();
+	size_t	sp	= 42 - this->_header.request_method.length();
+
+
 	std::cout	<< this->_header.request_method << " "
 				<< "http://" << (this->_server->ip() == "127.0.0.1" ? "localhost" : this->_server->ip())
-				<< ":" << this->_server->port() << this->_header.uri << "\t\t\t";
+				<< ":" << this->_server->port();
+	if (len > sp) {
+		std::cout << this->_header.uri.substr(0, 10) << "[...]" << this->_header.uri.substr(len - 10) << std::setw(sp - 25) << "";
+	}
+	else
+		std::cout << this->_header.uri << std::setw(sp - len) << "";
 }
 
 _END_NS_WEBSERV
