@@ -159,7 +159,7 @@ int		Socket::readHttpRequest(Request *request, struct kevent currEvt)
 		request->setStatus(400);
 	}
 	
-	request->print();
+	// request->print();
 
 #if DEBUG >= DEBUG_LVL_3
 	std::cout << "++++++++++++++ REQUEST +++++++++++++++\n" << std::endl;
@@ -251,6 +251,8 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 	toSend =  _currResponse->getHeader();
 	toSend += NEW_LINE;
 	toSend += _currResponse->getContent();
+	
+	_currResponse->printStatus();
 
 	/* send to client */
 	if (SYSCALL_ERR == send(socket_fd, toSend.c_str(), toSend.length(), 0))
@@ -263,7 +265,6 @@ int		Socket::sendHttpResponse(Request* request, int socket_fd)
 	delete _currResponse;
 	_respMap.erase(socket_fd);
 
-	_currResponse->printStatus();
 #if DEBUG >= DEBUG_LVL_3
 	std::cout << "------------- RESPONSE ---------------" << std::endl;
 	std::cout << toSend.c_str() << std::endl;

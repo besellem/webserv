@@ -444,15 +444,17 @@ bool	Response::uploadFile(void)
 void	Response::printStatus(void) const
 {
 	std::string color;
+
+	_request->print();
 	if (this->_status.first < 300)
 		color = "\e[30;42m"; // background green
 	else if (this->_status.first < 400)
-		color = "\e[30;44m";  // background blue
+		color = "\e[30;44m"; // background blue
 	else
-		color = "\e[30;41m";  // background red
+		color = "\e[30;41m"; // background red
 	std::cout	<< "[HTTP/1.1 "
 				<< color << this->_status.first
-				<< S_NONE << " " << this->_status.second << "]\n";
+				<< S_NONE << " " << this->_status.second << "]" << std::endl;
 }
 
 _END_NS_WEBSERV
