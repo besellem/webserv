@@ -6,7 +6,7 @@
 /*   By: kaye <kaye@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/30 23:44:26 by adbenoit          #+#    #+#             */
-/*   Updated: 2021/11/18 13:57:17 by kaye             ###   ########.fr       */
+/*   Updated: 2021/11/18 13:59:35 by kaye             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -357,7 +357,6 @@ void	Request::print(void) const
 {
 	size_t	len = this->_header.uri.length();
 	size_t	sp	= 42 - this->_header.request_method.length();
-
 
 	std::cout	<< this->_header.request_method << " "
 				<< "http://" << (this->_server->ip() == "127.0.0.1" ? "localhost" : this->_server->ip())
