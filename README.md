@@ -50,7 +50,7 @@ server
 location [route]
 {
     allow [list of methods]
-    return [code] [file path]
+    return [code] [path]
     root [path]
     index [list of index files]
     autoindex [on or off]
